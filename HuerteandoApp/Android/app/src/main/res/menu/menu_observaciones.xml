@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    menu_observaciones.xml — Menú del ActionBar en ObservacionesActivity.
+
+    Elementos:
+    - Lupa de búsqueda (SearchView expandible): RF-12
+    - Cerrar sesión (en el menú de desbordamiento ⋮)
+-->
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!--
+        Búsqueda: showAsAction="ifRoom|collapseActionView"
+        → aparece como icono de lupa en la barra si hay espacio,
+          y al pulsarlo se expande como campo de texto.
+        actionViewClass: usa SearchView de AndroidX (compatible con API 21+).
+    -->
+    <item
+        android:id="@+id/action_search"
+        android:title="Buscar"
+        android:icon="@android:drawable/ic_menu_search"
+        app:showAsAction="ifRoom|collapseActionView"
+        app:actionViewClass="androidx.appcompat.widget.SearchView" />
+
+    <!--
+        Cerrar sesión: never = siempre en el menú de desbordamiento ⋮
+        No queremos que ocupe espacio en la barra superior.
+    -->
+    <item
+        android:id="@+id/action_logout"
+        android:title="@string/obs_menu_cerrar_sesion"
+        app:showAsAction="never" />
+
+</menu>

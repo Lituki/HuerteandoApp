@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    bg_chip_tipo.xml — Fondo redondeado para el badge de tipo en item_observacion.xml.
+
+    Se usa como android:background en el TextView de tipo (PLANTA / RINCÓN / DENUNCIA).
+    El color real se sobreescribe en código según el tipo de observación,
+    pero este drawable define la forma: cápsula (rectángulo con bordes circulares).
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <!-- Color por defecto: verde principal. Se sobreescribe en el adaptador. -->
+    <solid android:color="@color/verde_principal" />
+
+    <!-- cornerRadius grande → aspecto de cápsula -->
+    <corners android:radius="16dp" />
+
+</shape>

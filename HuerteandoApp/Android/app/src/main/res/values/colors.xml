@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Colores base -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- Paleta principal de Huerteando (verde huerta) -->
+    <color name="verde_principal">#4A7C59</color>    <!-- Botones, iconos, títulos -->
+    <color name="verde_oscuro">#2E5C3A</color>        <!-- Hover, pressed states -->
+    <color name="verde_claro">#E8F5E9</color>         <!-- Fondos suaves, chips -->
+    <color name="verde_accent">#81C784</color>        <!-- Elementos secundarios -->
+
+    <!-- Fondos -->
+    <color name="fondo_pantalla">#FAFAF7</color>      <!-- Fondo crema de las pantallas -->
+    <color name="fondo_card">#FFFFFF</color>           <!-- Fondo de las tarjetas -->
+
+    <!-- Texto -->
+    <color name="texto_principal">#212121</color>      <!-- Texto principal oscuro -->
+    <color name="texto_secundario">#888888</color>     <!-- Subtítulos, metadatos -->
+    <color name="texto_error">#D32F2F</color>          <!-- Mensajes de error -->
+
+    <!-- Chips de tipo de observación -->
+    <color name="chip_planta_fondo">#E8F5E9</color>
+    <color name="chip_planta_texto">#2E7D32</color>
+    <color name="chip_rincon_fondo">#E3F2FD</color>
+    <color name="chip_rincon_texto">#1565C0</color>
+    <color name="chip_denuncia_fondo">#FFF3E0</color>
+    <color name="chip_denuncia_texto">#E65100</color>
+</resources>

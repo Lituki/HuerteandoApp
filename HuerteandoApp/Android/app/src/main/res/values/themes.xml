@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        Tema principal de Huerteando.
+        Hereda de MaterialComponents para tener los botones y campos de Material Design.
+        Aquí definimos los colores globales que se aplicarán a toda la app.
+    -->
+    <style name="Base.Theme.Huerteando" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Color principal (botones, FAB, toolbar) -->
+        <item name="colorPrimary">@color/verde_principal</item>
+        <!-- Versión oscura del principal (status bar, etc.) -->
+        <item name="colorPrimaryDark">@color/verde_oscuro</item>
+        <!-- Color de acento (checkboxes, switches) -->
+        <item name="colorAccent">@color/verde_accent</item>
+        <!-- Color del texto sobre el fondo primario (blanco para verde oscuro) -->
+        <item name="colorOnPrimary">@color/white</item>
+        <!-- Color de fondo de la app -->
+        <item name="android:colorBackground">@color/fondo_pantalla</item>
+        <!-- Fuente de texto principal -->
+        <item name="android:textColorPrimary">@color/texto_principal</item>
+        <item name="android:textColorSecondary">@color/texto_secundario</item>
+    </style>
+
+    <style name="Theme.Huerteando" parent="Base.Theme.Huerteando" />
+</resources>
