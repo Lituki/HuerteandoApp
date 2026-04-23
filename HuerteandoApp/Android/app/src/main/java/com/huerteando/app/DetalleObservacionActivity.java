@@ -39,6 +39,7 @@ import retrofit2.Response;
 public class DetalleObservacionActivity extends AppCompatActivity {
 
     // ─── IDs del layout activity_detalle_observacion.xml ──────────────────────
+    private android.widget.ImageView ivDetalleImagen;
     private ProgressBar       progressDetalle;
     private TextView          tvDetalleTipo;
     private TextView          tvDetalleTitulo;
@@ -79,6 +80,7 @@ public class DetalleObservacionActivity extends AppCompatActivity {
         }
 
         // Enlazar vistas
+        ivDetalleImagen            = findViewById(R.id.ivDetalleImagen);
         progressDetalle            = findViewById(R.id.progressDetalle);
         tvDetalleTipo              = findViewById(R.id.tvDetalleTipo);
         tvDetalleTitulo            = findViewById(R.id.tvDetalleTitulo);
@@ -177,6 +179,23 @@ public class DetalleObservacionActivity extends AppCompatActivity {
             tvDetalleEspecie.setVisibility(View.VISIBLE);
         } else {
             tvDetalleEspecie.setVisibility(View.GONE);
+        }
+        // Cargar imagen con Glide si existe
+        if (o.getImagenesUrl() != null && !o.getImagenesUrl().isEmpty()) {
+            ivDetalleImagen.setVisibility(View.VISIBLE);
+
+            // Suponemos que mostramos la primera imagen de la lista
+            String urlImagen = o.getImagenesUrl().get(0);
+
+            // Si la URL es relativa, añade la BASE_URL de tu API
+            // Si ya viene completa desde el servidor, déjala así:
+            com.bumptech.glide.Glide.with(this)
+                    .load(urlImagen)
+                    .placeholder(android.R.drawable.ic_menu_gallery)
+                    .error(android.R.drawable.ic_menu_report_image)
+                    .into(ivDetalleImagen);
+        } else {
+            ivDetalleImagen.setVisibility(View.GONE);
         }
 
         // Likes
