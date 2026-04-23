@@ -121,8 +121,10 @@ public class CrearObservacionActivity extends AppCompatActivity {
                 .build();
 
         datePicker.addOnPositiveButtonClickListener(selection -> {
+            java.util.Calendar calendar = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
+            calendar.setTimeInMillis(selection);
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-            editFecha.setText(sdf.format(new Date(selection)));
+            editFecha.setText(sdf.format(calendar.getTime()));
         });
 
         datePicker.show(getSupportFragmentManager(), "FECHA");
@@ -158,6 +160,8 @@ public class CrearObservacionActivity extends AppCompatActivity {
                 })
                 .addOnFailureListener(e -> {
                     progressBar.setVisibility(View.GONE);
+                    ubicacionObtenida = false;
+                    btnGuardar.setEnabled(false);
                     Toast.makeText(this, "Error al obtener ubicación", Toast.LENGTH_SHORT).show();
                 });
     }
@@ -170,10 +174,13 @@ public class CrearObservacionActivity extends AppCompatActivity {
                 Address address = addresses.get(0);
                 direccionActual = address.getAddressLine(0);
                 editDireccion.setText(direccionActual);
-                editZona.setText(address.getSubLocality() != null ? address.getSubLocality() : address.getLocality());
+                String zonaTexto = address.getSubLocality();
+                if (zonaTexto == null) zonaTexto = address.getLocality();
+                if (zonaTexto == null) zonaTexto = "Sin zona";
+                editZona.setText(zonaTexto);;
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Toast.makeText(this, "No se pudo obtener la dirección", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -183,6 +190,8 @@ public class CrearObservacionActivity extends AppCompatActivity {
         if (requestCode == 1 && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             obtenerUbicacionActual();
         } else {
+            ubicacionObtenida = false;
+            btnGuardar.setEnabled(false);
             Toast.makeText(this, "Sin GPS no se puede geolocalizar la observación.", Toast.LENGTH_LONG).show();
         }
     }
@@ -210,8 +219,22 @@ public class CrearObservacionActivity extends AppCompatActivity {
             editFecha.setError("Selecciona una fecha");
             return;
         }
+        if (descripcion.isEmpty()) {
+            editDescripcion.setError("Campo obligatorio");
+            return;
+        }
+
+        if (zona.isEmpty()) {
+            editZona.setError("Campo obligatorio");
+            return;
+        }
+
+        if (direccion.isEmpty()) {
+            editDireccion.setError("Campo obligatorio");
+            return;
+        }
         // Validar que se haya seleccionado una ubicación
-        if (latitud == 0 || longitud == 0) {
+        if (!ubicacionObtenida) {
             Toast.makeText(this, "Debes seleccionar una ubicación", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -241,11 +264,15 @@ public class CrearObservacionActivity extends AppCompatActivity {
                 progressBar.setVisibility(View.GONE);
                 btnGuardar.setEnabled(true);
 
-                if (response.isSuccessful()) {
+                if (response.isSuccessful() && response.body() != null) {
                     Toast.makeText(CrearObservacionActivity.this, "¡Observación creada!", Toast.LENGTH_SHORT).show();
-                    finish();  // Volver a la lista
+                    finish();
                 } else {
-                    Toast.makeText(CrearObservacionActivity.this, "Error al crear la observación. Inténtalo de nuevo.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(
+                            CrearObservacionActivity.this,
+                            "Error servidor: " + response.code(),
+                            Toast.LENGTH_LONG
+                    ).show();
                 }
             }
 
