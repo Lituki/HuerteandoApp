@@ -57,17 +57,17 @@ public class CrearObservacionActivity extends AppCompatActivity {
     private TextInputEditText editDireccion;
     private TextInputEditText editFecha;
     private TextInputEditText editNombreTradicional;
-
+    private List<android.net.Uri> imagenesSeleccionadas = new java.util.ArrayList<>();
+    private android.widget.Button btnSeleccionarImagen;
+    private androidx.activity.result.ActivityResultLauncher<android.content.Intent> pickImageLauncher;
     private MaterialButton btnGuardar;
     private MaterialButton btnMiUbicacion;
     private ProgressBar progressBar;
-
     private FusedLocationProviderClient fusedLocationClient;
     private double latitud = 0;
     private double longitud = 0;
     private String direccionActual = "";
     private boolean ubicacionObtenida = false;
-
     private SessionManager sessionManager;
 
     // Tipos de observación
@@ -77,6 +77,38 @@ public class CrearObservacionActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_crear_observacion);
+        pickImageLauncher = registerForActivityResult(
+                new androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(),
+                result -> {
+
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+
+                        android.content.Intent data = result.getData();
+
+                        imagenesSeleccionadas.clear();
+
+                        if (data.getClipData() != null) {
+
+                            int count = data.getClipData().getItemCount();
+
+                            for (int i = 0; i < count; i++) {
+                                android.net.Uri uri =
+                                        data.getClipData().getItemAt(i).getUri();
+                                imagenesSeleccionadas.add(uri);
+                            }
+
+                        } else if (data.getData() != null) {
+                            imagenesSeleccionadas.add(data.getData());
+                        }
+
+                        android.widget.Toast.makeText(
+                                this,
+                                imagenesSeleccionadas.size() + " imágenes seleccionadas",
+                                android.widget.Toast.LENGTH_SHORT
+                        ).show();
+                    }
+                }
+        );
 
         sessionManager = new SessionManager(this);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
@@ -92,6 +124,8 @@ public class CrearObservacionActivity extends AppCompatActivity {
         editNombreTradicional = findViewById(R.id.editNombreTradicional);
         btnGuardar = findViewById(R.id.btnGuardar);
         btnMiUbicacion = findViewById(R.id.btnMiUbicacion);
+        btnSeleccionarImagen = findViewById(R.id.btnSeleccionarImagen);
+        btnSeleccionarImagen.setOnClickListener(v -> abrirGaleria());
         progressBar = findViewById(R.id.progressBar);
 
         // Configurar spinner de tipo
@@ -183,6 +217,16 @@ public class CrearObservacionActivity extends AppCompatActivity {
             Toast.makeText(this, "No se pudo obtener la dirección", Toast.LENGTH_SHORT).show();
         }
     }
+    private void abrirGaleria() {
+        android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_GET_CONTENT);
+        intent.setType("image/*");
+        intent.putExtra(android.content.Intent.EXTRA_ALLOW_MULTIPLE, true);
+
+        pickImageLauncher.launch(
+                android.content.Intent.createChooser(intent, "Selecciona imágenes")
+        );
+    }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
