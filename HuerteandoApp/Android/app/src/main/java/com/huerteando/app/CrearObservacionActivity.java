@@ -66,6 +66,7 @@ public class CrearObservacionActivity extends AppCompatActivity {
     private double latitud = 0;
     private double longitud = 0;
     private String direccionActual = "";
+    private boolean ubicacionObtenida = false;
 
     private SessionManager sessionManager;
 
@@ -106,6 +107,7 @@ public class CrearObservacionActivity extends AppCompatActivity {
 
         // Botón guardar
         btnGuardar.setOnClickListener(v -> guardarObservacion());
+        btnGuardar.setEnabled(false); // Deshabilitar hasta que se obtenga la ubicación
 
         // Poner fecha actual por defecto
         String fechaActual = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
@@ -143,10 +145,14 @@ public class CrearObservacionActivity extends AppCompatActivity {
                     if (location != null) {
                         latitud = location.getLatitude();
                         longitud = location.getLongitude();
+                        ubicacionObtenida = true;
+                        btnGuardar.setEnabled(true);
                         
                         // Obtener dirección legible
                         obtenerDireccionDesdeCoordenadas(latitud, longitud);
                     } else {
+                        ubicacionObtenida = false;
+                        btnGuardar.setEnabled(false);
                         Toast.makeText(this, "No se pudo obtener ubicación", Toast.LENGTH_SHORT).show();
                     }
                 })
@@ -176,6 +182,8 @@ public class CrearObservacionActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == 1 && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             obtenerUbicacionActual();
+        } else {
+            Toast.makeText(this, "Sin GPS no se puede geolocalizar la observación.", Toast.LENGTH_LONG).show();
         }
     }
 
