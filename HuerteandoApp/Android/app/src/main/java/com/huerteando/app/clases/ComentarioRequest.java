@@ -4,7 +4,7 @@ package com.huerteando.app.clases;
  * Clase para enviar un nuevo comentario al servidor.
  */
 public class ComentarioRequest {
-    private String contenido;
+    private final String contenido;
 
     public ComentarioRequest(String contenido) {
         this.contenido = contenido;

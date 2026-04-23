@@ -4,10 +4,10 @@ package com.huerteando.app.clases;
  * Clase para actualizar el perfil del usuario.
  */
 public class ActualizarPerfilRequest {
-    private String nombre;
-    private String apellidos;
-    private String email;
-    private String avatarUrl;  // URL de la nueva foto de perfil
+    private final String nombre;
+    private final String apellidos;
+    private final String email;
+    private final String avatarUrl;  // URL de la nueva foto de perfil
 
     public ActualizarPerfilRequest(String nombre, String apellidos, String email, String avatarUrl) {
         this.nombre = nombre;

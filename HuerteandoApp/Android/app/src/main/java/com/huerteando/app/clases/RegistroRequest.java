@@ -5,11 +5,11 @@ package com.huerteando.app.clases;
  * Se envía como JSON al API.
  */
 public class RegistroRequest {
-    private String nick;
-    private String password;
-    private String nombre;
-    private String apellidos;
-    private String email;
+    private final String nick;
+    private final String password;
+    private final String nombre;
+    private final String apellidos;
+    private final String email;
 
     public RegistroRequest(String nick, String password, String nombre, String apellidos, String email) {
         this.nick = nick;

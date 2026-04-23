@@ -18,8 +18,8 @@ public class SessionManager {
     private static final String KEY_ROL   = "rol";
     private static final String KEY_ID    = "userId";
 
-    private SharedPreferences prefs;
-    private SharedPreferences.Editor editor;
+    private final SharedPreferences prefs;
+    private final SharedPreferences.Editor editor;
 
     public SessionManager(Context context) {
         // MODE_PRIVATE = solo esta app puede leer este archivo

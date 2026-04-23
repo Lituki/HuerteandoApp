@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity
     private FloatingActionButton fabCrear;
 
     private ObservacionAdapter   adapter;
-    private List<Observacion>    listaObservaciones = new ArrayList<>();
+    private final List<Observacion>    listaObservaciones = new ArrayList<>();
 
     private SessionManager sessionManager;
     private String         filtroTipo = null; // null = todas

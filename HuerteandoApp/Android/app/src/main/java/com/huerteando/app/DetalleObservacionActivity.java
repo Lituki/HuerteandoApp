@@ -58,7 +58,8 @@ public class DetalleObservacionActivity extends AppCompatActivity {
     private long              idObservacion;
     private Observacion       observacionActual;
     private ComentarioAdapter adapterComentarios;
-    private List<Comentario>  comentarios = new ArrayList<>();
+    private final List<Comentario>  comentarios = new ArrayList<>();
+
 
     private SessionManager session;
 

@@ -23,8 +23,8 @@ import java.util.List;
  */
 public class ObservacionAdapter extends RecyclerView.Adapter<ObservacionAdapter.ViewHolder> {
 
-    private List<Observacion> observaciones;
-    private OnObservacionClickListener listener;
+    private final List<Observacion> observaciones;
+    private final OnObservacionClickListener listener;
 
     // Interface para manejar clicks en las tarjetas
     public interface OnObservacionClickListener {
@@ -64,13 +64,13 @@ public class ObservacionAdapter extends RecyclerView.Adapter<ObservacionAdapter.
      */
     class ViewHolder extends RecyclerView.ViewHolder {
         
-        private ImageView ivImagen;
-        private TextView tvTitulo;
-        private TextView tvTipo;
-        private TextView tvZona;
-        private TextView tvFecha;
-        private TextView tvLikes;
-        private TextView tvComentarios;
+        private final ImageView ivImagen;
+        private final TextView tvTitulo;
+        private final TextView tvTipo;
+        private final TextView tvZona;
+        private final TextView tvFecha;
+        private final TextView tvLikes;
+        private final TextView tvComentarios;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);

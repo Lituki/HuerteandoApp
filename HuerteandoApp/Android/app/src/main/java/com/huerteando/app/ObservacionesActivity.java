@@ -47,7 +47,7 @@ public class ObservacionesActivity extends AppCompatActivity {
 
     // ─── Datos ────────────────────────────────────────────────────────────────
     private ObservacionAdapter adapter;
-    private List<Observacion>  lista = new ArrayList<>();
+    private final List<Observacion>  lista = new ArrayList<>();
 
     // ─── Filtros activos ──────────────────────────────────────────────────────
     private String tipoSeleccionado  = null;   // null = todos

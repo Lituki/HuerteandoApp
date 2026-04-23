@@ -57,7 +57,7 @@ public class CrearObservacionActivity extends AppCompatActivity {
     private TextInputEditText editDireccion;
     private TextInputEditText editFecha;
     private TextInputEditText editNombreTradicional;
-    private List<android.net.Uri> imagenesSeleccionadas = new java.util.ArrayList<>();
+    private final List<android.net.Uri> imagenesSeleccionadas = new java.util.ArrayList<>();
     private android.widget.Button btnSeleccionarImagen;
     private androidx.activity.result.ActivityResultLauncher<android.content.Intent> pickImageLauncher;
     private MaterialButton btnGuardar;

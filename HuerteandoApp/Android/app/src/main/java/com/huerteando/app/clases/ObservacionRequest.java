@@ -5,16 +5,16 @@ package com.huerteando.app.clases;
  * Se envía al servidor cuando el usuario crea o edita una observación.
  */
 public class ObservacionRequest {
-    private String titulo;
-    private String descripcion;
-    private String fechaObservacion;  // Formato: "2024-05-01"
-    private String tipoObservacion;   // PLANTA, RINCON, DENUNCIA
-    private String especieNombre;     // Opcional
-    private double latitud;
-    private double longitud;
-    private String direccionTxt;
-    private String nombreZona;
-    private String nombreTradicional; // Opcional
+    private final String titulo;
+    private final String descripcion;
+    private final String fechaObservacion;  // Formato: "2024-05-01"
+    private final String tipoObservacion;   // PLANTA, RINCON, DENUNCIA
+    private final String especieNombre;     // Opcional
+    private final double latitud;
+    private final double longitud;
+    private final String direccionTxt;
+    private final String nombreZona;
+    private final String nombreTradicional; // Opcional
 
     public ObservacionRequest(String titulo, String descripcion, String fechaObservacion,
                               String tipoObservacion, String especieNombre,

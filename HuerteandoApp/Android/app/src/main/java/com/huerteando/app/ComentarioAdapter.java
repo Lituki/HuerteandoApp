@@ -19,7 +19,7 @@ import java.util.List;
  */
 public class ComentarioAdapter extends RecyclerView.Adapter<ComentarioAdapter.ViewHolder> {
 
-    private List<Comentario> comentarios;
+    private final List<Comentario> comentarios;
 
     public ComentarioAdapter(List<Comentario> comentarios) {
         this.comentarios = comentarios;
@@ -44,10 +44,10 @@ public class ComentarioAdapter extends RecyclerView.Adapter<ComentarioAdapter.Vi
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        private ImageView ivAvatar;
-        private TextView tvAutor;
-        private TextView tvContenido;
-        private TextView tvFecha;
+        private final ImageView ivAvatar;
+        private final TextView tvAutor;
+        private final TextView tvContenido;
+        private final TextView tvFecha;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
