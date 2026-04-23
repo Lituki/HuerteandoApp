@@ -208,15 +208,18 @@ public class CrearObservacionActivity extends AppCompatActivity {
                 Address address = addresses.get(0);
                 direccionActual = address.getAddressLine(0);
                 editDireccion.setText(direccionActual);
+
+                //Intentar obtener barrio o localidad
                 String zonaTexto = address.getSubLocality();
                 if (zonaTexto == null) zonaTexto = address.getLocality();
                 if (zonaTexto == null) zonaTexto = "Sin zona";
-                editZona.setText(zonaTexto);;
+                editZona.setText(zonaTexto);
             }
         } catch (IOException e) {
             Toast.makeText(this, "No se pudo obtener la dirección", Toast.LENGTH_SHORT).show();
         }
     }
+
     private void abrirGaleria() {
         android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_GET_CONTENT);
         intent.setType("image/*");
@@ -238,6 +241,52 @@ public class CrearObservacionActivity extends AppCompatActivity {
             btnGuardar.setEnabled(false);
             Toast.makeText(this, "Sin GPS no se puede geolocalizar la observación.", Toast.LENGTH_LONG).show();
         }
+    }
+    private void subirImagenes(long idObservacion) {
+        progressBar.setVisibility(View.VISIBLE);
+
+        List<okhttp3.MultipartBody.Part> parts = new java.util.ArrayList<>();
+
+        for (android.net.Uri uri : imagenesSeleccionadas) {
+            try {
+                // Convertir URI a bytes para enviar por red
+                java.io.InputStream inputStream = getContentResolver().openInputStream(uri);
+                byte[] bytes = new byte[inputStream.available()];
+                inputStream.read(bytes);
+
+                okhttp3.RequestBody requestFile = okhttp3.RequestBody.create(
+                        okhttp3.MediaType.parse(getContentResolver().getType(uri)),
+                        bytes
+                );
+
+                // "imagenes" es el nombre que espera tu API en el @Part
+                parts.add(okhttp3.MultipartBody.Part.createFormData("imagenes", "imagen.jpg", requestFile));
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        String token = sessionManager.getToken();
+        ApiService apiService = ApiClient.getClient(token).create(ApiService.class);
+
+        apiService.subirImagenes(idObservacion, parts).enqueue(new Callback<com.huerteando.app.clases.ImagenResponse>() {
+            @Override
+            public void onResponse(Call<com.huerteando.app.clases.ImagenResponse> call, Response<com.huerteando.app.clases.ImagenResponse> response) {
+                progressBar.setVisibility(View.GONE);
+                if (response.isSuccessful()) {
+                    Toast.makeText(CrearObservacionActivity.this, "¡Imágenes subidas!", Toast.LENGTH_SHORT).show();
+                }
+                finish(); // Cerramos al terminar
+            }
+
+            @Override
+            public void onFailure(Call<com.huerteando.app.clases.ImagenResponse> call, Throwable t) {
+                progressBar.setVisibility(View.GONE);
+                Toast.makeText(CrearObservacionActivity.this, "Error al subir imágenes", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        });
     }
 
     private void guardarObservacion() {
@@ -309,14 +358,15 @@ public class CrearObservacionActivity extends AppCompatActivity {
                 btnGuardar.setEnabled(true);
 
                 if (response.isSuccessful() && response.body() != null) {
-                    Toast.makeText(CrearObservacionActivity.this, "¡Observación creada!", Toast.LENGTH_SHORT).show();
-                    finish();
+                    // Si hay imágenes, las subimos. Si no, cerramos.
+                    if (!imagenesSeleccionadas.isEmpty()) {
+                        subirImagenes(response.body().getId());
+                    } else {
+                        Toast.makeText(CrearObservacionActivity.this, "¡Observación creada!", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
                 } else {
-                    Toast.makeText(
-                            CrearObservacionActivity.this,
-                            "Error servidor: " + response.code(),
-                            Toast.LENGTH_LONG
-                    ).show();
+                    Toast.makeText(CrearObservacionActivity.this, "Error: " + response.code(), Toast.LENGTH_LONG).show();
                 }
             }
 
