@@ -32,39 +32,31 @@ import retrofit2.Response;
 /**
  * Pantalla principal: lista de observaciones con filtros y ordenación.
  *
- * Funcionalidades implementadas:
- *   - RF-09  Listar observaciones
- *   - RF-11  Filtrar por tipo (PLANTA, RINCON, DENUNCIA)
- *   - RF-12  Búsqueda por texto libre
- *   - RF-13  Ordenar por fecha, likes, comentarios
- *   - RF-14  Combinar filtros y ordenación
- *
- * Navegación:
- *   - FAB (+) → NuevaObservacionActivity
- *   - Click en tarjeta → DetalleObservacionActivity
- *   - Menú (⋮) → Cerrar sesión
+ * RF cubiertos: RF-09 (listar), RF-11 (filtrar), RF-12 (búsqueda texto),
+ *               RF-13 (ordenar), RF-14 (combinar filtros).
  */
 public class ObservacionesActivity extends AppCompatActivity {
 
-    // ---- Vistas ----
-    private RecyclerView          recyclerView;
-    private ProgressBar           progressBar;
-    private TextView              tvSinResultados;
-    private Spinner               spinnerTipo;
-    private Spinner               spinnerOrden;
-    private FloatingActionButton  fabNueva;
+    // ─── Vistas ───────────────────────────────────────────────────────────────
+    private RecyclerView         recyclerView;
+    private ProgressBar          progressBar;
+    private TextView             tvSinResultados;
+    private Spinner              spinnerTipo;
+    private Spinner              spinnerOrden;
+    private FloatingActionButton fabNueva;
 
-    // ---- Adaptador y datos ----
-    private ObservacionAdapter    adapter;
-    private List<Observacion>     listaObservaciones = new ArrayList<>();
+    // ─── Datos ────────────────────────────────────────────────────────────────
+    private ObservacionAdapter adapter;
+    private List<Observacion>  lista = new ArrayList<>();
 
-    // ---- Estado de filtros ----
-    private String tipoSeleccionado  = null;  // null = todos los tipos
-    private String ordenSeleccionado = "fecha"; // por defecto: más reciente
+    // ─── Filtros activos ──────────────────────────────────────────────────────
+    private String tipoSeleccionado  = null;   // null = todos
+    private String ordenSeleccionado = "fecha";
     private String textoBusqueda     = null;
 
-    // ---- Sesión ----
     private SessionManager session;
+
+    // ─────────────────────────────────────────────────────────────────────────
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,25 +66,23 @@ public class ObservacionesActivity extends AppCompatActivity {
         session = new SessionManager(this);
 
         // 1. Enlazar vistas
-        recyclerView     = findViewById(R.id.recyclerObservaciones);
-        progressBar      = findViewById(R.id.progressBar);
-        tvSinResultados  = findViewById(R.id.tvSinResultados);
-        spinnerTipo      = findViewById(R.id.spinnerTipo);
-        spinnerOrden     = findViewById(R.id.spinnerOrden);
-        fabNueva         = findViewById(R.id.fabNuevaObservacion);
+        recyclerView    = findViewById(R.id.recyclerObservaciones);
+        progressBar     = findViewById(R.id.progressBar);
+        tvSinResultados = findViewById(R.id.tvSinResultados);
+        spinnerTipo     = findViewById(R.id.spinnerTipo);
+        spinnerOrden    = findViewById(R.id.spinnerOrden);
+        fabNueva        = findViewById(R.id.fabCrearObservacion);
 
-        // 2. Configurar RecyclerView
+        // 2. RecyclerView — constructor correcto (2 parámetros: lista + listener)
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new ObservacionAdapter(listaObservaciones, session.getUserId(), observacion -> {
-            // Al pulsar una tarjeta → abrir el detalle
+        adapter = new ObservacionAdapter(lista, observacion -> {
             Intent intent = new Intent(this, DetalleObservacionActivity.class);
-            intent.putExtra("id_observacion", observacion.getId());
+            intent.putExtra("idObservacion", observacion.getId()); // clave unificada
             startActivity(intent);
         });
         recyclerView.setAdapter(adapter);
 
-        // 3. Configurar spinner de TIPO
-        //    El primer ítem es "Todos" (valor null en la query)
+        // 3. Spinner TIPO
         ArrayAdapter<String> adapterTipo = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item,
                 new String[]{"Todos los tipos", "PLANTA", "RINCÓN", "DENUNCIA"});
@@ -100,49 +90,46 @@ public class ObservacionesActivity extends AppCompatActivity {
         spinnerTipo.setAdapter(adapterTipo);
         spinnerTipo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                // Posición 0 = "Todos" → null, resto = nombre del tipo
-                tipoSeleccionado = position == 0 ? null : adapterTipo.getItem(position);
+            public void onItemSelected(AdapterView<?> p, View v, int pos, long id) {
+                tipoSeleccionado = (pos == 0) ? null : adapterTipo.getItem(pos);
                 cargarObservaciones();
             }
-            @Override public void onNothingSelected(AdapterView<?> parent) {}
+            @Override public void onNothingSelected(AdapterView<?> p) {}
         });
 
-        // 4. Configurar spinner de ORDEN
+        // 4. Spinner ORDEN
+        final String[] valoresOrden = {"fecha", "likes", "comentarios"};
         ArrayAdapter<String> adapterOrden = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item,
                 new String[]{"Más recientes", "Más likes", "Más comentarios"});
         adapterOrden.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerOrden.setAdapter(adapterOrden);
         spinnerOrden.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            private final String[] valores = {"fecha", "likes", "comentarios"};
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                ordenSeleccionado = valores[position];
+            public void onItemSelected(AdapterView<?> p, View v, int pos, long id) {
+                ordenSeleccionado = valoresOrden[pos];
                 cargarObservaciones();
             }
-            @Override public void onNothingSelected(AdapterView<?> parent) {}
+            @Override public void onNothingSelected(AdapterView<?> p) {}
         });
 
-        // 5. FAB para nueva observación
+        // 5. FAB → crear nueva observación
         fabNueva.setOnClickListener(v ->
-                startActivity(new Intent(this, NuevaObservacionActivity.class)));
+                startActivity(new Intent(this, CrearObservacionActivity.class)));
 
         // 6. Carga inicial
         cargarObservaciones();
     }
 
-    /**
-     * Añade la lupa de búsqueda en el ActionBar.
-     * Al escribir texto se actualiza textoBusqueda y se recarga.
-     */
+    // ─── Menú (búsqueda + cerrar sesión) ─────────────────────────────────────
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_observaciones, menu);
 
         MenuItem searchItem = menu.findItem(R.id.action_search);
         SearchView searchView = (SearchView) searchItem.getActionView();
-        searchView.setQueryHint("Buscar observaciones...");
+        searchView.setQueryHint("Buscar observaciones…");
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -153,20 +140,17 @@ public class ObservacionesActivity extends AppCompatActivity {
             }
             @Override
             public boolean onQueryTextChange(String newText) {
-                // Buscar en tiempo real (se puede quitar si la API es lenta)
                 textoBusqueda = newText.trim().isEmpty() ? null : newText.trim();
                 cargarObservaciones();
                 return true;
             }
         });
-
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_logout) {
-            // Cerrar sesión → limpiar SharedPreferences y volver al login
             session.cerrarSesion();
             Intent intent = new Intent(this, LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -176,48 +160,47 @@ public class ObservacionesActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * Llama a la API con los filtros actuales y actualiza el RecyclerView.
-     * Se ejecuta cada vez que cambia un spinner o el texto de búsqueda.
-     */
+    // ─── Carga de datos ───────────────────────────────────────────────────────
+
     private void cargarObservaciones() {
         progressBar.setVisibility(View.VISIBLE);
         tvSinResultados.setVisibility(View.GONE);
 
         ApiService api = ApiClient.getClient(session.getToken()).create(ApiService.class);
 
+        // getObservaciones ahora tiene 4 parámetros: tipo, estado, orden, busqueda
         api.getObservaciones(tipoSeleccionado, null, ordenSeleccionado, textoBusqueda)
                 .enqueue(new Callback<List<Observacion>>() {
-
                     @Override
                     public void onResponse(Call<List<Observacion>> call,
                                            Response<List<Observacion>> response) {
                         progressBar.setVisibility(View.GONE);
 
                         if (response.isSuccessful() && response.body() != null) {
-                            listaObservaciones.clear();
-                            listaObservaciones.addAll(response.body());
+                            lista.clear();
+                            lista.addAll(response.body());
                             adapter.notifyDataSetChanged();
-
-                            // Si la lista está vacía, mostrar mensaje
                             tvSinResultados.setVisibility(
-                                    listaObservaciones.isEmpty() ? View.VISIBLE : View.GONE);
+                                    lista.isEmpty() ? View.VISIBLE : View.GONE);
+                        } else {
+                            mostrarError("Error al cargar observaciones");
                         }
                     }
 
                     @Override
                     public void onFailure(Call<List<Observacion>> call, Throwable t) {
                         progressBar.setVisibility(View.GONE);
-                        tvSinResultados.setText("Error de conexión. Comprueba la red.");
-                        tvSinResultados.setVisibility(View.VISIBLE);
+                        mostrarError("Error de conexión. Comprueba la red.");
                     }
                 });
     }
 
-    /**
-     * Al volver de NuevaObservacionActivity recargamos la lista
-     * para que aparezca la observación recién creada.
-     */
+    private void mostrarError(String msg) {
+        tvSinResultados.setText(msg);
+        tvSinResultados.setVisibility(View.VISIBLE);
+    }
+
+    // Recargar al volver de crear una observación
     @Override
     protected void onResume() {
         super.onResume();

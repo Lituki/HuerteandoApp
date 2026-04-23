@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -25,24 +24,22 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
- * Activity de Login - Pantalla de inicio de sesión
- * 
- * ¿Qué hace esta clase?
- * 1. Permite al usuario introducir su nick y contraseña
- * 2. Envía estos datos al servidor (API REST)
- * 3. Si el login es correcto, guarda la sesión y va a la pantalla principal
- * 4. Si hay error, muestra un mensaje
+ * Pantalla de inicio de sesión.
+ *
+ * Flujo:
+ *   1. Si ya hay sesión activa → va directamente a ObservacionesActivity.
+ *   2. El usuario introduce nick + contraseña → POST /api/auth/login.
+ *   3. Si OK → guarda token en SessionManager → va a ObservacionesActivity.
+ *   4. Si error → muestra mensaje debajo del botón.
  */
 public class LoginActivity extends AppCompatActivity {
 
-    // Elementos del layout (vistas)
-    private TextInputEditText editNick;      // Campo para el usuario
-    private TextInputEditText editPassword;  // Campo para la contraseña
-    private MaterialButton btnLogin;         // Botón de entrar
-    private TextView tvError;                // Mensaje de error
-    private TextView tvIrARegistro;          // Texto para ir a registro
+    private TextInputEditText editNick;
+    private TextInputEditText editPassword;
+    private MaterialButton    btnLogin;
+    private TextView          tvError;
+    private TextView          tvIrARegistro;
 
-    // Gestor de sesión (guarda el token en el dispositivo)
     private SessionManager sessionManager;
 
     @Override
@@ -51,144 +48,100 @@ public class LoginActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
 
-        // Inicializar el gestor de sesión
         sessionManager = new SessionManager(this);
 
-        // Verificar si ya hay sesión activa
-        // Si ya está logueado, ir directamente a la pantalla principal
+        // Si ya está logueado, saltar directamente a la app
         if (sessionManager.haySesion()) {
-            irAMain();
+            irAObservaciones();
             return;
         }
 
-        // Conectar las variables con los elementos del layout
-        editNick = findViewById(R.id.editNick);
-        editPassword = findViewById(R.id.editPassword);
-        btnLogin = findViewById(R.id.btnLogin);
-        tvError = findViewById(R.id.tvError);
+        editNick      = findViewById(R.id.editNick);
+        editPassword  = findViewById(R.id.editPassword);
+        btnLogin      = findViewById(R.id.btnLogin);
+        tvError       = findViewById(R.id.tvError);
         tvIrARegistro = findViewById(R.id.tvIrARegistro);
 
-        // Ajustar los márgenes para que no se superponga con las barras del sistema
+        // Padding para no solapar con las barras del sistema
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.loginLayout), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(bars.left, bars.top, bars.right, bars.bottom);
             return insets;
         });
 
-        // Programar el botón de login
-        btnLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                realizarLogin();
-            }
-        });
+        btnLogin.setOnClickListener(v -> realizarLogin());
 
-        // Programar el texto de ir a registro
-        tvIrARegistro.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Ir a la pantalla de registro
-                Intent intent = new Intent(LoginActivity.this, RegistroActivity.class);
-                startActivity(intent);
-            }
-        });
+        tvIrARegistro.setOnClickListener(v ->
+                startActivity(new Intent(LoginActivity.this, RegistroActivity.class)));
     }
 
-    /**
-     * Método para hacer el login
-     * 1. Obtiene los datos de los campos de texto
-     * 2. Valida que no estén vacíos
-     * 3. Llama al API para verificar credenciales
-     * 4. Guarda la sesión si es exitoso
-     */
-    private void realizarLogin() {
-        // Obtener texto de los campos
-        String nick = editNick.getText() != null ? editNick.getText().toString().trim() : "";
-        String password = editPassword.getText() != null ? editPassword.getText().toString().trim() : "";
+    // ─────────────────────────────────────────────────────────────────────────
 
-        // Validar que los campos no estén vacíos
-        if (nick.isEmpty() || password.isEmpty()) {
-            mostrarError("Por favor, completa todos los campos");
+    private void realizarLogin() {
+        String nick     = texto(editNick);
+        String password = texto(editPassword);
+
+        if (nick.isEmpty()) {
+            mostrarError("Por favor, introduce el nick de usuario");
+            return;
+        }
+        if (password.isEmpty()) {
+            mostrarError("Por favor, introduce la contraseña");
             return;
         }
 
-        // Ocultar mensaje de error
-        tvError.setVisibility(View.GONE);
-        
-        // Desactivar el botón mientras carga (para evitar doble click)
-        btnLogin.setEnabled(false);
-        btnLogin.setText("Cargando...");
 
-        // Crear la llamada al API
-        // Primero obtenemos el cliente sin token (para login)
-        ApiService apiService = ApiClient.getClient().create(ApiService.class);
-        
-        // Crear objeto con las credenciales
-        LoginRequest request = new LoginRequest(nick, password);
-        
-        // Hacer la llamada al servidor
-        Call<LoginResponse> call = apiService.login(request);
-        
-        // Definir qué hacer cuando llegue la respuesta
-        call.enqueue(new Callback<LoginResponse>() {
+        tvError.setVisibility(View.GONE);
+        btnLogin.setEnabled(false);
+        btnLogin.setText("Cargando…");
+
+        ApiService api = ApiClient.getClient().create(ApiService.class);
+
+        api.login(new LoginRequest(nick, password)).enqueue(new Callback<LoginResponse>() {
             @Override
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-                // Reactivar el botón
                 btnLogin.setEnabled(true);
                 btnLogin.setText("Entrar");
 
-                if (response.isSuccessful()) {
-                    // Login correcto - el servidor nos dio un token
-                    LoginResponse loginResponse = response.body();
-                    
-                    if (loginResponse != null) {
-                        // Guardar la sesión del usuario
-                        sessionManager.guardarSesion(loginResponse);
-                        
-                        // Ir a la pantalla principal
-                        irAMain();
-                    } else {
-                        mostrarError("Error al procesar la respuesta del servidor");
-                    }
+                if (response.isSuccessful() && response.body() != null) {
+                    sessionManager.guardarSesion(response.body());
+                    irAObservaciones();
                 } else {
-                    // Login incorrecto (credenciales wrong)
-                    if (response.code() == 401) {
+                    int code = response.code();
+                    if (code == 401 || code == 403) {
                         mostrarError("Usuario o contraseña incorrectos");
-                    } else if (response.code() == 404) {
+                    } else if (code == 404) {
                         mostrarError("Usuario no encontrado");
                     } else {
-                        mostrarError("Error del servidor: " + response.code());
+                        mostrarError("Error del servidor (" + code + ")");
                     }
                 }
             }
 
             @Override
             public void onFailure(Call<LoginResponse> call, Throwable t) {
-                // Reactivar el botón
                 btnLogin.setEnabled(true);
                 btnLogin.setText("Entrar");
-
-                // Error de conexión (sin internet, servidor caído, etc.)
-                mostrarError("Error de conexión. ¿Estás conectado a internet?");
+                mostrarError("Error de conexión. ¿Tienes internet?");
             }
         });
     }
 
-    /**
-     * Muestra un mensaje de error en la pantalla
-     */
-    private void mostrarError(String mensaje) {
-        tvError.setText(mensaje);
+    // ─────────────────────────────────────────────────────────────────────────
+
+    private void irAObservaciones() {
+        Intent intent = new Intent(LoginActivity.this, ObservacionesActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+    }
+
+    private void mostrarError(String msg) {
+        tvError.setText(msg);
         tvError.setVisibility(View.VISIBLE);
     }
 
-    /**
-     * Navega a la pantalla principal de la app
-     */
-    private void irAMain() {
-        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-        // Limpiar el historial para que no pueda volver al login con el botón atrás
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
+    /** Devuelve el texto del campo recortado, o "" si es null. */
+    private String texto(TextInputEditText campo) {
+        return campo.getText() != null ? campo.getText().toString().trim() : "";
     }
 }

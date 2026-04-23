@@ -3,7 +3,7 @@
 # Ventaja: si quieres actualizar Retrofit, lo cambias en un solo sitio.
 
 [versions]
-agp = "8.7.3"
+agp = "8.13.2"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"

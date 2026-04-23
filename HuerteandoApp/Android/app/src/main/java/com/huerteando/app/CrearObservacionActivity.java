@@ -188,8 +188,23 @@ public class CrearObservacionActivity extends AppCompatActivity {
         String direccion = editDireccion.getText() != null ? editDireccion.getText().toString().trim() : "";
         String fecha = editFecha.getText() != null ? editFecha.getText().toString().trim() : "";
 
-        if (titulo.isEmpty() || tipo.isEmpty()) {
-            Toast.makeText(this, "El título y tipo son obligatorios", Toast.LENGTH_SHORT).show();
+        if (titulo.isEmpty()) {
+            editTitulo.setError("Campo obligatorio");
+            return;
+        }
+
+        if (tipo.isEmpty()) {
+            spinnerTipo.setError("Selecciona un tipo");
+            return;
+        }
+
+        if (fecha.isEmpty()) {
+            editFecha.setError("Selecciona una fecha");
+            return;
+        }
+        // Validar que se haya seleccionado una ubicación
+        if (latitud == 0 || longitud == 0) {
+            Toast.makeText(this, "Debes seleccionar una ubicación", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -222,7 +237,7 @@ public class CrearObservacionActivity extends AppCompatActivity {
                     Toast.makeText(CrearObservacionActivity.this, "¡Observación creada!", Toast.LENGTH_SHORT).show();
                     finish();  // Volver a la lista
                 } else {
-                    Toast.makeText(CrearObservacionActivity.this, "Error al crear", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(CrearObservacionActivity.this, "Error al crear la observación. Inténtalo de nuevo.", Toast.LENGTH_SHORT).show();
                 }
             }
 

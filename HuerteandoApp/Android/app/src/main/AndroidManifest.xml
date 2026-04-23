@@ -2,12 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Permisos necesarios -->
+    <!-- Permisos de red y localización -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" 
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 
@@ -23,36 +23,46 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
 
-        <!-- Activity de Login (pantalla de inicio) -->
+        <!-- LAUNCHER: pantalla de login -->
         <activity
             android:name=".LoginActivity"
             android:exported="true"
-            android:theme="@style/Theme.Huerteando">
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <!-- Activity de Registro -->
+        <!-- Registro de nuevo usuario -->
         <activity
             android:name=".RegistroActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- Pantalla principal: listado de observaciones -->
+        <activity
+            android:name=".ObservacionesActivity"
             android:exported="false" />
 
-        <!-- Activity Principal (Lista de observaciones) -->
+        <!-- Pantalla principal alternativa (con tabs) -->
         <activity
             android:name=".MainActivity"
             android:exported="false" />
 
-        <!-- Activity de Detalle -->
+        <!-- Detalle de una observación -->
         <activity
             android:name=".DetalleObservacionActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:parentActivityName=".ObservacionesActivity" />
 
-        <!-- Activity para crear observación -->
+
+        <!-- Crear observación (versión alternativa con más campos) -->
         <activity
             android:name=".CrearObservacionActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            android:parentActivityName=".ObservacionesActivity" />
 
     </application>
 

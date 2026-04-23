@@ -79,12 +79,12 @@
 
     <!-- FAB: botón flotante para crear nueva observación (RF-06) -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabNuevaObservacion"
+        android:id="@+id/fabCrearObservacion"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="24dp"
-        android:contentDescription="Nueva observación"
+        android:contentDescription="Crear observación"
         android:src="@android:drawable/ic_input_add"
         app:backgroundTint="@color/verde_principal"
         app:tint="@color/white" />
