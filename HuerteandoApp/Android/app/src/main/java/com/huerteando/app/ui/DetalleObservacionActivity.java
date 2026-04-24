@@ -1,6 +1,7 @@
 package com.huerteando.app.ui;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -115,7 +116,6 @@ public class DetalleObservacionActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     observacionActual = response.body();
                     mostrarObservacion();
-                    // Una vez cargada la obs, pedimos el estado real del Like
                     actualizarEstadoLikeServidor();
                 }
             }
@@ -129,7 +129,6 @@ public class DetalleObservacionActivity extends AppCompatActivity {
         ApiService api = ApiClient.getClient().create(ApiService.class);
         Long idUsuario = session.getUserId();
 
-        // 1. Conteo total
         api.getLikeCount(idObservacion).enqueue(new Callback<Map<String, Long>>() {
             @Override
             public void onResponse(Call<Map<String, Long>> call, Response<Map<String, Long>> response) {
@@ -144,7 +143,6 @@ public class DetalleObservacionActivity extends AppCompatActivity {
             @Override public void onFailure(Call<Map<String, Long>> call, Throwable t) {}
         });
 
-        // 2. ¿Tengo like yo?
         if (idUsuario != -1L) {
             api.checkLikeExiste(idObservacion, idUsuario).enqueue(new Callback<Map<String, Boolean>>() {
                 @Override
@@ -174,10 +172,28 @@ public class DetalleObservacionActivity extends AppCompatActivity {
             tvDetalleZona.setVisibility(View.VISIBLE);
         } else tvDetalleZona.setVisibility(View.GONE);
 
-        if (o.getImagenesUrl() != null && !o.getImagenesUrl().isEmpty()) {
+        // CORRECCIÓN FOTO: Sincronización con Backend
+        List<String> urls = o.getImagenesUrl();
+        if (urls != null && !urls.isEmpty()) {
+            String urlImagen = urls.get(0);
+            
+            // Construcción de URL completa
+            if (!urlImagen.startsWith("http")) {
+                urlImagen = ApiClient.BASE_URL + (urlImagen.startsWith("/") ? urlImagen.substring(1) : urlImagen);
+            }
+            
+            Log.d("HuerteandoDEBUG", "Cargando imagen desde: " + urlImagen);
+            
             ivDetalleImagen.setVisibility(View.VISIBLE);
-            com.bumptech.glide.Glide.with(this).load(o.getImagenesUrl().get(0)).into(ivDetalleImagen);
-        } else ivDetalleImagen.setVisibility(View.GONE);
+            com.bumptech.glide.Glide.with(this)
+                    .load(urlImagen)
+                    .placeholder(android.R.drawable.ic_menu_gallery)
+                    .error(android.R.drawable.ic_menu_report_image)
+                    .into(ivDetalleImagen);
+        } else {
+            Log.d("HuerteandoDEBUG", "No hay imágenes para esta observación");
+            ivDetalleImagen.setImageResource(android.R.drawable.ic_menu_gallery);
+        }
 
         actualizarBotonLike();
     }
@@ -197,7 +213,7 @@ public class DetalleObservacionActivity extends AppCompatActivity {
             return;
         }
 
-        btnLike.setEnabled(false); // Bloqueamos para evitar spam
+        btnLike.setEnabled(false);
         ApiService api = ApiClient.getClient().create(ApiService.class);
         final boolean accionEsQuitar = observacionActual.isLikePropio();
 
@@ -208,7 +224,6 @@ public class DetalleObservacionActivity extends AppCompatActivity {
             public void onResponse(Call<Void> call, Response<Void> response) {
                 btnLike.setEnabled(true);
                 if (response.isSuccessful() || response.code() == 409) {
-                    // Si es 409 (Ya existía), simplemente refrescamos para sincronizar
                     actualizarEstadoLikeServidor();
                 } else {
                     Toast.makeText(DetalleObservacionActivity.this, "Error: " + response.code(), Toast.LENGTH_SHORT).show();

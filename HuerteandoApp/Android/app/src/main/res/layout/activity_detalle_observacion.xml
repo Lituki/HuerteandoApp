@@ -8,28 +8,33 @@
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="250dp">
+        android:layout_height="250dp"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:id="@+id/collapsingToolbar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
-            app:contentScrim="@color/verde_principal">
+            app:contentScrim="@color/verde_principal"
+            app:expandedTitleMarginStart="48dp"
+            app:expandedTitleMarginEnd="64dp">
 
             <ImageView
                 android:id="@+id/ivDetalleImagen"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
-                android:background="#EEEEEE"
+                android:src="@android:drawable/ic_menu_gallery"
+                app:tint="#44000000"
                 app:layout_collapseMode="parallax" />
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                app:layout_collapseMode="pin" />
+                app:layout_collapseMode="pin"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
@@ -45,7 +50,6 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- ProgressBar mientras carga -->
             <ProgressBar
                 android:id="@+id/progressDetalle"
                 android:layout_width="wrap_content"
@@ -53,7 +57,6 @@
                 android:layout_gravity="center_horizontal"
                 android:visibility="gone" />
 
-            <!-- Tipo -->
             <TextView
                 android:id="@+id/tvDetalleTipo"
                 android:layout_width="wrap_content"
@@ -63,7 +66,6 @@
                 android:textStyle="bold"
                 android:layout_marginBottom="4dp" />
 
-            <!-- Título grande -->
             <TextView
                 android:id="@+id/tvDetalleTitulo"
                 android:layout_width="match_parent"
@@ -73,7 +75,6 @@
                 android:textColor="#2B2B2B"
                 android:layout_marginBottom="8dp" />
 
-            <!-- Fecha -->
             <TextView
                 android:id="@+id/tvDetalleFecha"
                 android:layout_width="match_parent"
@@ -82,7 +83,6 @@
                 android:textColor="#888888"
                 android:layout_marginBottom="12dp" />
 
-            <!-- Descripción -->
             <TextView
                 android:id="@+id/tvDetalleDescripcion"
                 android:layout_width="match_parent"
@@ -91,7 +91,6 @@
                 android:textColor="#444444"
                 android:layout_marginBottom="12dp" />
 
-            <!-- zona (opcional) -->
             <TextView
                 android:id="@+id/tvDetalleZona"
                 android:layout_width="match_parent"
@@ -101,7 +100,6 @@
                 android:visibility="gone"
                 android:layout_marginBottom="6dp" />
 
-            <!-- Nombre tradicional (opcional) -->
             <TextView
                 android:id="@+id/tvDetalleNombreTradicional"
                 android:layout_width="match_parent"
@@ -111,7 +109,6 @@
                 android:layout_marginBottom="6dp"
                 android:visibility="gone" />
 
-            <!-- Especie (solo para PLANTA, opcional) -->
             <TextView
                 android:id="@+id/tvDetalleEspecie"
                 android:layout_width="match_parent"
@@ -122,14 +119,12 @@
                 android:visibility="gone"
                 android:layout_marginBottom="12dp" />
 
-            <!-- Separador -->
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="#DDDDDD"
                 android:layout_marginVertical="12dp" />
 
-            <!-- Fila like: contador + botón -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -169,7 +164,6 @@
 
             </LinearLayout>
 
-            <!-- ===== COMENTARIOS ===== -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
