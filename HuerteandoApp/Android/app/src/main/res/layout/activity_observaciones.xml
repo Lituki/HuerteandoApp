@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- CoordinatorLayout permite que el FAB se eleve por encima del RecyclerView
-     y que la Snackbar no tape el FAB (comportamiento Material Design) -->
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -8,13 +6,22 @@
     android:layout_height="match_parent"
     android:background="#FAFAF7">
 
-    <!-- Contenedor principal en columna -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <!-- Barra de filtros: tipo + orden en fila horizontal -->
+        <!-- AÑADIMOS LA TOOLBAR AQUÍ -->
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbarPrincipal"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/verde_principal"
+            app:title="Huerteando"
+            app:titleTextColor="@color/white"
+            android:elevation="4dp" />
+
+        <!-- Barra de filtros -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -23,7 +30,6 @@
             android:background="#FFFFFF"
             android:elevation="2dp">
 
-            <!-- Spinner Tipo (izquierda) -->
             <Spinner
                 android:id="@+id/spinnerTipo"
                 android:layout_width="0dp"
@@ -31,7 +37,6 @@
                 android:layout_weight="1"
                 android:layout_marginEnd="8dp" />
 
-            <!-- Spinner Orden (derecha) -->
             <Spinner
                 android:id="@+id/spinnerOrden"
                 android:layout_width="0dp"
@@ -40,7 +45,6 @@
 
         </LinearLayout>
 
-        <!-- ProgressBar centrado, visible solo mientras carga -->
         <ProgressBar
             android:id="@+id/progressBar"
             android:layout_width="wrap_content"
@@ -49,12 +53,11 @@
             android:layout_marginTop="16dp"
             android:visibility="gone" />
 
-        <!-- Mensaje cuando la lista está vacía -->
         <TextView
             android:id="@+id/tvSinResultados"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="No hay observaciones con estos filtros."
+            android:text="@string/sin_resultados"
             android:textAlignment="center"
             android:textColor="#888888"
             android:layout_marginTop="48dp"
@@ -62,7 +65,6 @@
             android:padding="16dp"
             android:visibility="gone" />
 
-        <!-- Lista de observaciones -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerObservaciones"
             android:layout_width="match_parent"
@@ -70,14 +72,9 @@
             android:padding="8dp"
             android:clipToPadding="false"
             android:paddingBottom="80dp" />
-        <!--
-            paddingBottom="80dp": deja espacio para que el FAB no tape
-            el último elemento de la lista.
-        -->
 
     </LinearLayout>
 
-    <!-- FAB: botón flotante para crear nueva observación (RF-06) -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabCrearObservacion"
         android:layout_width="wrap_content"
