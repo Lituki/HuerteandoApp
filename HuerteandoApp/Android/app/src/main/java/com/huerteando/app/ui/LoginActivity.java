@@ -1,4 +1,4 @@
-package com.huerteando.app;
+package com.huerteando.app.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,6 +13,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.huerteando.app.R;
 import com.huerteando.app.api.ApiClient;
 import com.huerteando.app.api.ApiService;
 import com.huerteando.app.clases.LoginRequest;

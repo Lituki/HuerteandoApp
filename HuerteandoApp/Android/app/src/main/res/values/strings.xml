@@ -3,9 +3,9 @@
     <string name="app_tagline">Huerta de Murcia</string>
 
     <!-- Menús -->
-    <string name="obs_menu_cerrar_sesion">Cerrar sesión</string>
-    <string name="obs_menu_buscar">Buscar</string>
     <string name="menu_cerrar_sesion">Cerrar sesión</string>
+    <string name="menu_buscar">Buscar</string>
+
 
     <!-- Tipos de observación -->
     <string name="tipo_todos">Todos los tipos</string>

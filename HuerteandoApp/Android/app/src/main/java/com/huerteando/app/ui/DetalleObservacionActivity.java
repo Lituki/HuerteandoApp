@@ -1,4 +1,4 @@
-package com.huerteando.app;
+package com.huerteando.app.ui;
 
 import android.os.Bundle;
 import android.view.View;
@@ -11,6 +11,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
+import com.huerteando.app.R;
+import com.huerteando.app.adapter.ComentarioAdapter;
 import com.huerteando.app.api.ApiClient;
 import com.huerteando.app.api.ApiService;
 import com.huerteando.app.clases.Comentario;
@@ -59,16 +61,22 @@ public class DetalleObservacionActivity extends AppCompatActivity {
     private Observacion       observacionActual;
     private ComentarioAdapter adapterComentarios;
     private final List<Comentario>  comentarios = new ArrayList<>();
-
-
     private SessionManager session;
-
     // ─────────────────────────────────────────────────────────────────────────
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detalle_observacion);
+
+        // CONFIGURACIÓN DE TOOLBAR (NUEVO)
+        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true); // Botón atrás
+            getSupportActionBar().setTitle(""); // El título lo maneja el CollapsingToolbar
+        }
+        toolbar.setNavigationOnClickListener(v -> finish());
 
         session = new SessionManager(this);
 
@@ -145,8 +153,12 @@ public class DetalleObservacionActivity extends AppCompatActivity {
         tvDetalleTipo.setText(o.getTipoObservacion());
         tvDetalleTipo.setTextColor(colorTipo(o.getTipoObservacion()));
 
-        // Título
+        // Título: Lo ponemos en el texto y también en la Toolbar expansiva
         tvDetalleTitulo.setText(o.getTitulo());
+        com.google.android.material.appbar.CollapsingToolbarLayout collapsingToolbar = findViewById(R.id.collapsingToolbar);
+        if (collapsingToolbar != null) {
+            collapsingToolbar.setTitle(o.getTitulo());
+        }
 
         // Fecha
         tvDetalleFecha.setText("📅 " + (o.getFechaObservacion() != null ? o.getFechaObservacion() : ""));

@@ -25,7 +25,7 @@
 
         <!-- LAUNCHER: pantalla de login -->
         <activity
-            android:name=".LoginActivity"
+            android:name=".ui.LoginActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
@@ -36,33 +36,27 @@
 
         <!-- Registro de nuevo usuario -->
         <activity
-            android:name=".RegistroActivity"
+            android:name=".ui.RegistroActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
         <!-- Pantalla principal: listado de observaciones -->
         <activity
-            android:name=".ObservacionesActivity"
-            android:exported="false" />
-
-        <!-- Pantalla principal alternativa (con tabs) -->
-        <activity
-            android:name=".MainActivity"
+            android:name=".ui.ObservacionesActivity"
             android:exported="false" />
 
         <!-- Detalle de una observación -->
         <activity
-            android:name=".DetalleObservacionActivity"
+            android:name=".ui.DetalleObservacionActivity"
             android:exported="false"
-            android:parentActivityName=".ObservacionesActivity" />
-
+            android:parentActivityName=".ui.ObservacionesActivity" />
 
         <!-- Crear observación (versión alternativa con más campos) -->
         <activity
-            android:name=".CrearObservacionActivity"
+            android:name=".ui.CrearObservacionActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize"
-            android:parentActivityName=".ObservacionesActivity" />
+            android:parentActivityName=".ui.ObservacionesActivity" />
 
     </application>
 

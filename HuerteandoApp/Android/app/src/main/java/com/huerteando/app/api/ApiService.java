@@ -1,6 +1,5 @@
 package com.huerteando.app.api;
 
-import com.huerteando.app.clases.ActualizarPerfilRequest;
 import com.huerteando.app.clases.Comentario;
 import com.huerteando.app.clases.ComentarioRequest;
 import com.huerteando.app.clases.ImagenResponse;
@@ -93,9 +92,6 @@ public interface ApiService {
 
     @GET("api/usuarios/me")
     Call<Usuario> getMiPerfil();
-
-    @PUT("api/usuarios/me")
-    Call<Usuario> actualizarPerfil(@Body ActualizarPerfilRequest request);
 
     @GET("api/usuarios/{id}")
     Call<Usuario> getUsuario(@Path("id") Long id);

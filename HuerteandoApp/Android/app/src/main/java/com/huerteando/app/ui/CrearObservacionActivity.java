@@ -1,4 +1,4 @@
-package com.huerteando.app;
+package com.huerteando.app.ui;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -20,7 +20,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
+import com.huerteando.app.R;
 import com.huerteando.app.api.ApiClient;
 import com.huerteando.app.api.ApiService;
 import com.huerteando.app.clases.ObservacionRequest;

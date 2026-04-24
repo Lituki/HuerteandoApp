@@ -1,4 +1,4 @@
-package com.huerteando.app;
+package com.huerteando.app.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -17,6 +17,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.huerteando.app.R;
+import com.huerteando.app.adapter.ObservacionAdapter;
 import com.huerteando.app.api.ApiClient;
 import com.huerteando.app.api.ApiService;
 import com.huerteando.app.clases.Observacion;
