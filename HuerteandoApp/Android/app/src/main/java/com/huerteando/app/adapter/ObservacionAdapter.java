@@ -17,7 +17,7 @@ import java.util.List;
 
 /**
  * Adapter para el RecyclerView de observaciones
- * 
+ *
  * ¿Qué hace esta clase?
  * Se encarga de mostrar cada observación en una "tarjeta" de la lista.
  * Convierte cada objeto Observacion en una vista visual.
@@ -48,11 +48,7 @@ public class ObservacionAdapter extends RecyclerView.Adapter<ObservacionAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        // Obtener la observación de esta posición
-        Observacion obs = observaciones.get(position);
-        
-        //绑定数据到视图 (asignar datos a la vista)
-        holder.bind(obs);
+        holder.bind(observaciones.get(position));
     }
 
     @Override
@@ -64,18 +60,13 @@ public class ObservacionAdapter extends RecyclerView.Adapter<ObservacionAdapter.
      * Clase interna que representa cada tarjeta de la lista
      */
     class ViewHolder extends RecyclerView.ViewHolder {
-        
+
         private final ImageView ivImagen;
-        private final TextView tvTitulo;
-        private final TextView tvTipo;
-        private final TextView tvZona;
-        private final TextView tvFecha;
-        private final TextView tvLikes;
-        private final TextView tvComentarios;
+        private final TextView tvTitulo, tvTipo, tvZona, tvFecha, tvLikes, tvComentarios;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            
+
             // Conectar con los elementos del layout
             ivImagen = itemView.findViewById(R.id.ivImagen);
             tvTitulo = itemView.findViewById(R.id.tvTitulo);
@@ -97,28 +88,17 @@ public class ObservacionAdapter extends RecyclerView.Adapter<ObservacionAdapter.
         public void bind(Observacion obs) {
             // Título
             tvTitulo.setText(obs.getTitulo());
-            
+
             // Tipo (con color según el tipo)
             tvTipo.setText(obs.getTipoObservacion());
-            int colorTipo = getColorTipo(obs.getTipoObservacion());
-            tvTipo.setBackgroundColor(colorTipo);
-            
-            // Zona
+            tvTipo.setBackgroundColor(getColorTipo(obs.getTipoObservacion()));
             tvZona.setText(obs.getNombreZona() != null ? obs.getNombreZona() : "Sin zona");
-            
-            // Fecha
             tvFecha.setText(obs.getFechaObservacion());
-            
-            // Likes y comentarios
             tvLikes.setText(String.valueOf(obs.getNumLikes()));
             tvComentarios.setText(String.valueOf(obs.getNumComentarios()));
 
-            // Imagen (usando Glide para cargar imágenes de internet)
             if (obs.getImagenesUrl() != null && !obs.getImagenesUrl().isEmpty()) {
-                Glide.with(itemView.getContext())
-                        .load(obs.getImagenesUrl().get(0))
-                        .centerCrop()
-                        .into(ivImagen);
+                Glide.with(itemView.getContext()).load(obs.getImagenesUrl().get(0)).centerCrop().into(ivImagen);
                 ivImagen.setVisibility(View.VISIBLE);
             } else {
                 ivImagen.setVisibility(View.GONE);
@@ -128,9 +108,9 @@ public class ObservacionAdapter extends RecyclerView.Adapter<ObservacionAdapter.
         private int getColorTipo(String tipo) {
             if (tipo == null) return 0xFF888888;
             switch (tipo) {
-                case "PLANTA": return 0xFF4CAF50;   // Verde
-                case "RINCON": return 0xFF2196F3; // Azul
-                case "DENUNCIA": return 0xFFF44336; // Rojo
+                case "PLANTA": return 0xFF4CAF50;
+                case "RINCON": return 0xFF2196F3;
+                case "INCIDENCIA": return 0xFFF44336;
                 default: return 0xFF888888;
             }
         }

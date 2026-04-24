@@ -11,7 +11,7 @@
     <string name="tipo_todos">Todos los tipos</string>
     <string name="tipo_planta">PLANTA</string>
     <string name="tipo_rincon">RINCON</string>
-    <string name="tipo_denuncia">DENUNCIA</string>
+    <string name="tipo_incidencia">INCIDENCIA</string>
 
     <!-- Orden -->
     <string name="orden_recientes">Más recientes</string>
@@ -60,7 +60,7 @@
         <item>@string/tipo_todos</item>
         <item>@string/tipo_planta</item>
         <item>@string/tipo_rincon</item>
-        <item>@string/tipo_denuncia</item>
+        <item>@string/tipo_incidencia</item>
     </string-array>
 
     <string-array name="array_orden">
