@@ -30,17 +30,9 @@ import retrofit2.Response;
 
 /**
  * Pantalla de detalle de una observación.
- *
- * Layout: activity_detalle_observacion.xml
- *
- * RF cubiertos: RF-10 (ver por ID), RF-34/36 (comentarios),
- *               RF-38/40/41 (likes).
- *
- * Recibe el ID en el extra "idObservacion" (Long).
  */
 public class DetalleObservacionActivity extends AppCompatActivity {
 
-    // ─── IDs del layout activity_detalle_observacion.xml ──────────────────────
     private android.widget.ImageView ivDetalleImagen;
     private ProgressBar       progressDetalle;
     private TextView          tvDetalleTipo;
@@ -56,31 +48,27 @@ public class DetalleObservacionActivity extends AppCompatActivity {
     private com.google.android.material.textfield.TextInputEditText editNuevoComentario;
     private MaterialButton    btnEnviarComentario;
 
-    // ─── Datos ────────────────────────────────────────────────────────────────
     private long              idObservacion;
     private Observacion       observacionActual;
     private ComentarioAdapter adapterComentarios;
     private final List<Comentario>  comentarios = new ArrayList<>();
     private SessionManager session;
-    // ─────────────────────────────────────────────────────────────────────────
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detalle_observacion);
 
-        // CONFIGURACIÓN DE TOOLBAR (NUEVO)
         androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true); // Botón atrás
-            getSupportActionBar().setTitle(""); // El título lo maneja el CollapsingToolbar
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle("");
         }
         toolbar.setNavigationOnClickListener(v -> finish());
 
         session = new SessionManager(this);
 
-        // Obtener ID de la observación
         idObservacion = getIntent().getLongExtra("idObservacion", -1L);
         if (idObservacion == -1L) {
             Toast.makeText(this, "Error: observación no encontrada", Toast.LENGTH_SHORT).show();
@@ -88,7 +76,6 @@ public class DetalleObservacionActivity extends AppCompatActivity {
             return;
         }
 
-        // Enlazar vistas
         ivDetalleImagen            = findViewById(R.id.ivDetalleImagen);
         progressDetalle            = findViewById(R.id.progressDetalle);
         tvDetalleTipo              = findViewById(R.id.tvDetalleTipo);
@@ -104,7 +91,6 @@ public class DetalleObservacionActivity extends AppCompatActivity {
         editNuevoComentario        = findViewById(R.id.editNuevoComentario);
         btnEnviarComentario        = findViewById(R.id.btnEnviarComentario);
 
-        // RecyclerView de comentarios
         adapterComentarios = new ComentarioAdapter(comentarios);
         recyclerComentarios.setLayoutManager(new LinearLayoutManager(this));
         recyclerComentarios.setAdapter(adapterComentarios);
@@ -112,18 +98,13 @@ public class DetalleObservacionActivity extends AppCompatActivity {
         btnLike.setOnClickListener(v -> toggleLike());
         btnEnviarComentario.setOnClickListener(v -> enviarComentario());
 
-        // Cargar datos
         cargarObservacion();
         cargarComentarios();
     }
 
-    // ─── Carga de la observación ─────────────────────────────────────────────
-
     private void cargarObservacion() {
         progressDetalle.setVisibility(View.VISIBLE);
-
         ApiService api = ApiClient.getClient().create(ApiService.class);
-
         api.getObservacion(idObservacion).enqueue(new Callback<Observacion>() {
             @Override
             public void onResponse(Call<Observacion> call, Response<Observacion> response) {
@@ -136,133 +117,79 @@ public class DetalleObservacionActivity extends AppCompatActivity {
                             "Error al cargar la observación", Toast.LENGTH_SHORT).show();
                 }
             }
-
             @Override
             public void onFailure(Call<Observacion> call, Throwable t) {
                 progressDetalle.setVisibility(View.GONE);
-                Toast.makeText(DetalleObservacionActivity.this,
-                        "Error de conexión", Toast.LENGTH_SHORT).show();
+                Toast.makeText(DetalleObservacionActivity.this, "Error de conexión", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void mostrarObservacion() {
         Observacion o = observacionActual;
-
-        // Tipo
         tvDetalleTipo.setText(o.getTipoObservacion());
         tvDetalleTipo.setTextColor(colorTipo(o.getTipoObservacion()));
-
-        // Título: Lo ponemos en el texto y también en la Toolbar expansiva
         tvDetalleTitulo.setText(o.getTitulo());
         com.google.android.material.appbar.CollapsingToolbarLayout collapsingToolbar = findViewById(R.id.collapsingToolbar);
-        if (collapsingToolbar != null) {
-            collapsingToolbar.setTitle(o.getTitulo());
-        }
-
-        // Fecha
+        if (collapsingToolbar != null) collapsingToolbar.setTitle(o.getTitulo());
         tvDetalleFecha.setText("📅 " + (o.getFechaObservacion() != null ? o.getFechaObservacion() : ""));
+        tvDetalleDescripcion.setText(o.getDescripcion() != null && !o.getDescripcion().isEmpty() ? o.getDescripcion() : "Sin descripción");
 
-        // Descripción
-        tvDetalleDescripcion.setText(
-                o.getDescripcion() != null && !o.getDescripcion().isEmpty()
-                        ? o.getDescripcion() : "Sin descripción");
-
-        // Zona (opcional)
         if (o.getNombreZona() != null && !o.getNombreZona().isEmpty()) {
             tvDetalleZona.setText("📍 " + o.getNombreZona());
             tvDetalleZona.setVisibility(View.VISIBLE);
-        } else {
-            tvDetalleZona.setVisibility(View.GONE);
-        }
+        } else tvDetalleZona.setVisibility(View.GONE);
 
-        // Nombre tradicional (opcional)
         if (o.getNombreTradicional() != null && !o.getNombreTradicional().isEmpty()) {
             tvDetalleNombreTradicional.setText("«" + o.getNombreTradicional() + "»");
             tvDetalleNombreTradicional.setVisibility(View.VISIBLE);
-        } else {
-            tvDetalleNombreTradicional.setVisibility(View.GONE);
-        }
+        } else tvDetalleNombreTradicional.setVisibility(View.GONE);
 
-        // Especie (solo PLANTA, opcional)
-        if ("PLANTA".equals(o.getTipoObservacion())
-                && o.getEspecieNombre() != null
-                && !o.getEspecieNombre().isEmpty()) {
+        if ("PLANTA".equals(o.getTipoObservacion()) && o.getEspecieNombre() != null && !o.getEspecieNombre().isEmpty()) {
             tvDetalleEspecie.setText("🌿 " + o.getEspecieNombre());
             tvDetalleEspecie.setVisibility(View.VISIBLE);
-        } else {
-            tvDetalleEspecie.setVisibility(View.GONE);
-        }
-        // Cargar imagen con Glide si existe
+        } else tvDetalleEspecie.setVisibility(View.GONE);
+
         if (o.getImagenesUrl() != null && !o.getImagenesUrl().isEmpty()) {
             ivDetalleImagen.setVisibility(View.VISIBLE);
-
-            // Suponemos que mostramos la primera imagen de la lista
-            String urlImagen = o.getImagenesUrl().get(0);
-
-            // Si la URL es relativa, añade la BASE_URL de tu API
-            // Si ya viene completa desde el servidor, déjala así:
-            com.bumptech.glide.Glide.with(this)
-                    .load(urlImagen)
+            com.bumptech.glide.Glide.with(this).load(o.getImagenesUrl().get(0))
                     .placeholder(android.R.drawable.ic_menu_gallery)
-                    .error(android.R.drawable.ic_menu_report_image)
-                    .into(ivDetalleImagen);
-        } else {
-            ivDetalleImagen.setVisibility(View.GONE);
-        }
+                    .error(android.R.drawable.ic_menu_report_image).into(ivDetalleImagen);
+        } else ivDetalleImagen.setVisibility(View.GONE);
 
-        // Likes
         actualizarBotonLike();
     }
-
-    // ─── Likes ───────────────────────────────────────────────────────────────
 
     private void actualizarBotonLike() {
         if (observacionActual == null) return;
         tvDetalleNumLikes.setText(String.valueOf(observacionActual.getNumLikes()));
-        if (observacionActual.isLikePropio()) {
-            btnLike.setText("❤️ Te gusta");
-        } else {
-            btnLike.setText("🤍 Me gusta");
-        }
+        btnLike.setText(observacionActual.isLikePropio() ? "❤️ Te gusta" : "🤍 Me gusta");
     }
 
     private void toggleLike() {
         if (observacionActual == null) return;
-
         ApiService api = ApiClient.getClient().create(ApiService.class);
-        Call<LikeResponse> call;
-
-        if (observacionActual.isLikePropio()) {
-            call = api.quitarLike(idObservacion);
-        } else {
-            call = api.darLike(idObservacion);
-        }
-
+        Call<LikeResponse> call = observacionActual.isLikePropio() ? api.quitarLike(idObservacion) : api.darLike(idObservacion);
         call.enqueue(new Callback<LikeResponse>() {
             @Override
             public void onResponse(Call<LikeResponse> c, Response<LikeResponse> r) {
                 if (r.isSuccessful() && r.body() != null) {
-                    // Actualizar estado local sin recargar toda la observación
                     observacionActual.setNumLikes(r.body().getLikesTotales());
                     observacionActual.setLikePropio(r.body().isTieneLike());
                     actualizarBotonLike();
+                } else {
+                    Toast.makeText(DetalleObservacionActivity.this, "Error: " + r.code(), Toast.LENGTH_SHORT).show();
                 }
             }
-
             @Override
             public void onFailure(Call<LikeResponse> c, Throwable t) {
-                Toast.makeText(DetalleObservacionActivity.this,
-                        "Error de conexión", Toast.LENGTH_SHORT).show();
+                Toast.makeText(DetalleObservacionActivity.this, "Error de conexión", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    // ─── Comentarios ─────────────────────────────────────────────────────────
-
     private void cargarComentarios() {
         ApiService api = ApiClient.getClient().create(ApiService.class);
-
         api.getComentarios(idObservacion).enqueue(new Callback<List<Comentario>>() {
             @Override
             public void onResponse(Call<List<Comentario>> call, Response<List<Comentario>> response) {
@@ -272,24 +199,26 @@ public class DetalleObservacionActivity extends AppCompatActivity {
                     adapterComentarios.notifyDataSetChanged();
                 }
             }
-
             @Override
-            public void onFailure(Call<List<Comentario>> call, Throwable t) { /* silencioso */ }
+            public void onFailure(Call<List<Comentario>> call, Throwable t) {}
         });
     }
 
     private void enviarComentario() {
-        String contenido = editNuevoComentario.getText() != null
-                ? editNuevoComentario.getText().toString().trim() : "";
-
+        String contenido = editNuevoComentario.getText() != null ? editNuevoComentario.getText().toString().trim() : "";
         if (contenido.isEmpty()) {
             Toast.makeText(this, "Escribe un comentario", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        ApiService api = ApiClient.getClient().create(ApiService.class);
+        Long idUsuario = session.getUserId();
+        if (idUsuario == -1L) {
+            Toast.makeText(this, "Inicia sesión para comentar", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        api.addComentario(idObservacion, new ComentarioRequest(contenido))
+        ApiService api = ApiClient.getClient().create(ApiService.class);
+        api.addComentario(idObservacion, new ComentarioRequest(contenido, idUsuario))
                 .enqueue(new Callback<Comentario>() {
                     @Override
                     public void onResponse(Call<Comentario> call, Response<Comentario> response) {
@@ -297,28 +226,23 @@ public class DetalleObservacionActivity extends AppCompatActivity {
                             editNuevoComentario.setText("");
                             cargarComentarios();
                         } else {
-                            Toast.makeText(DetalleObservacionActivity.this,
-                                    "Error al enviar comentario", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(DetalleObservacionActivity.this, "Error al enviar: " + response.code(), Toast.LENGTH_SHORT).show();
                         }
                     }
-
                     @Override
                     public void onFailure(Call<Comentario> call, Throwable t) {
-                        Toast.makeText(DetalleObservacionActivity.this,
-                                "Error de conexión", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(DetalleObservacionActivity.this, "Error de conexión", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 
-    // ─── Utilidades ──────────────────────────────────────────────────────────
-
     private int colorTipo(String tipo) {
         if (tipo == null) return 0xFF888888;
         switch (tipo) {
-            case "PLANTA":   return 0xFF4CAF50;
-            case "RINCON":   return 0xFF2196F3;
+            case "PLANTA": return 0xFF4CAF50;
+            case "RINCON": return 0xFF2196F3;
             case "DENUNCIA": return 0xFFF44336;
-            default:         return 0xFF888888;
+            default: return 0xFF888888;
         }
     }
 }
