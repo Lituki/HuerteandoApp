@@ -180,6 +180,16 @@
             android:layout_marginTop="16dp"
             android:text="Seleccionar imágenes" />
 
+        <TextView
+            android:id="@+id/tvImagenesSeleccionadas"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:gravity="center"
+            android:text="Ninguna imagen seleccionada"
+            android:textColor="#666666"
+            android:textSize="12sp" />
+
         <!-- Loading -->
         <ProgressBar
             android:id="@+id/progressBar"

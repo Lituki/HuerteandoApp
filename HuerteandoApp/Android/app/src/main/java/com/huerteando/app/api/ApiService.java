@@ -30,53 +30,38 @@ public interface ApiService {
 
     // ==================== AUTENTICACIÓN ====================
 
-    // POST /api/auth/login
-    @POST("auth/login")
+    @POST("api/auth/login")
     Call<LoginResponse> login(@Body LoginRequest request);
 
-    // POST /api/usuarios  (registro)
-    @POST("usuarios")
+    @POST("api/auth/register")
     Call<Usuario> registrar(@Body RegistroRequest request);
 
     // ==================== OBSERVACIONES ====================
 
-    /**
-     * Listado con filtros opcionales.
-     * @param tipo      PLANTA | RINCON | DENUNCIA  (null = todos)
-     * @param estado    ABIERTA | CERRADA           (null = todos)
-     * @param orden     fecha | likes | comentarios  (null = fecha)
-     * @param busqueda  texto libre en título/descripción (null = sin filtro)
-     */
-    @GET("observaciones")
-    Call<List<Observacion>> getObservaciones(
+    @GET("api/observaciones")    Call<List<Observacion>> getObservaciones(
             @Query("tipo")     String tipo,
             @Query("estado")   String estado,
             @Query("orden")    String orden,
             @Query("busqueda") String busqueda
     );
 
-    // GET /api/observaciones/{id}
-    @GET("observaciones/{id}")
+    @GET("api/observaciones/{id}")
     Call<Observacion> getObservacion(@Path("id") Long id);
 
-    // POST /api/observaciones
-    @POST("observaciones")
+    @POST("api/observaciones")
     Call<Observacion> crearObservacion(@Body ObservacionRequest request);
 
-    // PUT /api/observaciones/{id}
-    @PUT("observaciones/{id}")
+    @PUT("api/observaciones/{id}")
     Call<Observacion> actualizarObservacion(
             @Path("id") Long id,
             @Body ObservacionRequest request
     );
 
-    // DELETE /api/observaciones/{id}
-    @DELETE("observaciones/{id}")
+    @DELETE("api/observaciones/{id}")
     Call<Void> eliminarObservacion(@Path("id") Long id);
 
-    // POST /api/observaciones/{id}/imagenes  (multipart, máx. 3)
     @Multipart
-    @POST("observaciones/{id}/imagenes")
+    @POST("api/observaciones/{id}/imagenes")
     Call<ImagenResponse> subirImagenes(
             @Path("id") Long id,
             @Part List<MultipartBody.Part> imagenes
@@ -84,42 +69,34 @@ public interface ApiService {
 
     // ==================== LIKES ====================
 
-    // POST /api/observaciones/{id}/like
-    @POST("observaciones/{id}/like")
+    @POST("api/observaciones/{id}/like")
     Call<LikeResponse> darLike(@Path("id") Long id);
 
-    // DELETE /api/observaciones/{id}/like
-    @DELETE("observaciones/{id}/like")
+    @DELETE("api/observaciones/{id}/like")
     Call<LikeResponse> quitarLike(@Path("id") Long id);
 
     // ==================== COMENTARIOS ====================
 
-    // GET /api/observaciones/{id}/comentarios
-    @GET("observaciones/{id}/comentarios")
+    @GET("api/observaciones/{id}/comentarios")
     Call<List<Comentario>> getComentarios(@Path("id") Long idObservacion);
 
-    // POST /api/observaciones/{id}/comentarios
-    @POST("observaciones/{id}/comentarios")
+    @POST("api/observaciones/{id}/comentarios")
     Call<Comentario> addComentario(
             @Path("id") Long idObservacion,
             @Body ComentarioRequest request
     );
 
-    // DELETE /api/comentarios/{id}
-    @DELETE("comentarios/{id}")
+    @DELETE("api/comentarios/{id}")
     Call<Void> eliminarComentario(@Path("id") Long id);
 
     // ==================== USUARIOS ====================
 
-    // GET /api/usuarios/me
-    @GET("usuarios/me")
+    @GET("api/usuarios/me")
     Call<Usuario> getMiPerfil();
 
-    // PUT /api/usuarios/me
-    @PUT("usuarios/me")
+    @PUT("api/usuarios/me")
     Call<Usuario> actualizarPerfil(@Body ActualizarPerfilRequest request);
 
-    // GET /api/usuarios/{id}
-    @GET("usuarios/{id}")
+    @GET("api/usuarios/{id}")
     Call<Usuario> getUsuario(@Path("id") Long id);
 }

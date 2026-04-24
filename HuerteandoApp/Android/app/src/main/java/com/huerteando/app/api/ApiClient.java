@@ -21,10 +21,10 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class ApiClient {
 
     // ⚠️ IMPORTANTE: Cambia esta URL según dónde corra tu servidor:
-    // - Emulador Android →  "http://10.0.2.2:8080/api/"
-    // - Dispositivo real  → "http://TU_IP_LOCAL:8080/api/"  (ej: 192.168.1.50:8080/api/)
-    // - Producción        → "https://huerteandoapp-1.onrender.com/api/" "Test"
-    private static final String BASE_URL = "https://huerteandoapp-1.onrender.com/api/";
+    // - Emulador Android →  "http://10.0.2.2:8080/"
+    // - Dispositivo real  → "http://TU_IP_LOCAL:8080/"  (ej: 192.168.1.50:8080/)
+    // - Producción        → "https://huerteandoapp-1.onrender.com/" "Test"
+    private static final String BASE_URL = "https://huerteandoapp-1.onrender.com/";
 
     /**
      * Crea un cliente Retrofit configurado con el token JWT del usuario.

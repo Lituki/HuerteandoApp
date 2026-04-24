@@ -1,5 +1,6 @@
 package com.huerteando.app.clases;
 
+import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
 // Esta clase representa una observación del servidor (JSON → Java)
@@ -8,28 +9,52 @@ public class Observacion {
     private Long id;
     private String titulo;
     private String descripcion;
+
+    @SerializedName("fecha_observacion")
     private String fechaObservacion;  // Formato ISO: "2024-05-01"
+
+    @SerializedName("estado_observacion")
     private String estado;            // "ABIERTA", "CERRADA"
+
+    @SerializedName("nombre_tradicional")
     private String nombreTradicional; // Nombre popular huertano (opcional)
+
 
     // Ubicación — van en la misma tabla según los requisitos
     private double latitud;
     private double longitud;
+
+    @SerializedName("direccion_txt")
     private String direccionTxt;
+
+    @SerializedName("nombre_zona")
     private String nombreZona;        // Topónimo local
 
     // Relaciones
+    @SerializedName("tipo_observacion")
     private String tipoObservacion;   // "PLANTA", "RINCON", "DENUNCIA"
+
+    @SerializedName("especie_nombre")
     private String especieNombre;     // Puede ser null si no se identificó
+
+    @SerializedName("autor_nick")
     private String autorNick;         // Quién la creó
+
+    @SerializedName("autor_avatar_url")
     private String autorAvatarUrl;
 
     // Contadores para mostrar en la tarjeta
+    @SerializedName("num_likes")
     private int numLikes;
+
+    @SerializedName("num_comentarios")
     private int numComentarios;
+
+    @SerializedName("like_propio")
     private boolean likePropio;       // Si el usuario actual ya le dio like
 
-    // Lista de imágenes (máximo 3 según requisitos)
+    //Lista de imagenes (URL)
+    @SerializedName("imagenes_url")
     private List<String> imagenesUrl;
 
     // Getters y Setters

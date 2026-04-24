@@ -1,22 +1,18 @@
 package com.huerteando.app.clases;
 
-// Lo que nos devuelve el servidor si el login es correcto
-public class LoginResponse {
-    private String token;   // El JWT o token de sesión
-    private String nick;
-    private String rol;     // "USER" o "ADMIN"
-    private Long id;
+import com.google.gson.annotations.SerializedName;
 
-    public String getToken() {
-        return token;
-    }
-    public String getNick() {
-        return nick;
-    }
-    public String getRol() {
-        return rol;
-    }
-    public Long getId() {
-        return id;
-    }
+public class LoginResponse {
+    private Long id;
+    private String nick;
+    private String token;
+    private String rol;
+
+    // Usamos SerializedName por si el backend devuelve "nombre_usuario" o similar,
+    // pero según el manual el campo es "nick".
+
+    public Long getId() { return id; }
+    public String getNick() { return nick; }
+    public String getToken() { return token; }
+    public String getRol() { return rol; }
 }

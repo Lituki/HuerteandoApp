@@ -59,6 +59,7 @@ public class CrearObservacionActivity extends AppCompatActivity {
     private TextInputEditText editNombreTradicional;
     private final List<android.net.Uri> imagenesSeleccionadas = new java.util.ArrayList<>();
     private android.widget.Button btnSeleccionarImagen;
+    private android.widget.TextView tvImagenesSeleccionadas;
     private androidx.activity.result.ActivityResultLauncher<android.content.Intent> pickImageLauncher;
     private MaterialButton btnGuardar;
     private MaterialButton btnMiUbicacion;
@@ -101,11 +102,13 @@ public class CrearObservacionActivity extends AppCompatActivity {
                             imagenesSeleccionadas.add(data.getData());
                         }
 
-                        android.widget.Toast.makeText(
-                                this,
-                                imagenesSeleccionadas.size() + " imágenes seleccionadas",
-                                android.widget.Toast.LENGTH_SHORT
-                        ).show();
+                        String mensaje = imagenesSeleccionadas.size() + " imágenes seleccionadas";
+                        android.widget.Toast.makeText(this, mensaje, android.widget.Toast.LENGTH_SHORT).show();
+
+                        if (tvImagenesSeleccionadas != null) {
+                            tvImagenesSeleccionadas.setText(mensaje);
+                            tvImagenesSeleccionadas.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
+                        }
                     }
                 }
         );
@@ -125,6 +128,7 @@ public class CrearObservacionActivity extends AppCompatActivity {
         btnGuardar = findViewById(R.id.btnGuardar);
         btnMiUbicacion = findViewById(R.id.btnMiUbicacion);
         btnSeleccionarImagen = findViewById(R.id.btnSeleccionarImagen);
+        tvImagenesSeleccionadas = findViewById(R.id.tvImagenesSeleccionadas);
         btnSeleccionarImagen.setOnClickListener(v -> abrirGaleria());
         progressBar = findViewById(R.id.progressBar);
 
@@ -251,19 +255,34 @@ public class CrearObservacionActivity extends AppCompatActivity {
             try {
                 // Convertir URI a bytes para enviar por red
                 java.io.InputStream inputStream = getContentResolver().openInputStream(uri);
-                byte[] bytes = new byte[inputStream.available()];
-                inputStream.read(bytes);
+
+                // Forma segura de leer todos los bytes sin importar el tamaño
+                java.io.ByteArrayOutputStream byteBuffer = new java.io.ByteArrayOutputStream();
+                byte[] buffer = new byte[1024];
+                int len;
+                while ((len = inputStream.read(buffer)) != -1) {
+                    byteBuffer.write(buffer, 0, len);
+                }
+                byte[] bytes = byteBuffer.toByteArray();
 
                 okhttp3.RequestBody requestFile = okhttp3.RequestBody.create(
                         okhttp3.MediaType.parse(getContentResolver().getType(uri)),
                         bytes
                 );
 
-                // "imagenes" es el nombre que espera tu API en el @Part
-                parts.add(okhttp3.MultipartBody.Part.createFormData("imagenes", "imagen.jpg", requestFile));
+                // Generamos un nombre único para cada foto usando el tiempo actual
+                String fileName = "foto_" + System.currentTimeMillis() + "_" + uri.getLastPathSegment() + ".jpg";
+                parts.add(okhttp3.MultipartBody.Part.createFormData("imagenes", fileName, requestFile));
 
+            } catch (java.io.FileNotFoundException e) {
+                android.util.Log.e("Huerteando", "Archivo no encontrado: " + uri.toString());
+                Toast.makeText(this, "No se encontró una de las imágenes", Toast.LENGTH_SHORT).show();
+            } catch (java.io.IOException e) {
+                android.util.Log.e("Huerteando", "Error al leer la imagen", e);
+                Toast.makeText(this, "Error al procesar las fotos", Toast.LENGTH_SHORT).show();
             } catch (Exception e) {
-                e.printStackTrace();
+                android.util.Log.e("Huerteando", "Error inesperado", e);
+                Toast.makeText(this, "Error inesperado al preparar las fotos", Toast.LENGTH_SHORT).show();
             }
         }
 
@@ -329,6 +348,12 @@ public class CrearObservacionActivity extends AppCompatActivity {
         // Validar que se haya seleccionado una ubicación
         if (!ubicacionObtenida) {
             Toast.makeText(this, "Debes seleccionar una ubicación", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Validación extra: Si es una denuncia, obligar a poner al menos una foto
+        if ("DENUNCIA".equals(tipo) && imagenesSeleccionadas.isEmpty()) {
+            Toast.makeText(this, "Las denuncias ambientales requieren al menos una imagen.", Toast.LENGTH_LONG).show();
             return;
         }
 
