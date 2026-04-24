@@ -10,7 +10,7 @@
     <!-- Tipos de observación -->
     <string name="tipo_todos">Todos los tipos</string>
     <string name="tipo_planta">PLANTA</string>
-    <string name="tipo_rincon">RINCÓN</string>
+    <string name="tipo_rincon">RINCON</string>
     <string name="tipo_denuncia">DENUNCIA</string>
 
     <!-- Orden -->
@@ -53,4 +53,20 @@
     <string name="zona_prefijo">📍 </string>
     <string name="fecha_prefijo">📅 </string>
     <string name="autor_prefijo">👤 </string>
+
+
+    <!-- Arrays para los desplegables de ObservacionesActivity -->
+    <string-array name="array_tipos">
+        <item>@string/tipo_todos</item>
+        <item>@string/tipo_planta</item>
+        <item>@string/tipo_rincon</item>
+        <item>@string/tipo_denuncia</item>
+    </string-array>
+
+    <string-array name="array_orden">
+        <item>@string/orden_recientes</item>
+        <item>@string/orden_likes</item>
+        <item>@string/orden_comentarios</item>
+    </string-array>
+
 </resources>

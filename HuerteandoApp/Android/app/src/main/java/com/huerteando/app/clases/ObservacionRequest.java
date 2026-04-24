@@ -5,36 +5,44 @@ package com.huerteando.app.clases;
  * Se envía al servidor cuando el usuario crea o edita una observación.
  */
 import com.google.gson.annotations.SerializedName;
+import java.math.BigDecimal;
 
 public class ObservacionRequest {
     private final String titulo;
     private final String descripcion;
 
-    @SerializedName("fecha_observacion")
+    @SerializedName("fechaObservacion")
     private final String fechaObservacion;
 
-    @SerializedName("tipo_observacion")
-    private final String tipoObservacion;
+    @SerializedName("tipoObservacion")
+    private final TipoRequest tipoObservacion;
 
-    @SerializedName("especie_nombre")
+    @SerializedName("usuario")
+    private final UsuarioRequest usuario;
+
+    @SerializedName("especieNombre")
     private final String especieNombre;
 
-    private final double latitud;
-    private final double longitud;
+    private final BigDecimal latitud;
+    private final BigDecimal longitud;
 
-    @SerializedName("direccion_txt")
+    @SerializedName("direccionTxt")
     private final String direccionTxt;
 
-    @SerializedName("nombre_zona")
+    @SerializedName("nombreZona")
     private final String nombreZona;
 
-    @SerializedName("nombre_tradicional")
+    @SerializedName("nombreTradicional")
     private final String nombreTradicional;
 
+    @SerializedName("estadoObservacion")
+    private final String estadoObservacion = "ABIERTA";
+
     public ObservacionRequest(String titulo, String descripcion, String fechaObservacion,
-                              String tipoObservacion, String especieNombre,
-                              double latitud, double longitud, String direccionTxt,
-                              String nombreZona, String nombreTradicional) {
+                              TipoRequest tipoObservacion, String especieNombre,
+                              BigDecimal latitud, BigDecimal longitud, String direccionTxt,
+                              String nombreZona, String nombreTradicional,
+                              UsuarioRequest usuario) {
         this.titulo = titulo;
         this.descripcion = descripcion;
         this.fechaObservacion = fechaObservacion;
@@ -45,16 +53,38 @@ public class ObservacionRequest {
         this.direccionTxt = direccionTxt;
         this.nombreZona = nombreZona;
         this.nombreTradicional = nombreTradicional;
+        this.usuario = usuario;
     }
 
     public String getTitulo() { return titulo; }
     public String getDescripcion() { return descripcion; }
     public String getFechaObservacion() { return fechaObservacion; }
-    public String getTipoObservacion() { return tipoObservacion; }
+    public TipoRequest getTipoObservacion() { return tipoObservacion; }
+    public UsuarioRequest getUsuario() { return usuario; }
     public String getEspecieNombre() { return especieNombre; }
-    public double getLatitud() { return latitud; }
-    public double getLongitud() { return longitud; }
+    public BigDecimal getLatitud() { return latitud; }
+    public BigDecimal getLongitud() { return longitud; }
     public String getDireccionTxt() { return direccionTxt; }
     public String getNombreZona() { return nombreZona; }
     public String getNombreTradicional() { return nombreTradicional; }
+
+    /**
+     * Mini-clase interna para representar el objeto TipoObservacion que espera el backend.
+     */
+    public static class TipoRequest {
+        public int id;
+        public TipoRequest(int id) {
+            this.id = id;
+        }
+    }
+
+    /**
+     * Mini-clase interna para representar el objeto Usuario que espera el backend.
+     */
+    public static class UsuarioRequest {
+        public Long id;
+        public UsuarioRequest(Long id) {
+            this.id = id;
+        }
+    }
 }

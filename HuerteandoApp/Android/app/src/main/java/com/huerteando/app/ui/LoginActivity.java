@@ -30,7 +30,7 @@ import retrofit2.Response;
  * Flujo:
  *   1. Si ya hay sesión activa → va directamente a ObservacionesActivity.
  *   2. El usuario introduce nick + contraseña → POST /api/auth/login.
- *   3. Si OK → guarda token en SessionManager → va a ObservacionesActivity.
+ *   3. Si OK → guarda sesión en SessionManager → va a ObservacionesActivity.
  *   4. Si error → muestra mensaje debajo del botón.
  */
 public class LoginActivity extends AppCompatActivity {
@@ -91,6 +91,20 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
+        // --- 🚧 INICIO BLOQUE BYPASS PRUEBAS (DESCOMENTADO PARA PRUEBAS) ---
+        if (nick.equals("admin")) {
+            // Inyectamos un usuario falso para poder entrar a la app sin servidor
+            LoginResponse mock = new LoginResponse();
+            mock.setId(1L);
+            mock.setNick("admin");
+            mock.setNombre("Administrador Test");
+            mock.setRol("ADMIN");
+            
+            sessionManager.guardarSesion(mock);
+            irAObservaciones();
+            return;
+        }
+        // --- 🚧 FIN BLOQUE BYPASS PRUEBAS ---
 
         tvError.setVisibility(View.GONE);
         btnLogin.setEnabled(false);

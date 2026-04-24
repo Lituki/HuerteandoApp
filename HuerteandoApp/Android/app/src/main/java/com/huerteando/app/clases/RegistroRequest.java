@@ -1,11 +1,14 @@
 package com.huerteando.app.clases;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Clase para enviar datos al servidor al registrar un nuevo usuario.
  * Se envía como JSON al API.
  */
 public class RegistroRequest {
     private final String nick;
+    @SerializedName("passwordHash")
     private final String password;
     private final String nombre;
     private final String apellidos;

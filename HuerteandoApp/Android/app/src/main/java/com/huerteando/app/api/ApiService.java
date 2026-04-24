@@ -25,6 +25,12 @@ import retrofit2.http.Part;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
+/**
+ * ApiService — Definición de endpoints para el Backend de Huerteando.
+ * 
+ * Se han ajustado las rutas y eliminado las dependencias de JWT
+ * para ser compatible con el sistema de autenticación básica.
+ */
 public interface ApiService {
 
     // ==================== AUTENTICACIÓN ====================
@@ -37,7 +43,8 @@ public interface ApiService {
 
     // ==================== OBSERVACIONES ====================
 
-    @GET("api/observaciones")    Call<List<Observacion>> getObservaciones(
+    @GET("api/observaciones")
+    Call<List<Observacion>> getObservaciones(
             @Query("tipo")     String tipo,
             @Query("estado")   String estado,
             @Query("orden")    String orden,
@@ -90,9 +97,8 @@ public interface ApiService {
 
     // ==================== USUARIOS ====================
 
-    @GET("api/usuarios/me")
-    Call<Usuario> getMiPerfil();
-
+    // Nota: getMiPerfil() requiere JWT o sesión en servidor. 
+    // Para login básico, es mejor usar getUsuario(id).
     @GET("api/usuarios/{id}")
     Call<Usuario> getUsuario(@Path("id") Long id);
 }

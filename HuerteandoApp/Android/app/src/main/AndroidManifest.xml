@@ -7,8 +7,11 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- Para móviles antiguos (Android 12 hacia abajo) -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
+
+    <!-- Para móviles modernos (Android 13 hacia arriba) -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 
     <application

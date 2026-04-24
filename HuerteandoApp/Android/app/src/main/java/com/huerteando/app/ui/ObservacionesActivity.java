@@ -85,15 +85,14 @@ public class ObservacionesActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
 
         // 3. Spinner TIPO
-        ArrayAdapter<String> adapterTipo = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item,
-                new String[]{"Todos los tipos", "PLANTA", "RINCÓN", "DENUNCIA"});
+        ArrayAdapter<CharSequence> adapterTipo = ArrayAdapter.createFromResource(this,
+                R.array.array_tipos, android.R.layout.simple_spinner_item);
         adapterTipo.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerTipo.setAdapter(adapterTipo);
         spinnerTipo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> p, View v, int pos, long id) {
-                tipoSeleccionado = (pos == 0) ? null : adapterTipo.getItem(pos);
+                tipoSeleccionado = (pos == 0) ? null : adapterTipo.getItem(pos).toString();
                 cargarObservaciones();
             }
             @Override public void onNothingSelected(AdapterView<?> p) {}
@@ -101,9 +100,8 @@ public class ObservacionesActivity extends AppCompatActivity {
 
         // 4. Spinner ORDEN
         final String[] valoresOrden = {"fecha", "likes", "comentarios"};
-        ArrayAdapter<String> adapterOrden = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item,
-                new String[]{"Más recientes", "Más likes", "Más comentarios"});
+        ArrayAdapter<CharSequence> adapterOrden = ArrayAdapter.createFromResource(this,
+                R.array.array_orden, android.R.layout.simple_spinner_item);
         adapterOrden.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerOrden.setAdapter(adapterOrden);
         spinnerOrden.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -168,7 +166,7 @@ public class ObservacionesActivity extends AppCompatActivity {
         progressBar.setVisibility(View.VISIBLE);
         tvSinResultados.setVisibility(View.GONE);
 
-        ApiService api = ApiClient.getClient(session.getToken()).create(ApiService.class);
+        ApiService api = ApiClient.getClient().create(ApiService.class);
 
         // getObservaciones ahora tiene 4 parámetros: tipo, estado, orden, busqueda
         api.getObservaciones(tipoSeleccionado, null, ordenSeleccionado, textoBusqueda)

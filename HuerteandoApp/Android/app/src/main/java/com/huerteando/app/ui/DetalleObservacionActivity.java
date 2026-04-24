@@ -122,7 +122,7 @@ public class DetalleObservacionActivity extends AppCompatActivity {
     private void cargarObservacion() {
         progressDetalle.setVisibility(View.VISIBLE);
 
-        ApiService api = ApiClient.getClient(session.getToken()).create(ApiService.class);
+        ApiService api = ApiClient.getClient().create(ApiService.class);
 
         api.getObservacion(idObservacion).enqueue(new Callback<Observacion>() {
             @Override
@@ -230,7 +230,7 @@ public class DetalleObservacionActivity extends AppCompatActivity {
     private void toggleLike() {
         if (observacionActual == null) return;
 
-        ApiService api = ApiClient.getClient(session.getToken()).create(ApiService.class);
+        ApiService api = ApiClient.getClient().create(ApiService.class);
         Call<LikeResponse> call;
 
         if (observacionActual.isLikePropio()) {
@@ -261,7 +261,7 @@ public class DetalleObservacionActivity extends AppCompatActivity {
     // ─── Comentarios ─────────────────────────────────────────────────────────
 
     private void cargarComentarios() {
-        ApiService api = ApiClient.getClient(session.getToken()).create(ApiService.class);
+        ApiService api = ApiClient.getClient().create(ApiService.class);
 
         api.getComentarios(idObservacion).enqueue(new Callback<List<Comentario>>() {
             @Override
@@ -287,7 +287,7 @@ public class DetalleObservacionActivity extends AppCompatActivity {
             return;
         }
 
-        ApiService api = ApiClient.getClient(session.getToken()).create(ApiService.class);
+        ApiService api = ApiClient.getClient().create(ApiService.class);
 
         api.addComentario(idObservacion, new ComentarioRequest(contenido))
                 .enqueue(new Callback<Comentario>() {

@@ -39,6 +39,7 @@ public class RegistroActivity extends AppCompatActivity {
     private TextInputEditText editEmail;
     private MaterialButton btnRegistro;
     private TextView tvError;
+    private TextView tvIrALogin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,16 +56,24 @@ public class RegistroActivity extends AppCompatActivity {
         editEmail = findViewById(R.id.editEmail);
         btnRegistro = findViewById(R.id.btnRegistro);
         tvError = findViewById(R.id.tvError);
+        tvIrALogin = findViewById(R.id.tvIrALogin);
+
+        // Volver al login al pulsar el texto
+        tvIrALogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish(); // Cierra esta pantalla y vuelve a la anterior (LoginActivity)
+            }
+        });
 
         // Botón de registro
         btnRegistro.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                realizarRegistro();
+                realizarRegistro(); // Llamamos a la función de registro
             }
         });
-    }
-
+        }
     private void realizarRegistro() {
         // Obtener valores
         String nick = editNick.getText() != null ? editNick.getText().toString().trim() : "";

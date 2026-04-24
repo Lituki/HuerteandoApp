@@ -18,7 +18,6 @@ import androidx.core.content.ContextCompat;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.textfield.TextInputEditText;
 import com.huerteando.app.R;
 import com.huerteando.app.api.ApiClient;
@@ -28,6 +27,7 @@ import com.huerteando.app.clases.Observacion;
 import com.huerteando.app.utils.SessionManager;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -38,13 +38,10 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
- * Activity para crear una nueva observación
+ * Activity para crear una nueva observación.
  * 
- * ¿Qué hace esta clase?
- * 1. Permite al usuario crear una nueva observación (planta, rincón o denuncia)
- * 2. Obtiene la ubicación actual del usuario
- * 3. Permite seleccionar fecha y tipo
- * 4. Envía los datos al servidor
+ * Se ha automatizado la fecha y hora para que coincida con el backend (LocalDateTime).
+ * Las coordenadas se envían como BigDecimal para evitar errores de validación.
  */
 public class CrearObservacionActivity extends AppCompatActivity {
 
@@ -78,26 +75,20 @@ public class CrearObservacionActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_crear_observacion);
+        
         pickImageLauncher = registerForActivityResult(
                 new androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(),
                 result -> {
-
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-
                         android.content.Intent data = result.getData();
-
                         imagenesSeleccionadas.clear();
 
                         if (data.getClipData() != null) {
-
                             int count = data.getClipData().getItemCount();
-
                             for (int i = 0; i < count; i++) {
-                                android.net.Uri uri =
-                                        data.getClipData().getItemAt(i).getUri();
+                                android.net.Uri uri = data.getClipData().getItemAt(i).getUri();
                                 imagenesSeleccionadas.add(uri);
                             }
-
                         } else if (data.getData() != null) {
                             imagenesSeleccionadas.add(data.getData());
                         }
@@ -137,39 +128,21 @@ public class CrearObservacionActivity extends AppCompatActivity {
                 android.R.layout.simple_dropdown_item_1line, tipos);
         spinnerTipo.setAdapter(adapter);
 
-        // Selector de fecha
-        editFecha.setOnClickListener(v -> mostrarSelectorFecha());
+        // Mostrar fecha y hora actual del teléfono
+        String fechaVisible = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(new Date());
+        editFecha.setText(fechaVisible);
+        editFecha.setEnabled(false);
+        editFecha.setFocusable(false);
 
         // Botón de mi ubicación
         btnMiUbicacion.setOnClickListener(v -> obtenerUbicacionActual());
 
         // Botón guardar
         btnGuardar.setOnClickListener(v -> guardarObservacion());
-        btnGuardar.setEnabled(false); // Deshabilitar hasta que se obtenga la ubicación
-
-        // Poner fecha actual por defecto
-        String fechaActual = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-        editFecha.setText(fechaActual);
-    }
-
-    private void mostrarSelectorFecha() {
-        MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
-                .setTitleText("Selecciona la fecha")
-                .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
-                .build();
-
-        datePicker.addOnPositiveButtonClickListener(selection -> {
-            java.util.Calendar calendar = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
-            calendar.setTimeInMillis(selection);
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-            editFecha.setText(sdf.format(calendar.getTime()));
-        });
-
-        datePicker.show(getSupportFragmentManager(), "FECHA");
+        btnGuardar.setEnabled(true); // Deshabilitar hasta que se obtenga la ubicación
     }
 
     private void obtenerUbicacionActual() {
-        // Verificar permisos
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
@@ -187,12 +160,9 @@ public class CrearObservacionActivity extends AppCompatActivity {
                         longitud = location.getLongitude();
                         ubicacionObtenida = true;
                         btnGuardar.setEnabled(true);
-                        
-                        // Obtener dirección legible
                         obtenerDireccionDesdeCoordenadas(latitud, longitud);
                     } else {
                         ubicacionObtenida = false;
-                        btnGuardar.setEnabled(false);
                         Toast.makeText(this, "No se pudo obtener ubicación", Toast.LENGTH_SHORT).show();
                     }
                 })
@@ -213,7 +183,6 @@ public class CrearObservacionActivity extends AppCompatActivity {
                 direccionActual = address.getAddressLine(0);
                 editDireccion.setText(direccionActual);
 
-                //Intentar obtener barrio o localidad
                 String zonaTexto = address.getSubLocality();
                 if (zonaTexto == null) zonaTexto = address.getLocality();
                 if (zonaTexto == null) zonaTexto = "Sin zona";
@@ -228,12 +197,8 @@ public class CrearObservacionActivity extends AppCompatActivity {
         android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_GET_CONTENT);
         intent.setType("image/*");
         intent.putExtra(android.content.Intent.EXTRA_ALLOW_MULTIPLE, true);
-
-        pickImageLauncher.launch(
-                android.content.Intent.createChooser(intent, "Selecciona imágenes")
-        );
+        pickImageLauncher.launch(android.content.Intent.createChooser(intent, "Selecciona imágenes"));
     }
-
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
@@ -242,21 +207,17 @@ public class CrearObservacionActivity extends AppCompatActivity {
             obtenerUbicacionActual();
         } else {
             ubicacionObtenida = false;
-            btnGuardar.setEnabled(false);
             Toast.makeText(this, "Sin GPS no se puede geolocalizar la observación.", Toast.LENGTH_LONG).show();
         }
     }
+
     private void subirImagenes(long idObservacion) {
         progressBar.setVisibility(View.VISIBLE);
-
         List<okhttp3.MultipartBody.Part> parts = new java.util.ArrayList<>();
 
         for (android.net.Uri uri : imagenesSeleccionadas) {
             try {
-                // Convertir URI a bytes para enviar por red
                 java.io.InputStream inputStream = getContentResolver().openInputStream(uri);
-
-                // Forma segura de leer todos los bytes sin importar el tamaño
                 java.io.ByteArrayOutputStream byteBuffer = new java.io.ByteArrayOutputStream();
                 byte[] buffer = new byte[1024];
                 int len;
@@ -270,25 +231,19 @@ public class CrearObservacionActivity extends AppCompatActivity {
                         bytes
                 );
 
-                // Generamos un nombre único para cada foto usando el tiempo actual
                 String fileName = "foto_" + System.currentTimeMillis() + "_" + uri.getLastPathSegment() + ".jpg";
                 parts.add(okhttp3.MultipartBody.Part.createFormData("imagenes", fileName, requestFile));
 
             } catch (java.io.FileNotFoundException e) {
-                android.util.Log.e("Huerteando", "Archivo no encontrado: " + uri.toString());
                 Toast.makeText(this, "No se encontró una de las imágenes", Toast.LENGTH_SHORT).show();
             } catch (java.io.IOException e) {
-                android.util.Log.e("Huerteando", "Error al leer la imagen", e);
                 Toast.makeText(this, "Error al procesar las fotos", Toast.LENGTH_SHORT).show();
             } catch (Exception e) {
-                android.util.Log.e("Huerteando", "Error inesperado", e);
                 Toast.makeText(this, "Error inesperado al preparar las fotos", Toast.LENGTH_SHORT).show();
             }
         }
 
-        String token = sessionManager.getToken();
-        ApiService apiService = ApiClient.getClient(token).create(ApiService.class);
-
+        ApiService apiService = ApiClient.getClient().create(ApiService.class);
         apiService.subirImagenes(idObservacion, parts).enqueue(new Callback<com.huerteando.app.clases.ImagenResponse>() {
             @Override
             public void onResponse(Call<com.huerteando.app.clases.ImagenResponse> call, Response<com.huerteando.app.clases.ImagenResponse> response) {
@@ -296,7 +251,7 @@ public class CrearObservacionActivity extends AppCompatActivity {
                 if (response.isSuccessful()) {
                     Toast.makeText(CrearObservacionActivity.this, "¡Imágenes subidas!", Toast.LENGTH_SHORT).show();
                 }
-                finish(); // Cerramos al terminar
+                finish();
             }
 
             @Override
@@ -309,72 +264,72 @@ public class CrearObservacionActivity extends AppCompatActivity {
     }
 
     private void guardarObservacion() {
-        // Validar campos obligatorios
         String titulo = editTitulo.getText() != null ? editTitulo.getText().toString().trim() : "";
         String descripcion = editDescripcion.getText() != null ? editDescripcion.getText().toString().trim() : "";
         String tipo = spinnerTipo.getText() != null ? spinnerTipo.getText().toString().trim() : "";
         String zona = editZona.getText() != null ? editZona.getText().toString().trim() : "";
         String direccion = editDireccion.getText() != null ? editDireccion.getText().toString().trim() : "";
-        String fecha = editFecha.getText() != null ? editFecha.getText().toString().trim() : "";
 
         if (titulo.isEmpty()) {
             editTitulo.setError("Campo obligatorio");
             return;
         }
-
         if (tipo.isEmpty()) {
             spinnerTipo.setError("Selecciona un tipo");
-            return;
-        }
-
-        if (fecha.isEmpty()) {
-            editFecha.setError("Selecciona una fecha");
             return;
         }
         if (descripcion.isEmpty()) {
             editDescripcion.setError("Campo obligatorio");
             return;
         }
-
         if (zona.isEmpty()) {
             editZona.setError("Campo obligatorio");
             return;
         }
-
         if (direccion.isEmpty()) {
             editDireccion.setError("Campo obligatorio");
             return;
         }
-        // Validar que se haya seleccionado una ubicación
         if (!ubicacionObtenida) {
             Toast.makeText(this, "Debes seleccionar una ubicación", Toast.LENGTH_SHORT).show();
             return;
         }
-
-        // Validación extra: Si es una denuncia, obligar a poner al menos una foto
         if ("DENUNCIA".equals(tipo) && imagenesSeleccionadas.isEmpty()) {
             Toast.makeText(this, "Las denuncias ambientales requieren al menos una imagen.", Toast.LENGTH_LONG).show();
             return;
         }
 
-        // Obtener valores opcionales
         String especie = editEspecie.getText() != null ? editEspecie.getText().toString().trim() : "";
         String nombreTradicional = editNombreTradicional.getText() != null ? 
                 editNombreTradicional.getText().toString().trim() : "";
 
+        // Fecha y hora automáticas en formato ISO (requerido por backend LocalDateTime)
+        String fechaActualISO = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).format(new Date());
+
+        // Obtenemos el ID del usuario logueado
+        Long idUsuario = sessionManager.getUserId();
+        ObservacionRequest.UsuarioRequest usuarioObjeto = new ObservacionRequest.UsuarioRequest(idUsuario);
+
+        // Mapeo del tipo de observación
+        int idTipo = 1; // PLANTA
+        if ("RINCON".equals(tipo)) idTipo = 2;
+        if ("DENUNCIA".equals(tipo)) idTipo = 3;
+        ObservacionRequest.TipoRequest tipoObjeto = new ObservacionRequest.TipoRequest(idTipo);
+
+        // Convertir coordenadas a BigDecimal para el backend
+        BigDecimal latBD = new BigDecimal(String.valueOf(latitud));
+        BigDecimal lonBD = new BigDecimal(String.valueOf(longitud));
+
         progressBar.setVisibility(View.VISIBLE);
         btnGuardar.setEnabled(false);
 
-        // Crear request
         ObservacionRequest request = new ObservacionRequest(
-                titulo, descripcion, fecha, tipo, especie,
-                latitud, longitud, direccion, zona, nombreTradicional
+                titulo, descripcion, fechaActualISO, tipoObjeto, especie,
+                latBD, lonBD, direccion, zona, nombreTradicional,
+                usuarioObjeto
         );
 
-        // Llamar al API
-        String token = sessionManager.getToken();
-        ApiService apiService = ApiClient.getClient(token).create(ApiService.class);
-
+        ApiService apiService = ApiClient.getClient().create(ApiService.class);
         Call<Observacion> call = apiService.crearObservacion(request);
         call.enqueue(new Callback<Observacion>() {
             @Override
@@ -383,7 +338,6 @@ public class CrearObservacionActivity extends AppCompatActivity {
                 btnGuardar.setEnabled(true);
 
                 if (response.isSuccessful() && response.body() != null) {
-                    // Si hay imágenes, las subimos. Si no, cerramos.
                     if (!imagenesSeleccionadas.isEmpty()) {
                         subirImagenes(response.body().getId());
                     } else {

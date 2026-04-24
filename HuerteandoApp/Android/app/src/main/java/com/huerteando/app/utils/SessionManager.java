@@ -5,56 +5,67 @@ import android.content.SharedPreferences;
 
 import com.huerteando.app.clases.LoginResponse;
 
-// Guarda y recupera los datos de sesión usando SharedPreferences
-// (almacenamiento clave-valor local en el dispositivo)
+/**
+ * SessionManager — Gestiona la sesión local del usuario (id, nick, nombre, rol).
+ * 
+ * Se ha eliminado toda la lógica relacionada con tokens JWT para adaptarla
+ * al sistema de login básico del backend.
+ */
 public class SessionManager {
 
-    // Nombre del archivo de preferencias
     private static final String PREF_NAME = "HuerteandoSession";
 
-    // Claves para cada dato guardado
-    private static final String KEY_TOKEN = "token";
-    private static final String KEY_NICK  = "nick";
-    private static final String KEY_ROL   = "rol";
-    private static final String KEY_ID    = "userId";
+    // Claves para el almacenamiento local
+    private static final String KEY_ID     = "userId";
+    private static final String KEY_NICK   = "nick";
+    private static final String KEY_NOMBRE = "nombre";
+    private static final String KEY_ROL    = "rol";
 
     private final SharedPreferences prefs;
     private final SharedPreferences.Editor editor;
 
     public SessionManager(Context context) {
-        // MODE_PRIVATE = solo esta app puede leer este archivo
         prefs  = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         editor = prefs.edit();
     }
 
-    // Guarda la sesión tras un login exitoso
+    /**
+     * Guarda los datos del usuario tras un login exitoso.
+     * Ya no se manejan ni guardan tokens.
+     */
     public void guardarSesion(LoginResponse response) {
-        editor.putString(KEY_TOKEN, response.getToken());
-        editor.putString(KEY_NICK,  response.getNick());
-        editor.putString(KEY_ROL,   response.getRol());
         editor.putLong(KEY_ID,      response.getId());
-        editor.apply(); // apply() es asíncrono, más eficiente que commit()
+        editor.putString(KEY_NICK,  response.getNick());
+        editor.putString(KEY_NOMBRE, response.getNombre());
+        editor.putString(KEY_ROL,   response.getRol());
+        editor.apply();
     }
 
-    public String getToken()  {
-        return prefs.getString(KEY_TOKEN, null);
+    // --- 🚧 CÓDIGO DE PRUEBAS (BYPASS) ---
+    public void guardarSesionManual() {
+        editor.putLong(KEY_ID, 1L);
+        editor.putString(KEY_NICK, "admin");
+        editor.putString(KEY_NOMBRE, "Administrador Test");
+        editor.putString(KEY_ROL, "ADMIN");
+        editor.apply();
     }
-    public String getNick()   {
-        return prefs.getString(KEY_NICK, null);
-    }
-    public String getRol()    {
-        return prefs.getString(KEY_ROL, null);
-    }
-    public Long   getUserId() {
-        return prefs.getLong(KEY_ID, -1);
-    }
+    // ------------------------------------
 
-    // ¿Hay sesión activa? Si hay token, sí
+    public Long   getUserId() { return prefs.getLong(KEY_ID, -1); }
+    public String getNick()   { return prefs.getString(KEY_NICK, null); }
+    public String getNombre() { return prefs.getString(KEY_NOMBRE, null); }
+    public String getRol()    { return prefs.getString(KEY_ROL, null); }
+
+    /**
+     * Comprueba si hay una sesión activa verificando si el ID de usuario existe.
+     */
     public boolean haySesion() {
-        return getToken() != null;
+        return getUserId() != -1;
     }
 
-    // Cierra sesión borrando todos los datos guardados
+    /**
+     * Cierra la sesión eliminando todos los datos del almacenamiento local.
+     */
     public void cerrarSesion() {
         editor.clear().apply();
     }
