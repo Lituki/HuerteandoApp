@@ -1,49 +1,43 @@
 package com.huerteando.app.clases;
 
+import com.google.gson.annotations.SerializedName;
+
+/**
+ * Clase que representa un comentario sincronizada con el Backend.
+ */
 public class Comentario {
     private Long id;
     private String contenido;
-    private String creadoEn;
-    private String autorNick;
-    private String autorAvatarUrl;
 
-    public Long getId() {
-        return id;
-    }
+    @SerializedName("creadoEn")
+    private String creadoEn; // Formato ISO
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    @SerializedName("usuario")
+    private UsuarioResponse usuario; // El backend devuelve el objeto usuario anidado
 
-    public String getContenido() {
-        return contenido;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setContenido(String contenido) {
-        this.contenido = contenido;
-    }
+    public String getContenido() { return contenido; }
+    public void setContenido(String contenido) { this.contenido = contenido; }
 
-    public String getCreadoEn() {
-        return creadoEn;
-    }
+    public String getCreadoEn() { return creadoEn; }
+    public void setCreadoEn(String creadoEn) { this.creadoEn = creadoEn; }
 
-    public void setCreadoEn(String creadoEn) {
-        this.creadoEn = creadoEn;
-    }
-
+    // Helpers para obtener datos del autor sin romper la lógica del Adapter
     public String getAutorNick() {
-        return autorNick;
-    }
-
-    public void setAutorNick(String autorNick) {
-        this.autorNick = autorNick;
+        return (usuario != null) ? usuario.nick : "Anónimo";
     }
 
     public String getAutorAvatarUrl() {
-        return autorAvatarUrl;
+        return (usuario != null) ? usuario.avatarUrl : null;
     }
 
-    public void setAutorAvatarUrl(String autorAvatarUrl) {
-        this.autorAvatarUrl = autorAvatarUrl;
+    /**
+     * Clase interna para mapear el objeto usuario del JSON.
+     */
+    private static class UsuarioResponse {
+        public String nick;
+        public String avatarUrl;
     }
 }

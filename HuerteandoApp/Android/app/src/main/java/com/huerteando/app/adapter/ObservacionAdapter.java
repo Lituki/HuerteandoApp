@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.huerteando.app.R;
+import com.huerteando.app.api.ApiClient;
 import com.huerteando.app.clases.Observacion;
 import com.bumptech.glide.Glide;
 
@@ -92,13 +93,39 @@ public class ObservacionAdapter extends RecyclerView.Adapter<ObservacionAdapter.
             // Tipo (con color según el tipo)
             tvTipo.setText(obs.getTipoObservacion());
             tvTipo.setBackgroundColor(getColorTipo(obs.getTipoObservacion()));
+
+            // Zona y Fecha
             tvZona.setText(obs.getNombreZona() != null ? obs.getNombreZona() : "Sin zona");
             tvFecha.setText(obs.getFechaObservacion());
+
+            // --- CORRECCIÓN DE CONTADORES ---
+            // Pintamos los valores actuales. Si el servidor no los envía, se mostrará 0.
             tvLikes.setText(String.valueOf(obs.getNumLikes()));
             tvComentarios.setText(String.valueOf(obs.getNumComentarios()));
 
+            // --- CARGA DE IMAGEN CORREGIDA ---
             if (obs.getImagenesUrl() != null && !obs.getImagenesUrl().isEmpty()) {
-                Glide.with(itemView.getContext()).load(obs.getImagenesUrl().get(0)).centerCrop().into(ivImagen);
+                String urlImagen = obs.getImagenesUrl().get(0);
+                
+                // Si la URL no es completa (no empieza por http), le pegamos la BASE_URL
+                if (!urlImagen.startsWith("http")) {
+                    // Aseguramos que solo haya una barra entre la BASE_URL y la ruta
+                    String base = ApiClient.BASE_URL;
+                    if (base.endsWith("/") && urlImagen.startsWith("/")) {
+                        urlImagen = base + urlImagen.substring(1);
+                    } else if (!base.endsWith("/") && !urlImagen.startsWith("/")) {
+                        urlImagen = base + "/" + urlImagen;
+                    } else {
+                        urlImagen = base + urlImagen;
+                    }
+                }
+
+                Glide.with(itemView.getContext())
+                        .load(urlImagen)
+                        .placeholder(android.R.drawable.ic_menu_gallery)
+                        .error(android.R.drawable.ic_menu_report_image)
+                        .centerCrop()
+                        .into(ivImagen);
                 ivImagen.setVisibility(View.VISIBLE);
             } else {
                 ivImagen.setVisibility(View.GONE);

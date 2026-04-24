@@ -13,7 +13,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Imagen de la observación -->
         <ImageView
             android:id="@+id/ivImagen"
             android:layout_width="match_parent"
@@ -27,7 +26,6 @@
             android:orientation="vertical"
             android:padding="12dp">
 
-            <!-- Tipo (etiqueta colorada) -->
             <TextView
                 android:id="@+id/tvTipo"
                 android:layout_width="wrap_content"
@@ -38,7 +36,6 @@
                 android:textSize="11sp"
                 android:textStyle="bold" />
 
-            <!-- Título -->
             <TextView
                 android:id="@+id/tvTitulo"
                 android:layout_width="match_parent"
@@ -50,7 +47,6 @@
                 android:maxLines="2"
                 android:ellipsize="end" />
 
-            <!-- Zona -->
             <TextView
                 android:id="@+id/tvZona"
                 android:layout_width="match_parent"
@@ -61,7 +57,6 @@
                 android:drawableStart="@android:drawable/ic_menu_mylocation"
                 android:drawablePadding="4dp" />
 
-            <!-- Fecha -->
             <TextView
                 android:id="@+id/tvFecha"
                 android:layout_width="match_parent"
@@ -70,20 +65,23 @@
                 android:textColor="#999999"
                 android:textSize="12sp" />
 
-            <!-- Likes y Comentarios -->
+            <!-- Contadores alineados -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                android:gravity="center_vertical"
                 android:orientation="horizontal">
 
                 <TextView
                     android:id="@+id/tvLikes"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:text="0"
                     android:textColor="#4A7C59"
                     android:textSize="14sp"
-                    android:drawableStart="@android:drawable/btn_star_big_on"
+                    android:textStyle="bold"
+                    android:drawableStart="@android:drawable/btn_star_big_off"
                     android:drawablePadding="4dp" />
 
                 <TextView
@@ -91,9 +89,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
+                    android:text="0"
                     android:textColor="#4A7C59"
                     android:textSize="14sp"
-                    android:drawableStart="@android:drawable/ic_menu_edit"
+                    android:textStyle="bold"
+                    android:drawableStart="@android:drawable/ic_menu_send"
                     android:drawablePadding="4dp" />
 
             </LinearLayout>

@@ -12,6 +12,7 @@ import com.huerteando.app.clases.RegistroRequest;
 import com.huerteando.app.clases.Usuario;
 
 import java.util.List;
+import java.util.Map;
 
 import okhttp3.MultipartBody;
 import retrofit2.Call;
@@ -26,10 +27,7 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 /**
- * ApiService — Definición de endpoints para el Backend de Huerteando.
- * 
- * Se han ajustado las rutas y eliminado las dependencias de JWT
- * para ser compatible con el sistema de autenticación básica.
+ * ApiService — Definición de endpoints sincronizada con el Backend.
  */
 public interface ApiService {
 
@@ -45,8 +43,8 @@ public interface ApiService {
 
     @GET("api/observaciones")
     Call<List<Observacion>> getObservaciones(
-            @Query("tipo")     String tipo,
-            @Query("estado")   String estado,
+            @Query("tipo")     String idTipo,
+            @Query("usuario")  Long idUsuario,
             @Query("orden")    String orden,
             @Query("busqueda") String busqueda
     );
@@ -75,11 +73,26 @@ public interface ApiService {
 
     // ==================== LIKES ====================
 
-    @POST("api/observaciones/{id}/like")
-    Call<LikeResponse> darLike(@Path("id") Long id);
+    @POST("api/observaciones/{id}/likes")
+    Call<Void> darLike(
+            @Path("id") Long idObservacion,
+            @Query("idUsuario") Long idUsuario
+    );
 
-    @DELETE("api/observaciones/{id}/like")
-    Call<LikeResponse> quitarLike(@Path("id") Long id);
+    @DELETE("api/observaciones/{id}/likes")
+    Call<Void> quitarLike(
+            @Path("id") Long idObservacion,
+            @Query("idUsuario") Long idUsuario
+    );
+
+    @GET("api/observaciones/{id}/likes/count")
+    Call<Map<String, Long>> getLikeCount(@Path("id") Long idObservacion);
+
+    @GET("api/observaciones/{id}/likes/existe")
+    Call<Map<String, Boolean>> checkLikeExiste(
+            @Path("id") Long idObservacion,
+            @Query("idUsuario") Long idUsuario
+    );
 
     // ==================== COMENTARIOS ====================
 
@@ -92,13 +105,15 @@ public interface ApiService {
             @Body ComentarioRequest request
     );
 
-    @DELETE("api/comentarios/{id}")
-    Call<Void> eliminarComentario(@Path("id") Long id);
+    // Ruta corregida: el borrado es anidado en el controlador de Spring
+    @DELETE("api/observaciones/{idObs}/comentarios/{idCom}")
+    Call<Void> eliminarComentario(
+            @Path("idObs") Long idObservacion,
+            @Path("idCom") Long idComentario
+    );
 
     // ==================== USUARIOS ====================
 
-    // Nota: getMiPerfil() requiere JWT o sesión en servidor. 
-    // Para login básico, es mejor usar getUsuario(id).
     @GET("api/usuarios/{id}")
     Call<Usuario> getUsuario(@Path("id") Long id);
 }

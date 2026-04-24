@@ -1,9 +1,12 @@
 package com.huerteando.app.clases;
 
 import com.google.gson.annotations.SerializedName;
+import java.util.ArrayList;
 import java.util.List;
 
-// Esta clase representa una observación del servidor (JSON → Java)
+/**
+ * Clase que representa una observación, sincronizada con los nombres del Backend.
+ */
 public class Observacion {
 
     private Long id;
@@ -38,17 +41,18 @@ public class Observacion {
     @SerializedName("usuario")
     private UsuarioResponse usuario;   // Quién la creó
 
-    @SerializedName("numLikes")
+    @SerializedName(value = "numLikes", alternate = {"likes", "totalLikes"})
     private int numLikes;
 
-    @SerializedName("numComentarios")
+    @SerializedName(value = "numComentarios", alternate = {"comentarios", "totalComentarios"})
     private int numComentarios;
 
     @SerializedName("likePropio")
     private boolean likePropio;       // Si el usuario actual ya le dio like
 
-    @SerializedName("imagenesUrl")
-    private List<String> imagenesUrl;
+    // CORRECCIÓN: El backend devuelve objetos Imagen, no Strings.
+    @SerializedName("imagenes")
+    private List<ImagenModel> imagenes;
 
     // Getters y Setters
     public Long getId() { return id; }
@@ -95,8 +99,27 @@ public class Observacion {
     public void setNumComentarios(int numComentarios) { this.numComentarios = numComentarios; }
     public boolean isLikePropio() { return likePropio; }
     public void setLikePropio(boolean likePropio) { this.likePropio = likePropio; }
-    public List<String> getImagenesUrl() { return imagenesUrl; }
-    public void setImagenesUrl(List<String> imagenesUrl) { this.imagenesUrl = imagenesUrl; }
+
+    // MÉTODO COMPATIBILIDAD: Extrae las URLs de los objetos Imagen del backend
+    public List<String> getImagenesUrl() {
+        List<String> urls = new ArrayList<>();
+        if (imagenes != null) {
+            for (ImagenModel img : imagenes) {
+                if (img.urlArchivo != null) urls.add(img.urlArchivo);
+            }
+        }
+        return urls;
+    }
+
+    public void setImagenes(List<ImagenModel> imagenes) { this.imagenes = imagenes; }
+
+    /**
+     * Modelo para capturar el objeto Imagen que envía Spring Boot
+     */
+    private static class ImagenModel {
+        @SerializedName("urlArchivo")
+        public String urlArchivo;
+    }
 
     /**
      * Clases internas para mapear objetos anidados del JSON del backend
