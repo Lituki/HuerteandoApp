@@ -2,9 +2,13 @@ package com.huerteando.app.ui;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.location.Address;
 import android.location.Geocoder;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.util.Base64;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -22,13 +26,16 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.huerteando.app.R;
 import com.huerteando.app.api.ApiClient;
 import com.huerteando.app.api.ApiService;
+import com.huerteando.app.clases.Imagen;
 import com.huerteando.app.clases.ObservacionRequest;
 import com.huerteando.app.clases.Observacion;
 import com.huerteando.app.utils.SessionManager;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -40,8 +47,8 @@ import retrofit2.Response;
 /**
  * Activity para crear una nueva observación.
  * 
- * Se ha automatizado la fecha y hora para que coincida con el backend (LocalDateTime).
- * Las coordenadas se envían como BigDecimal para evitar errores de validación.
+ * Refactorizada para subir imágenes en formato Base64 (JSON) y evitar errores de Multipart.
+ * Las coordenadas se envían como BigDecimal y la fecha en formato ISO.
  */
 public class CrearObservacionActivity extends AppCompatActivity {
 
@@ -54,7 +61,7 @@ public class CrearObservacionActivity extends AppCompatActivity {
     private TextInputEditText editDireccion;
     private TextInputEditText editFecha;
     private TextInputEditText editNombreTradicional;
-    private final List<android.net.Uri> imagenesSeleccionadas = new java.util.ArrayList<>();
+    private final List<Uri> imagenesSeleccionadas = new ArrayList<>();
     private android.widget.Button btnSeleccionarImagen;
     private android.widget.TextView tvImagenesSeleccionadas;
     private androidx.activity.result.ActivityResultLauncher<android.content.Intent> pickImageLauncher;
@@ -86,7 +93,7 @@ public class CrearObservacionActivity extends AppCompatActivity {
                         if (data.getClipData() != null) {
                             int count = data.getClipData().getItemCount();
                             for (int i = 0; i < count; i++) {
-                                android.net.Uri uri = data.getClipData().getItemAt(i).getUri();
+                                Uri uri = data.getClipData().getItemAt(i).getUri();
                                 imagenesSeleccionadas.add(uri);
                             }
                         } else if (data.getData() != null) {
@@ -94,7 +101,7 @@ public class CrearObservacionActivity extends AppCompatActivity {
                         }
 
                         String mensaje = imagenesSeleccionadas.size() + " imágenes seleccionadas";
-                        android.widget.Toast.makeText(this, mensaje, android.widget.Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, mensaje, Toast.LENGTH_SHORT).show();
 
                         if (tvImagenesSeleccionadas != null) {
                             tvImagenesSeleccionadas.setText(mensaje);
@@ -139,7 +146,7 @@ public class CrearObservacionActivity extends AppCompatActivity {
 
         // Botón guardar
         btnGuardar.setOnClickListener(v -> guardarObservacion());
-        btnGuardar.setEnabled(true); // Deshabilitar hasta que se obtenga la ubicación
+        btnGuardar.setEnabled(true);
     }
 
     private void obtenerUbicacionActual() {
@@ -211,56 +218,99 @@ public class CrearObservacionActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Sube las imágenes seleccionadas al servidor convirtiéndolas a Base64.
+     * Se envían como objetos Imagen vía JSON.
+     */
     private void subirImagenes(long idObservacion) {
-        progressBar.setVisibility(View.VISIBLE);
-        List<okhttp3.MultipartBody.Part> parts = new java.util.ArrayList<>();
-
-        for (android.net.Uri uri : imagenesSeleccionadas) {
-            try {
-                java.io.InputStream inputStream = getContentResolver().openInputStream(uri);
-                java.io.ByteArrayOutputStream byteBuffer = new java.io.ByteArrayOutputStream();
-                byte[] buffer = new byte[1024];
-                int len;
-                while ((len = inputStream.read(buffer)) != -1) {
-                    byteBuffer.write(buffer, 0, len);
-                }
-                byte[] bytes = byteBuffer.toByteArray();
-
-                okhttp3.RequestBody requestFile = okhttp3.RequestBody.create(
-                        okhttp3.MediaType.parse(getContentResolver().getType(uri)),
-                        bytes
-                );
-
-                String fileName = "foto_" + System.currentTimeMillis() + "_" + uri.getLastPathSegment() + ".jpg";
-                parts.add(okhttp3.MultipartBody.Part.createFormData("imagenes", fileName, requestFile));
-
-            } catch (java.io.FileNotFoundException e) {
-                Toast.makeText(this, "No se encontró una de las imágenes", Toast.LENGTH_SHORT).show();
-            } catch (java.io.IOException e) {
-                Toast.makeText(this, "Error al procesar las fotos", Toast.LENGTH_SHORT).show();
-            } catch (Exception e) {
-                Toast.makeText(this, "Error inesperado al preparar las fotos", Toast.LENGTH_SHORT).show();
-            }
+        if (imagenesSeleccionadas.isEmpty()) {
+            finalizarYSalir();
+            return;
         }
 
+        progressBar.setVisibility(View.VISIBLE);
+        final int total = imagenesSeleccionadas.size();
+        final int[] contador = {0};
+
         ApiService apiService = ApiClient.getClient().create(ApiService.class);
-        apiService.subirImagenes(idObservacion, parts).enqueue(new Callback<com.huerteando.app.clases.ImagenResponse>() {
-            @Override
-            public void onResponse(Call<com.huerteando.app.clases.ImagenResponse> call, Response<com.huerteando.app.clases.ImagenResponse> response) {
-                progressBar.setVisibility(View.GONE);
-                if (response.isSuccessful()) {
-                    Toast.makeText(CrearObservacionActivity.this, "¡Imágenes subidas!", Toast.LENGTH_SHORT).show();
+
+        for (Uri uri : imagenesSeleccionadas) {
+            String base64Imagen = convertirUriABase64(uri);
+
+            if (base64Imagen != null) {
+                Imagen imagenObj = new Imagen();
+                // El Backend espera el Base64 en el campo urlArchivo
+                imagenObj.setUrlArchivo(base64Imagen);
+                imagenObj.setTitulo("Obs_" + idObservacion + "_" + System.currentTimeMillis());
+
+                apiService.subirImagen(idObservacion, imagenObj).enqueue(new Callback<Imagen>() {
+                    @Override
+                    public void onResponse(Call<Imagen> call, Response<Imagen> response) {
+                        contador[0]++;
+                        if (contador[0] == total) {
+                            finalizarYSalir();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Imagen> call, Throwable t) {
+                        contador[0]++;
+                        if (contador[0] == total) {
+                            finalizarYSalir();
+                        }
+                    }
+                });
+            } else {
+                contador[0]++;
+                if (contador[0] == total) {
+                    finalizarYSalir();
                 }
-                finish();
+            }
+        }
+    }
+
+    /**
+     * Procesa la imagen localmente: carga el Bitmap, lo redimensiona y lo comprime
+     * para evitar que el String Base64 sea demasiado grande (Error 413).
+     */
+    private String convertirUriABase64(Uri uri) {
+        try {
+            Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);
+            if (bitmap == null) return null;
+
+            // Redimensionado para evitar Payload Too Large (max 1024px)
+            int maxSize = 1024;
+            int width = bitmap.getWidth();
+            int height = bitmap.getHeight();
+
+            if (width > maxSize || height > maxSize) {
+                float ratio = (float) width / (float) height;
+                if (ratio > 1) {
+                    width = maxSize;
+                    height = (int) (width / ratio);
+                } else {
+                    height = maxSize;
+                    width = (int) (height * ratio);
+                }
+                bitmap = Bitmap.createScaledBitmap(bitmap, width, height, true);
             }
 
-            @Override
-            public void onFailure(Call<com.huerteando.app.clases.ImagenResponse> call, Throwable t) {
-                progressBar.setVisibility(View.GONE);
-                Toast.makeText(CrearObservacionActivity.this, "Error al subir imágenes", Toast.LENGTH_SHORT).show();
-                finish();
-            }
-        });
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            // Compresión al 60% para balancear calidad y tamaño
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 60, baos);
+            byte[] imageBytes = baos.toByteArray();
+            
+            return Base64.encodeToString(imageBytes, Base64.DEFAULT);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private void finalizarYSalir() {
+        progressBar.setVisibility(View.GONE);
+        Toast.makeText(this, "¡Observación e imágenes guardadas!", Toast.LENGTH_SHORT).show();
+        finish();
     }
 
     private void guardarObservacion() {

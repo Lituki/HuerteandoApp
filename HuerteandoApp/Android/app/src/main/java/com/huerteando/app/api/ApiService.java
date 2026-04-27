@@ -2,8 +2,7 @@ package com.huerteando.app.api;
 
 import com.huerteando.app.clases.Comentario;
 import com.huerteando.app.clases.ComentarioRequest;
-import com.huerteando.app.clases.ImagenResponse;
-import com.huerteando.app.clases.LikeResponse;
+import com.huerteando.app.clases.Imagen;
 import com.huerteando.app.clases.LoginRequest;
 import com.huerteando.app.clases.LoginResponse;
 import com.huerteando.app.clases.Observacion;
@@ -14,20 +13,18 @@ import com.huerteando.app.clases.Usuario;
 import java.util.List;
 import java.util.Map;
 
-import okhttp3.MultipartBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
-import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
-import retrofit2.http.Part;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 /**
  * ApiService — Definición de endpoints sincronizada con el Backend.
+ * Se ha eliminado el soporte para Multipart en favor de JSON con Base64.
  */
 public interface ApiService {
 
@@ -64,11 +61,14 @@ public interface ApiService {
     @DELETE("api/observaciones/{id}")
     Call<Void> eliminarObservacion(@Path("id") Long id);
 
-    @Multipart
+    /**
+     * Sube una imagen vinculada a una observación.
+     * Envía un objeto Imagen en formato JSON con la imagen codificada en Base64.
+     */
     @POST("api/observaciones/{id}/imagenes")
-    Call<ImagenResponse> subirImagenes(
-            @Path("id") Long id,
-            @Part List<MultipartBody.Part> imagenes
+    Call<Imagen> subirImagen(
+            @Path("id") Long idObservacion,
+            @Body Imagen imagen
     );
 
     // ==================== LIKES ====================
@@ -105,7 +105,6 @@ public interface ApiService {
             @Body ComentarioRequest request
     );
 
-    // Ruta corregida: el borrado es anidado en el controlador de Spring
     @DELETE("api/observaciones/{idObs}/comentarios/{idCom}")
     Call<Void> eliminarComentario(
             @Path("idObs") Long idObservacion,

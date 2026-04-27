@@ -50,9 +50,9 @@ public class Observacion {
     @SerializedName("likePropio")
     private boolean likePropio;       // Si el usuario actual ya le dio like
 
-    // CORRECCIÓN: El backend devuelve objetos Imagen, no Strings.
+    // CORRECCIÓN: Usamos la clase Imagen estandarizada en lugar de un modelo interno.
     @SerializedName("imagenes")
-    private List<ImagenModel> imagenes;
+    private List<Imagen> imagenes;
 
     // Getters y Setters
     public Long getId() { return id; }
@@ -104,22 +104,15 @@ public class Observacion {
     public List<String> getImagenesUrl() {
         List<String> urls = new ArrayList<>();
         if (imagenes != null) {
-            for (ImagenModel img : imagenes) {
-                if (img.urlArchivo != null) urls.add(img.urlArchivo);
+            for (Imagen img : imagenes) {
+                if (img.getUrlArchivo() != null) urls.add(img.getUrlArchivo());
             }
         }
         return urls;
     }
 
-    public void setImagenes(List<ImagenModel> imagenes) { this.imagenes = imagenes; }
-
-    /**
-     * Modelo para capturar el objeto Imagen que envía Spring Boot
-     */
-    private static class ImagenModel {
-        @SerializedName("urlArchivo")
-        public String urlArchivo;
-    }
+    public List<Imagen> getImagenes() { return imagenes; }
+    public void setImagenes(List<Imagen> imagenes) { this.imagenes = imagenes; }
 
     /**
      * Clases internas para mapear objetos anidados del JSON del backend
