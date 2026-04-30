@@ -1,6 +1,6 @@
 -- El schema lo crea el script de estructura (huerteando-DB-H2.sql).
 
-DELETE FROM observacion_like;
+DELETE FROM megusta;
 DELETE FROM comentario;
 DELETE FROM imagen;
 DELETE FROM observacion;
@@ -9,10 +9,10 @@ DELETE FROM catalogo_eei;
 DELETE FROM tipo_observacion;
 DELETE FROM usuario;
 
-INSERT INTO tipo_observacion (nombre) VALUES
-    ('Planta'),
-    ('Rincon'),
-    ('Incidencia');
+INSERT INTO tipo_observacion (nombre, descripcion) VALUES
+    ('Planta', 'Observacion de especie vegetal'),
+    ('Rincon', 'Lugar o zona de interes en la huerta'),
+    ('Incidencia', 'Problema ambiental o de mantenimiento');
 
 INSERT INTO usuario (nombre, apellidos, nick, email, password_hash, rol)
 VALUES
@@ -31,7 +31,7 @@ VALUES
     ('Arundo donax', 'Cana comun', 'Plantae', 'Poaceae', 'Real Decreto 630/2013', CURRENT_TIMESTAMP),
     ('Ailanthus altissima', 'Arbol del cielo', 'Plantae', 'Simaroubaceae', 'Real Decreto 630/2013', CURRENT_TIMESTAMP);
 
-INSERT INTO especie (nombre_cientifico, nombre_comun, familia, descripcion, fecha_creacion, id_catalogo_eei)
+INSERT INTO especie (nombre_cientifico, nombre_comun, familia, descripcion, fecha_creacion, id_eei)
 VALUES
     (
         'Arundo donax',
@@ -39,10 +39,10 @@ VALUES
         'Poaceae',
         'Muy comun en acequias.',
         CURRENT_TIMESTAMP,
-        (SELECT id_catalogo_eei FROM catalogo_eei WHERE nombre_cientifico = 'Arundo donax')
+        (SELECT id_eei FROM catalogo_eei WHERE nombre_cientifico = 'Arundo donax')
     );
 
-INSERT INTO especie (nombre_cientifico, nombre_comun, familia, descripcion, fecha_creacion, id_catalogo_eei)
+    INSERT INTO especie (nombre_cientifico, nombre_comun, familia, descripcion, fecha_creacion, id_eei)
 VALUES
     (
         'Ailanthus altissima',
@@ -50,21 +50,21 @@ VALUES
         'Simaroubaceae',
         'Rebrota con fuerza.',
         CURRENT_TIMESTAMP,
-        (SELECT id_catalogo_eei FROM catalogo_eei WHERE nombre_cientifico = 'Ailanthus altissima')
+        (SELECT id_eei FROM catalogo_eei WHERE nombre_cientifico = 'Ailanthus altissima')
     );
 
-INSERT INTO especie (nombre_cientifico, nombre_comun, familia, descripcion, fecha_creacion, id_catalogo_eei)
+INSERT INTO especie (nombre_cientifico, nombre_comun, familia, descripcion, fecha_creacion, id_eei)
 VALUES
     ('Nerium oleander', 'Adelfa', 'Apocynaceae', 'Muy tipica en ramblas.', CURRENT_TIMESTAMP, NULL);
 
 INSERT INTO observacion (
     id_usuario,
-    id_tipo_observacion,
+    id_tipo,
     id_especie,
     titulo,
     descripcion,
     fecha_observacion,
-    estado,
+    estado_observacion,
     nombre_tradicional,
     identificacion_propuesta,
     latitud,
@@ -80,7 +80,7 @@ INSERT INTO observacion (
 VALUES
     (
         (SELECT id_usuario FROM usuario WHERE nick = 'sergio'),
-        (SELECT id_tipo_observacion FROM tipo_observacion WHERE nombre = 'Planta'),
+        (SELECT id_tipo FROM tipo_observacion WHERE nombre = 'Planta'),
         (SELECT id_especie FROM especie WHERE nombre_cientifico = 'Arundo donax'),
         'Cana junto a acequia',
         'Mata extensa en el borde del canal',
@@ -100,7 +100,7 @@ VALUES
     ),
     (
         (SELECT id_usuario FROM usuario WHERE nick = 'clara'),
-        (SELECT id_tipo_observacion FROM tipo_observacion WHERE nombre = 'Planta'),
+        (SELECT id_tipo FROM tipo_observacion WHERE nombre = 'Planta'),
         NULL,
         'Planta sin identificar',
         'Ejemplar joven, pendiente de confirmar especie',
@@ -120,7 +120,7 @@ VALUES
     ),
     (
         (SELECT id_usuario FROM usuario WHERE nick = 'admin'),
-        (SELECT id_tipo_observacion FROM tipo_observacion WHERE nombre = 'Incidencia'),
+        (SELECT id_tipo FROM tipo_observacion WHERE nombre = 'Incidencia'),
         NULL,
         'Vertido detectado',
         'Se observa residuo en margen de riego',
@@ -171,7 +171,7 @@ VALUES
         NULL
     );
 
-INSERT INTO observacion_like (id_observacion, id_usuario, creado_en)
+INSERT INTO megusta (id_observacion, id_usuario, creado_en)
 VALUES
     (
         (SELECT id_observacion FROM observacion WHERE titulo = 'Cana junto a acequia'),

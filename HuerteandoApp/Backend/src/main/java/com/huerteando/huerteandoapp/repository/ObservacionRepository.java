@@ -17,7 +17,7 @@ public interface ObservacionRepository extends JpaRepository<Observacion, Long> 
     List<Observacion> findByEspecie_IdOrderByFechaObservacionDesc(Long idEspecie);
 
     // Observaciones en un estado concreto (ABIERTA, CERRADA, etc).
-    List<Observacion> findByEstadoIgnoreCaseOrderByActualizadoEnDesc(String estado);
+    List<Observacion> findByEstadoObservacionIgnoreCaseOrderByActualizadoEnDesc(String estadoObservacion);
 
     // Últimas observaciones creadas.
     List<Observacion> findTop20ByOrderByCreadoEnDesc();

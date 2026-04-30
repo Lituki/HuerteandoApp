@@ -13,12 +13,12 @@ Usamos id propio para evitar claves compuestas.
 */
 @Getter @Setter @NoArgsConstructor
 @Entity
-@Table(name = "\"like\"")
-public class ObservacionLike {
+@Table(name = "megusta")
+public class MeGusta {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_like")
+    @Column(name = "id_megusta")
     private Long id;
 
     @ManyToOne

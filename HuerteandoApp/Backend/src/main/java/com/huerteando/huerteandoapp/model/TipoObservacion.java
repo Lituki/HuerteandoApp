@@ -1,28 +1,27 @@
 package com.huerteando.huerteandoapp.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /*
 Tabla: tipo_observacion
-Catalogo corto de tipos (Planta, Rincon, Incidencia).
+Catálogo corto de tipos (Planta, Rincón, Incidencia).
 */
+@Getter @Setter @NoArgsConstructor
 @Entity
 @Table(name = "tipo_observacion")
 public class TipoObservacion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_tipo_observacion")
-    private Short id; // id pequeno (smallint)
+    @Column(name = "id_tipo")
+    private Short id; // smallint, son pocos tipos
 
     @Column(name = "nombre", nullable = false, unique = true)
-    private String nombre; // etiqueta visible
+    private String nombre;
 
-    public TipoObservacion() {}
-
-    public Short getId() { return id; }
-    public void setId(Short id) { this.id = id; }
-
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
+    @Column(name = "descripcion")
+    private String descripcion;
 }

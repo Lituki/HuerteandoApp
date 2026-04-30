@@ -4,7 +4,6 @@ import com.huerteando.huerteandoapp.model.Especie;
 import com.huerteando.huerteandoapp.repository.EspecieRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 
 @Service
@@ -21,11 +20,12 @@ public class EspecieServiceImpl implements IEspecieService {
     public Especie crear(Especie especie) {
         if (especie == null) return null;
 
-        // En tu SQL nombre_cientifico es NOT NULL y UNIQUE.
+        // nombre_cientifico es NOT NULL y UNIQUE en la BD.
+        // Validamos aquí antes de que la BD lance un error.
         if (especie.getNombreCientifico() == null || especie.getNombreCientifico().isBlank()) return null;
 
-        boolean yaExiste = especieRepository.existsByNombreCientificoIgnoreCase(especie.getNombreCientifico());
-        if (yaExiste) return null;
+        // Si ya existe una especie con ese nombre científico, no la duplicamos.
+        if (especieRepository.existsByNombreCientificoIgnoreCase(especie.getNombreCientifico())) return null;
 
         return especieRepository.save(especie);
     }
@@ -36,10 +36,11 @@ public class EspecieServiceImpl implements IEspecieService {
         if (especie == null) return null;
         if (especie.getId() == null) return null;
 
-        boolean existe = especieRepository.existsById(especie.getId());
-        if (!existe) return null;
+        // Verificamos que existe antes de actualizar.
+        if (!especieRepository.existsById(especie.getId())) return null;
 
-        // Ojo: si cambias nombreCientifico a uno ya existente, te petará por UNIQUE.
+        // Ojo: si cambias el nombre científico a uno que ya tiene otra especie,
+        // la BD lanzará un error por la restricción UNIQUE.
         return especieRepository.save(especie);
     }
 
@@ -83,10 +84,10 @@ public class EspecieServiceImpl implements IEspecieService {
         if (nombreCientifico == null || nombreCientifico.isBlank()) return false;
 
         Especie especie = especieRepository.findByNombreCientificoIgnoreCase(nombreCientifico.trim());
-
-        // Una especie es invasora si tiene entrada en el catálogo EEI.
         if (especie == null) return false;
 
+        // Una especie es invasora si tiene enlace al catálogo EEI.
+        // Si catalogoEei es null, no está en el catálogo de invasoras.
         return especie.getCatalogoEei() != null;
     }
 

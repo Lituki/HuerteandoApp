@@ -1,5 +1,10 @@
--- Requiere que el schema huerteando ya exista.
-DELETE FROM huerteando."like";
+-- Datos DEMO para PostgreSQL/Supabase.
+-- Requiere que las tablas ya existan (ejecuta antes db/huerteando-DB-PostGreSQL.sql).
+-- Ojo: en Postgres NO uses nombres tipo "huerteando.huerteando.imagen" (3 partes). Usa "huerteando.imagen".
+
+-- Limpieza (idempotente)
+-- Nota: usamos DELETE (más compatible). Si quieres reiniciar IDs, ejecuta también db/reset.sql y recrea el esquema.
+DELETE FROM huerteando.megusta;
 DELETE FROM huerteando.comentario;
 DELETE FROM huerteando.imagen;
 DELETE FROM huerteando.observacion;
@@ -44,10 +49,7 @@ VALUES
         'Muy comun en acequias.',
         CURRENT_TIMESTAMP,
         (SELECT id_eei FROM huerteando.catalogo_eei WHERE nombre_cientifico = 'Arundo donax')
-    );
-
-    INSERT INTO huerteando.especie (nombre_cientifico, nombre_comun, familia, descripcion, fecha_creacion, id_eei)
-VALUES
+    ),
     (
         'Ailanthus altissima',
         'Árbol del cielo',
@@ -55,11 +57,15 @@ VALUES
         'Rebrota con fuerza.',
         CURRENT_TIMESTAMP,
         (SELECT id_eei FROM huerteando.catalogo_eei WHERE nombre_cientifico = 'Ailanthus altissima')
+    ),
+    (
+        'Nerium oleander',
+        'Adelfa',
+        'Apocynaceae',
+        'Muy tipica en ramblas.',
+        CURRENT_TIMESTAMP,
+        NULL
     );
-
-INSERT INTO huerteando.especie (nombre_cientifico, nombre_comun, familia, descripcion, fecha_creacion, id_eei)
-VALUES
-    ('Nerium oleander', 'Adelfa', 'Apocynaceae', 'Muy tipica en ramblas.', CURRENT_TIMESTAMP, NULL);
 
 -- Observaciones
 INSERT INTO huerteando.observacion (
@@ -89,7 +95,7 @@ VALUES
         (SELECT id_especie FROM huerteando.especie WHERE nombre_cientifico = 'Arundo donax'),
         'Cana junto a acequia',
         'Mata extensa en el borde del canal',
-        DATEADD('DAY', -2, CURRENT_TIMESTAMP),
+        CURRENT_TIMESTAMP - INTERVAL '2 days',
         'ABIERTA',
         'Cana',
         'Arundo donax',
@@ -100,8 +106,8 @@ VALUES
         'PROPUESTA',
         'IA',
         0.87,
-        DATEADD('DAY', -2, CURRENT_TIMESTAMP),
-        DATEADD('DAY', -2, CURRENT_TIMESTAMP)
+        CURRENT_TIMESTAMP - INTERVAL '2 days',
+        CURRENT_TIMESTAMP - INTERVAL '2 days'
     ),
     (
         (SELECT id_usuario FROM huerteando.usuario WHERE nick = 'clara'),
@@ -109,7 +115,7 @@ VALUES
         NULL,
         'Planta sin identificar',
         'Ejemplar joven, pendiente de confirmar especie',
-        DATEADD('DAY', -1, CURRENT_TIMESTAMP),
+        CURRENT_TIMESTAMP - INTERVAL '1 day',
         'ABIERTA',
         'Hierba alta',
         'Posible ailanto',
@@ -120,8 +126,8 @@ VALUES
         'PENDIENTE',
         'MANUAL',
         NULL,
-        DATEADD('DAY', -1, CURRENT_TIMESTAMP),
-        DATEADD('DAY', -1, CURRENT_TIMESTAMP)
+        CURRENT_TIMESTAMP - INTERVAL '1 day',
+        CURRENT_TIMESTAMP - INTERVAL '1 day'
     ),
     (
         (SELECT id_usuario FROM huerteando.usuario WHERE nick = 'admin'),
@@ -129,7 +135,7 @@ VALUES
         NULL,
         'Vertido detectado',
         'Se observa residuo en margen de riego',
-        DATEADD('HOUR', -3, CURRENT_TIMESTAMP),
+        CURRENT_TIMESTAMP - INTERVAL '3 hours',
         'ABIERTA',
         NULL,
         NULL,
@@ -140,8 +146,8 @@ VALUES
         'NO_APLICA',
         'MANUAL',
         NULL,
-        DATEADD('HOUR', -3, CURRENT_TIMESTAMP),
-        DATEADD('HOUR', -3, CURRENT_TIMESTAMP)
+        CURRENT_TIMESTAMP - INTERVAL '3 hours',
+        CURRENT_TIMESTAMP - INTERVAL '3 hours'
     );
 
 INSERT INTO huerteando.imagen (id_observacion, url_archivo, titulo, creado_en)
@@ -150,13 +156,13 @@ VALUES
         (SELECT id_observacion FROM huerteando.observacion WHERE titulo = 'Cana junto a acequia'),
         'https://example.org/img/cana-acequia-1.jpg',
         'Detalle de tallos',
-        DATEADD('DAY', -2, CURRENT_TIMESTAMP)
+        CURRENT_TIMESTAMP - INTERVAL '2 days'
     ),
     (
         (SELECT id_observacion FROM huerteando.observacion WHERE titulo = 'Planta sin identificar'),
         'https://example.org/img/planta-sin-id-1.jpg',
         'Vista general',
-        DATEADD('DAY', -1, CURRENT_TIMESTAMP)
+        CURRENT_TIMESTAMP - INTERVAL '1 day'
     );
 
 INSERT INTO huerteando.comentario (id_observacion, id_usuario, contenido, creado_en, editado_en)
@@ -165,31 +171,31 @@ VALUES
         (SELECT id_observacion FROM huerteando.observacion WHERE titulo = 'Cana junto a acequia'),
         (SELECT id_usuario FROM huerteando.usuario WHERE nick = 'antonio'),
         'Coincido con la identificacion propuesta.',
-        DATEADD('DAY', -1, CURRENT_TIMESTAMP),
+        CURRENT_TIMESTAMP - INTERVAL '1 day',
         NULL
     ),
     (
         (SELECT id_observacion FROM huerteando.observacion WHERE titulo = 'Planta sin identificar'),
         (SELECT id_usuario FROM huerteando.usuario WHERE nick = 'pepe'),
         'Podria ser ailanto, revisar hoja compuesta.',
-        DATEADD('HOUR', -12, CURRENT_TIMESTAMP),
+        CURRENT_TIMESTAMP - INTERVAL '12 hours',
         NULL
     );
 
-INSERT INTO huerteando."like" (id_observacion, id_usuario, creado_en)
+INSERT INTO huerteando.megusta (id_observacion, id_usuario, creado_en)
 VALUES
     (
         (SELECT id_observacion FROM huerteando.observacion WHERE titulo = 'Cana junto a acequia'),
         (SELECT id_usuario FROM huerteando.usuario WHERE nick = 'clara'),
-        DATEADD('HOUR', -20, CURRENT_TIMESTAMP)
+        CURRENT_TIMESTAMP - INTERVAL '20 hours'
     ),
     (
         (SELECT id_observacion FROM huerteando.observacion WHERE titulo = 'Planta sin identificar'),
         (SELECT id_usuario FROM huerteando.usuario WHERE nick = 'sergio'),
-        DATEADD('HOUR', -10, CURRENT_TIMESTAMP)
+        CURRENT_TIMESTAMP - INTERVAL '10 hours'
     ),
     (
         (SELECT id_observacion FROM huerteando.observacion WHERE titulo = 'Vertido detectado'),
         (SELECT id_usuario FROM huerteando.usuario WHERE nick = 'admin'),
-        DATEADD('HOUR', -2, CURRENT_TIMESTAMP)
+        CURRENT_TIMESTAMP - INTERVAL '2 hours'
     );

@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: huerteando-api
+    env: java
+    plan: free
+    buildCommand: "bash ./mvnw clean package -DskipTests"
+    startCommand: "java -Dserver.port=$PORT -jar target/HuerteandoApp-0.0.1-SNAPSHOT.jar"
+    envVars:
+      - key: JAVA_VERSION
+        value: "21"
+      - key: SPRING_PROFILES_ACTIVE
+        value: "postgres"
+
+      # Supabase (Postgres) - recomendado: configurar vía env vars
+      - key: SUPABASE_JDBC_URL
+        value: "jdbc:postgresql://aws-1-eu-north-1.pooler.supabase.com:6543/postgres?sslmode=require&currentSchema=huerteando&prepareThreshold=0"
+      - key: SUPABASE_DB_USER
+        value: "postgres.moqignnvjhcxnhtzcsgx"
+      - key: SUPABASE_DB_SCHEMA
+        value: "huerteando"
+
+      # Secreto: ponlo en Render Dashboard (no se guarda en el repo)
+      - key: SUPABASE_DB_PASSWORD
+        sync: false

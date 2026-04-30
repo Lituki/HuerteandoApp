@@ -1,6 +1,6 @@
 DROP TABLE IF EXISTS
     huerteando.comentario,
-    huerteando."like",
+    huerteando.megusta,
     huerteando.imagen,
     huerteando.observacion,
     huerteando.especie,

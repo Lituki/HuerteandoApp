@@ -1,14 +1,17 @@
 package com.huerteando.huerteandoapp.model;
 
 import jakarta.persistence.*;
-
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import java.time.LocalDateTime;
 
 /*
 Tabla: imagen
-Aqui solo guardamos metadatos: URL y titulo.
+Solo guardamos metadatos: URL y título.
 El archivo real vive fuera de la BD.
 */
+@Getter @Setter @NoArgsConstructor
 @Entity
 @Table(name = "imagen")
 public class Imagen {
@@ -22,7 +25,7 @@ public class Imagen {
     @JoinColumn(name = "id_observacion", nullable = false)
     private Observacion observacion;
 
-    @Column(name = "url_archivo", nullable = false)
+    @Column(name = "url_archivo", nullable = false, columnDefinition = "text")
     private String urlArchivo;
 
     @Column(name = "titulo")
@@ -31,19 +34,6 @@ public class Imagen {
     @Column(name = "creado_en", nullable = false)
     private LocalDateTime creadoEn;
 
-    public Imagen() {}
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public Observacion getObservacion() { return observacion; }
-    public void setObservacion(Observacion observacion) { this.observacion = observacion; }
-
-    public String getUrlArchivo() { return urlArchivo; }
-    public void setUrlArchivo(String urlArchivo) { this.urlArchivo = urlArchivo; }
-
-    public String getTitulo() { return titulo; }
-    public void setTitulo(String titulo) { this.titulo = titulo; }
-    public LocalDateTime getCreadoEn() { return creadoEn; }
-    public void setCreadoEn(LocalDateTime creadoEn) { this.creadoEn = creadoEn; }
+    @PrePersist
+    void alCrear() { creadoEn = LocalDateTime.now(); }
 }

@@ -1,12 +1,16 @@
 package com.huerteando.huerteandoapp.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import java.time.LocalDateTime;
 
 /*
 Tabla: comentario
-Comentario simple: quien comenta, donde comenta y que dice.
+Comentario simple: quién comenta, en qué observación y qué dice.
 */
+@Getter @Setter @NoArgsConstructor
 @Entity
 @Table(name = "comentario")
 public class Comentario {
@@ -24,7 +28,7 @@ public class Comentario {
     @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;
 
-    @Column(name = "contenido", nullable = false)
+    @Column(name = "contenido", nullable = false, columnDefinition = "text")
     private String contenido;
 
     @Column(name = "creado_en", nullable = false)
@@ -33,23 +37,6 @@ public class Comentario {
     @Column(name = "editado_en")
     private LocalDateTime editadoEn;
 
-    public Comentario() {}
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public Observacion getObservacion() { return observacion; }
-    public void setObservacion(Observacion observacion) { this.observacion = observacion; }
-
-    public Usuario getUsuario() { return usuario; }
-    public void setUsuario(Usuario usuario) { this.usuario = usuario; }
-
-    public String getContenido() { return contenido; }
-    public void setContenido(String contenido) { this.contenido = contenido; }
-
-    public LocalDateTime getCreadoEn() { return creadoEn; }
-    public void setCreadoEn(LocalDateTime creadoEn) { this.creadoEn = creadoEn; }
-
-    public LocalDateTime getEditadoEn() { return editadoEn; }
-    public void setEditadoEn(LocalDateTime editadoEn) { this.editadoEn = editadoEn; }
+    @PrePersist
+    void alCrear() { creadoEn = LocalDateTime.now(); }
 }

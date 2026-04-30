@@ -1,29 +1,30 @@
 package com.huerteando.huerteandoapp.service;
 
 import com.huerteando.huerteandoapp.model.Usuario;
-
 import java.util.List;
 
+// Interfaz del servicio de usuarios.
+// Aquí están los métodos que necesita el controller para registro, login y perfil.
 public interface IUsuarioService {
 
-    // Buscar usuario por id
+    // Busca por id (clave primaria)
     Usuario buscarPorId(Long idUsuario);
 
-    // Buscar usuario por nick
+    // Busca por nick, que es único en la BD. Se usa en el login.
     Usuario buscarPorNick(String nick);
 
-    // Comprobar si existe un nick
+    // Comprueba si un nick ya está en uso. Se usa en el registro.
     boolean existeNick(String nick);
 
-    // Comprobar si existe un email
+    // Comprueba si un email ya está en uso. Se usa en el registro.
     boolean existeEmail(String email);
 
-    // Guardar o actualizar usuario
+    // Guarda o actualiza un usuario. save() de JPA hace INSERT o UPDATE según si tiene id o no.
     Usuario guardar(Usuario usuario);
 
-    // Listar usuarios activos
+    // Lista usuarios activos, útil para administración
     List<Usuario> listarActivos();
 
-    // Listar últimos usuarios registrados (ej: top 5)
+    // Los 5 últimos registrados
     List<Usuario> listarUltimos();
 }

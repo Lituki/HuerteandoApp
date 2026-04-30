@@ -1,0 +1,51 @@
+# Build outputs
+/target/
+
+# Logs generados en local
+logs/
+*.log
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+.factorypath
+.metadata/
+.recommenders/
+.apt_generated/
+.sts4-cache/
+.claude/
+.codestudio/
+.kiro/
+.agents/
+.github/
+skills-lock.json
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Java
+*.class
+*.jar
+*.war
+
+# Local secrets / env files
+.env
+.env.*
+!.env.example
+
+# Certificados/keystores (nunca en Git)
+*.jks
+*.p12
+*.pfx
+*.pem
+*.key
+
+# Local Spring profile with secrets (DO NOT COMMIT)
+src/main/resources/application-local.properties

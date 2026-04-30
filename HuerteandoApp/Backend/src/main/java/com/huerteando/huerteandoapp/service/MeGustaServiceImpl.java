@@ -1,9 +1,9 @@
 package com.huerteando.huerteandoapp.service;
 
 import com.huerteando.huerteandoapp.model.Observacion;
-import com.huerteando.huerteandoapp.model.ObservacionLike;
+import com.huerteando.huerteandoapp.model.MeGusta;
 import com.huerteando.huerteandoapp.model.Usuario;
-import com.huerteando.huerteandoapp.repository.ObservacionLikeRepository;
+import com.huerteando.huerteandoapp.repository.MeGustaRepository;
 import com.huerteando.huerteandoapp.repository.ObservacionRepository;
 import com.huerteando.huerteandoapp.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
@@ -14,14 +14,14 @@ import java.util.List;
 // Este servicio necesita tres repositorios porque al dar like
 // tenemos que verificar que tanto la observación como el usuario existen en la BD.
 @Service
-public class ObservacionLikeServiceImpl implements IObservacionLikeService {
+public class MeGustaServiceImpl implements IMeGustaService {
 
-    private final ObservacionLikeRepository likeRepository;
+    private final MeGustaRepository likeRepository;
     private final ObservacionRepository observacionRepository;
     private final UsuarioRepository usuarioRepository;
 
-    public ObservacionLikeServiceImpl(
-            ObservacionLikeRepository likeRepository,
+    public MeGustaServiceImpl(
+            MeGustaRepository likeRepository,
             ObservacionRepository observacionRepository,
             UsuarioRepository usuarioRepository) {
         this.likeRepository = likeRepository;
@@ -31,7 +31,7 @@ public class ObservacionLikeServiceImpl implements IObservacionLikeService {
 
     @Override
     @Transactional
-    public ObservacionLike darLike(Long idObservacion, Long idUsuario) {
+    public MeGusta darLike(Long idObservacion, Long idUsuario) {
         if (idObservacion == null || idUsuario == null) return null;
 
         // Si ya existe ese like, no lo duplicamos. Devolvemos null para que el controller
@@ -47,7 +47,7 @@ public class ObservacionLikeServiceImpl implements IObservacionLikeService {
         if (usu == null) return null;
 
         // Construimos el like y lo guardamos.
-        ObservacionLike like = new ObservacionLike();
+        MeGusta like = new MeGusta();
         like.setObservacion(obs);
         like.setUsuario(usu);
         like.setCreadoEn(LocalDateTime.now());
@@ -80,21 +80,21 @@ public class ObservacionLikeServiceImpl implements IObservacionLikeService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ObservacionLike> listarPorObservacion(Long idObservacion) {
+    public List<MeGusta> listarPorObservacion(Long idObservacion) {
         if (idObservacion == null) return List.of();
         return likeRepository.findByObservacion_IdOrderByCreadoEnDesc(idObservacion);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<ObservacionLike> listarPorUsuario(Long idUsuario) {
+    public List<MeGusta> listarPorUsuario(Long idUsuario) {
         if (idUsuario == null) return List.of();
         return likeRepository.findByUsuario_IdOrderByCreadoEnDesc(idUsuario);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<ObservacionLike> listarDesde(LocalDateTime desde) {
+    public List<MeGusta> listarDesde(LocalDateTime desde) {
         if (desde == null) return List.of();
         return likeRepository.findByCreadoEnAfter(desde);
     }
