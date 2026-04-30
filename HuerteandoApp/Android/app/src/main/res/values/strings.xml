@@ -15,7 +15,7 @@
 
     <!-- Orden -->
     <string name="orden_recientes">Más recientes</string>
-    <string name="orden_likes">Más likes</string>
+    <string name="orden_megusta">Más me gusta</string>
     <string name="orden_comentarios">Más comentarios</string>
 
     <!-- Mensajes generales -->
@@ -65,7 +65,7 @@
 
     <string-array name="array_orden">
         <item>@string/orden_recientes</item>
-        <item>@string/orden_likes</item>
+        <item>@string/orden_megusta</item>
         <item>@string/orden_comentarios</item>
     </string-array>
 

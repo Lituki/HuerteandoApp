@@ -41,14 +41,14 @@ public class Observacion {
     @SerializedName("usuario")
     private UsuarioResponse usuario;   // Quién la creó
 
-    @SerializedName(value = "numLikes", alternate = {"likes", "totalLikes"})
-    private int numLikes;
+    @SerializedName(value = "numMeGustas", alternate = {"numLikes", "likes", "totalLikes", "megustas"})
+    private int numMeGustas;
 
     @SerializedName(value = "numComentarios", alternate = {"comentarios", "totalComentarios"})
     private int numComentarios;
 
-    @SerializedName("likePropio")
-    private boolean likePropio;       // Si el usuario actual ya le dio like
+    @SerializedName(value = "meGustaPropio", alternate = {"likePropio", "yaMeGusta"})
+    private boolean meGustaPropio;       // Si el usuario actual ya le dio me gusta
 
     // CORRECCIÓN: Usamos la clase Imagen estandarizada en lugar de un modelo interno.
     @SerializedName("imagenes")
@@ -93,12 +93,12 @@ public class Observacion {
         return (usuario != null) ? usuario.avatarUrl : null;
     }
 
-    public int getNumLikes() { return numLikes; }
-    public void setNumLikes(int numLikes) { this.numLikes = numLikes; }
+    public int getNumMeGustas() { return numMeGustas; }
+    public void setNumMeGustas(int numMeGustas) { this.numMeGustas = numMeGustas; }
     public int getNumComentarios() { return numComentarios; }
     public void setNumComentarios(int numComentarios) { this.numComentarios = numComentarios; }
-    public boolean isLikePropio() { return likePropio; }
-    public void setLikePropio(boolean likePropio) { this.likePropio = likePropio; }
+    public boolean isMeGustaPropio() { return meGustaPropio; }
+    public void setMeGustaPropio(boolean meGustaPropio) { this.meGustaPropio = meGustaPropio; }
 
     // MÉTODO COMPATIBILIDAD: Extrae las URLs de los objetos Imagen del backend
     public List<String> getImagenesUrl() {
@@ -115,7 +115,7 @@ public class Observacion {
     public void setImagenes(List<Imagen> imagenes) { this.imagenes = imagenes; }
 
     /**
-     * Clases internas para mapear objetos anidados del JSON del backend
+     * Clases internas para mapeap objetos anidados del JSON del backend
      */
     private static class TipoResponse {
         public String nombre;

@@ -1,7 +1,6 @@
 package com.huerteando.app.ui;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -27,6 +26,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -37,15 +37,15 @@ import retrofit2.Response;
  * Optimizada por el arquitecto para:
  * 1. Formateo de fechas ISO a legible.
  * 2. Gestión robusta de URLs de imágenes.
- * 3. Sincronización de estados de Like.
+ * 3. Sincronización de estados de Me Gusta.
  */
 public class DetalleObservacionActivity extends AppCompatActivity {
 
     private android.widget.ImageView ivDetalleImagen;
     private ProgressBar progressDetalle;
     private TextView tvDetalleTipo, tvDetalleTitulo, tvDetalleFecha;
-    private TextView tvDetalleDescripcion, tvDetalleZona, tvDetalleEspecie, tvDetalleNumLikes;
-    private MaterialButton btnLike;
+    private TextView tvDetalleDescripcion, tvDetalleZona, tvDetalleEspecie, tvDetalleNumMeGusta;
+    private MaterialButton btnMeGusta;
     private RecyclerView recyclerComentarios;
     private com.google.android.material.textfield.TextInputEditText editNuevoComentario;
     private MaterialButton btnEnviarComentario;
@@ -81,7 +81,7 @@ public class DetalleObservacionActivity extends AppCompatActivity {
         enlazarVistas();
         setupRecyclerView();
 
-        btnLike.setOnClickListener(v -> toggleLike());
+        btnMeGusta.setOnClickListener(v -> toggleMeGusta());
         btnEnviarComentario.setOnClickListener(v -> enviarComentario());
 
         cargarDatosCompletos();
@@ -96,8 +96,8 @@ public class DetalleObservacionActivity extends AppCompatActivity {
         tvDetalleDescripcion = findViewById(R.id.tvDetalleDescripcion);
         tvDetalleZona = findViewById(R.id.tvDetalleZona);
         tvDetalleEspecie = findViewById(R.id.tvDetalleEspecie);
-        tvDetalleNumLikes = findViewById(R.id.tvDetalleNumLikes);
-        btnLike = findViewById(R.id.btnLike);
+        tvDetalleNumMeGusta = findViewById(R.id.tvDetalleNumMegusta);
+        btnMeGusta = findViewById(R.id.btnMeGusta);
         recyclerComentarios = findViewById(R.id.recyclerComentarios);
         editNuevoComentario = findViewById(R.id.editNuevoComentario);
         btnEnviarComentario = findViewById(R.id.btnEnviarComentario);
@@ -124,7 +124,7 @@ public class DetalleObservacionActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     observacionActual = response.body();
                     mostrarObservacion();
-                    actualizarEstadoLikeServidor();
+                    actualizarEstadoMeGustaServidor();
                 }
             }
             @Override public void onFailure(Call<Observacion> call, Throwable t) {
@@ -168,7 +168,7 @@ public class DetalleObservacionActivity extends AppCompatActivity {
                     .into(ivDetalleImagen);
         }
 
-        actualizarBotonLike();
+        actualizarBotonMeGusta();
     }
 
     private String formatearFecha(String fechaIso) {
@@ -178,45 +178,51 @@ public class DetalleObservacionActivity extends AppCompatActivity {
             String limpia = fechaIso.split("\\.")[0].replace("T", " ");
             SimpleDateFormat sdfIso = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
             Date date = sdfIso.parse(limpia);
-            return new SimpleDateFormat("dd 'de' MMMM, yyyy", Locale.getDefault()).format(date);
+
+            // Configuramos el formato de hora para España
+            Locale localeES = new Locale("es", "ES");
+            SimpleDateFormat sdfSalida = new SimpleDateFormat("dd 'de' MMMM, yyyy 'a las' HH:mm", localeES);
+            sdfSalida.setTimeZone(TimeZone.getTimeZone("Europe/Madrid"));
+
+            return sdfSalida.format(date);
         } catch (Exception e) {
             return fechaIso; // Si falla, devolvemos la original
         }
     }
 
-    private void actualizarEstadoLikeServidor() {
+    private void actualizarEstadoMeGustaServidor() {
         ApiService api = ApiClient.getClient().create(ApiService.class);
         Long idUser = session.getUserId();
 
         // 1. Obtener conteo total
-        api.getLikeCount(idObservacion).enqueue(new Callback<Map<String, Long>>() {
+        api.getMeGustasCount(idObservacion).enqueue(new Callback<Map<String, Long>>() {
             @Override
             public void onResponse(Call<Map<String, Long>> call, Response<Map<String, Long>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     Long total = response.body().get("count"); // El backend suele usar 'count' o 'total'
-                    if (total == null) total = response.body().get("likes");
+                    if (total == null) total = response.body().get("Me gusta");
                     if (total != null) {
-                        observacionActual.setNumLikes(total.intValue());
-                        tvDetalleNumLikes.setText(String.valueOf(total));
+                        observacionActual.setNumMeGustas(total.intValue());
+                        tvDetalleNumMeGusta.setText(String.valueOf(total));
                     }
                 }
             }
             @Override public void onFailure(Call<Map<String, Long>> call, Throwable t) {}
         });
 
-        // 2. Comprobar si el usuario actual ha dado like
+        // 2. Comprobar si el usuario actual ha dado me gusta
         if (idUser != -1L) {
-            api.checkLikeExiste(idObservacion, idUser).enqueue(new Callback<Map<String, Boolean>>() {
+            api.checkMeGustaExiste(idObservacion, idUser).enqueue(new Callback<Map<String, Boolean>>() {
                 @Override
                 public void onResponse(Call<Map<String, Boolean>> call, Response<Map<String, Boolean>> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         // Buscamos varias claves posibles para evitar errores de mapeo
                         Boolean existe = response.body().get("existe");
-                        if (existe == null) existe = response.body().get("yaLikeado");
+                        if (existe == null) existe = response.body().get("ya le has dado a me gusta");
                         
                         if (existe != null) {
-                            observacionActual.setLikePropio(existe);
-                            actualizarBotonLike();
+                            observacionActual.setMeGustaPropio(existe);
+                            actualizarBotonMeGusta();
                         }
                     }
                 }
@@ -225,13 +231,13 @@ public class DetalleObservacionActivity extends AppCompatActivity {
         }
     }
 
-    private void actualizarBotonLike() {
+    private void actualizarBotonMeGusta() {
         if (observacionActual == null) return;
-        btnLike.setText(observacionActual.isLikePropio() ? "❤️ Ya no me gusta" : "🤍 Me gusta");
-        tvDetalleNumLikes.setText(String.valueOf(observacionActual.getNumLikes()));
+        btnMeGusta.setText(observacionActual.isMeGustaPropio() ? "❤️ Ya no me gusta" : "🤍 Me gusta");
+        tvDetalleNumMeGusta.setText(String.valueOf(observacionActual.getNumMeGustas()));
     }
 
-    private void toggleLike() {
+    private void toggleMeGusta() {
         if (observacionActual == null) return;
         Long idUser = session.getUserId();
         if (idUser == -1L) {
@@ -239,22 +245,22 @@ public class DetalleObservacionActivity extends AppCompatActivity {
             return;
         }
 
-        btnLike.setEnabled(false);
+        btnMeGusta.setEnabled(false);
         ApiService api = ApiClient.getClient().create(ApiService.class);
-        boolean quitar = observacionActual.isLikePropio();
+        boolean quitar = observacionActual.isMeGustaPropio();
         
-        Call<Void> call = quitar ? api.quitarLike(idObservacion, idUser) : api.darLike(idObservacion, idUser);
+        Call<Void> call = quitar ? api.quitarMeGusta(idObservacion, idUser) : api.darMeGusta(idObservacion, idUser);
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
-                btnLike.setEnabled(true);
+                btnMeGusta.setEnabled(true);
                 // 200, 201, 204 o 409 (ya existe) se consideran éxito para la UI
                 if (response.isSuccessful() || response.code() == 409) {
-                    actualizarEstadoLikeServidor();
+                    actualizarEstadoMeGustaServidor();
                 }
             }
             @Override public void onFailure(Call<Void> call, Throwable t) {
-                btnLike.setEnabled(true);
+                btnMeGusta.setEnabled(true);
             }
         });
     }

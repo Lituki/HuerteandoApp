@@ -93,25 +93,25 @@ public interface ApiService {
     @GET("api/especies/{id}")
     Call<Especie> getEspecie(@Path("id") Long id);
 
-    // ==================== LIKES ====================
+    // ==================== ME GUSTAS ====================
 
-    @POST("api/observaciones/{id}/likes")
-    Call<Void> darLike(
+    @POST("api/observaciones/{id}/megustas")
+    Call<Void> darMeGusta(
             @Path("id") Long idObservacion,
             @Query("idUsuario") Long idUsuario
     );
 
-    @DELETE("api/observaciones/{id}/likes")
-    Call<Void> quitarLike(
+    @DELETE("api/observaciones/{id}/megustas")
+    Call<Void> quitarMeGusta(
             @Path("id") Long idObservacion,
             @Query("idUsuario") Long idUsuario
     );
 
-    @GET("api/observaciones/{id}/likes/count")
-    Call<Map<String, Long>> getLikeCount(@Path("id") Long idObservacion);
+    @GET("api/observaciones/{id}/megustas/count")
+    Call<Map<String, Long>> getMeGustasCount(@Path("id") Long idObservacion);
 
-    @GET("api/observaciones/{id}/likes/existe")
-    Call<Map<String, Boolean>> checkLikeExiste(
+    @GET("api/observaciones/{id}/megustas/existe")
+    Call<Map<String, Boolean>> checkMeGustaExiste(
             @Path("id") Long idObservacion,
             @Query("idUsuario") Long idUsuario
     );

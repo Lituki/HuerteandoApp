@@ -120,7 +120,7 @@ public class ObservacionesActivity extends AppCompatActivity {
         });
 
         // Spinner ORDEN (Ordenación Local)
-        final String[] valoresOrden = {"fecha", "likes", "comentarios"};
+        final String[] valoresOrden = {"fecha", "me gustas", "comentarios"};
         ArrayAdapter<CharSequence> adapterOrden = ArrayAdapter.createFromResource(this,
                 R.array.array_orden, android.R.layout.simple_spinner_item);
         adapterOrden.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -165,7 +165,7 @@ public class ObservacionesActivity extends AppCompatActivity {
         // 1. Ordenación Local
         Collections.sort(temp, (o1, o2) -> {
             switch (ordenSeleccionado) {
-                case "likes": return Integer.compare(o2.getNumLikes(), o1.getNumLikes());
+                case "me gusta": return Integer.compare(o2.getNumMeGustas(), o1.getNumMeGustas());
                 case "comentarios": return Integer.compare(o2.getNumComentarios(), o1.getNumComentarios());
                 default: 
                     String f1 = o1.getFechaObservacion() != null ? o1.getFechaObservacion() : "";

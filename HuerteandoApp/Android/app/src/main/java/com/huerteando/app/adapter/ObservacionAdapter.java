@@ -63,7 +63,7 @@ public class ObservacionAdapter extends RecyclerView.Adapter<ObservacionAdapter.
     class ViewHolder extends RecyclerView.ViewHolder {
 
         private final ImageView ivImagen;
-        private final TextView tvTitulo, tvTipo, tvZona, tvFecha, tvLikes, tvComentarios;
+        private final TextView tvTitulo, tvTipo, tvZona, tvFecha, tvMeGustas, tvComentarios;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -74,7 +74,7 @@ public class ObservacionAdapter extends RecyclerView.Adapter<ObservacionAdapter.
             tvTipo = itemView.findViewById(R.id.tvTipo);
             tvZona = itemView.findViewById(R.id.tvZona);
             tvFecha = itemView.findViewById(R.id.tvFecha);
-            tvLikes = itemView.findViewById(R.id.tvLikes);
+            tvMeGustas = itemView.findViewById(R.id.tvMeGustas);
             tvComentarios = itemView.findViewById(R.id.tvComentarios);
 
             // Click en la tarjeta
@@ -100,7 +100,7 @@ public class ObservacionAdapter extends RecyclerView.Adapter<ObservacionAdapter.
 
             // --- CORRECCIÓN DE CONTADORES ---
             // Pintamos los valores actuales. Si el servidor no los envía, se mostrará 0.
-            tvLikes.setText(String.valueOf(obs.getNumLikes()));
+            tvMeGustas.setText(String.valueOf(obs.getNumMeGustas()));
             tvComentarios.setText(String.valueOf(obs.getNumComentarios()));
 
             // --- CARGA DE IMAGEN CORREGIDA ---

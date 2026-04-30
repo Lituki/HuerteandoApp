@@ -81,6 +81,10 @@ public class RetrofitClient {
 Necesitas clases Java que representen los datos que llegan del servidor.
 Tienen que tener los mismos nombres de campo que devuelve la API.
 
+> Nota sobre fechas: el backend devuelve `LocalDateTime` como texto ISO-8601,
+> por ejemplo: `"2026-04-29T18:35:12"`. En el modelo Android puedes guardarlo
+> como `String` (lo más simple) y ya está.
+
 ### Observacion.java (modelo Android)
 
 ```java
@@ -177,6 +181,10 @@ public interface ApiService {
     @GET("api/tipos-observacion")
     Call<List<TipoObservacion>> getTipos();
 
+    // GET /api/tipos-observacion/{id}
+    @GET("api/tipos-observacion/{id}")
+    Call<TipoObservacion> getTipo(@Path("id") short id);
+
 
     // ── OBSERVACIONES ─────────────────────────────────────────────────
     // GET /api/observaciones  → todas
@@ -197,6 +205,10 @@ public interface ApiService {
 
     // Compatibilidad: también acepta "estado" en backend, pero usa estado_observacion en la app nueva.
 
+    // GET /api/observaciones?estado=ABIERTA  → legado
+    @GET("api/observaciones")
+    Call<List<Observacion>> getObservacionesPorEstadoLegacy(@Query("estado") String estadoObservacion);
+
     // GET /api/observaciones/{id}  → detalle de una observación
     @GET("api/observaciones/{id}")
     Call<Observacion> getObservacion(@Path("id") Long id);
@@ -215,41 +227,51 @@ public interface ApiService {
 
 
     // ── IMÁGENES ──────────────────────────────────────────────────────
-    // GET /api/observaciones/{id}/imagenes
-    @GET("api/observaciones/{id}/imagenes")
-    Call<List<Imagen>> getImagenes(@Path("id") Long idObservacion);
+    // GET /api/observaciones/{idObservacion}/imagenes
+    @GET("api/observaciones/{idObservacion}/imagenes")
+    Call<List<Imagen>> getImagenes(@Path("idObservacion") Long idObservacion);
 
-    // POST /api/observaciones/{id}/imagenes
-    @POST("api/observaciones/{id}/imagenes")
-    Call<Imagen> subirImagen(@Path("id") Long idObservacion, @Body Imagen imagen);
+    // POST /api/observaciones/{idObservacion}/imagenes
+    @POST("api/observaciones/{idObservacion}/imagenes")
+    Call<Imagen> subirImagen(@Path("idObservacion") Long idObservacion, @Body Imagen imagen);
+
+    // DELETE /api/observaciones/{idObservacion}/imagenes/{idImagen}
+    @DELETE("api/observaciones/{idObservacion}/imagenes/{idImagen}")
+    Call<Void> borrarImagen(@Path("idObservacion") Long idObservacion, @Path("idImagen") Long idImagen);
 
 
     // ── COMENTARIOS ───────────────────────────────────────────────────
-    // GET /api/observaciones/{id}/comentarios
-    @GET("api/observaciones/{id}/comentarios")
-    Call<List<Comentario>> getComentarios(@Path("id") Long idObservacion);
+    // GET /api/observaciones/{idObservacion}/comentarios
+    @GET("api/observaciones/{idObservacion}/comentarios")
+    Call<List<Comentario>> getComentarios(@Path("idObservacion") Long idObservacion);
 
-    // POST /api/observaciones/{id}/comentarios
-    @POST("api/observaciones/{id}/comentarios")
-    Call<Comentario> crearComentario(@Path("id") Long idObservacion, @Body Comentario comentario);
+    // POST /api/observaciones/{idObservacion}/comentarios
+    @POST("api/observaciones/{idObservacion}/comentarios")
+    Call<Comentario> crearComentario(@Path("idObservacion") Long idObservacion, @Body Comentario comentario);
+
+    // DELETE /api/observaciones/{idObservacion}/comentarios/{idComentario}
+    @DELETE("api/observaciones/{idObservacion}/comentarios/{idComentario}")
+    Call<Void> borrarComentario(@Path("idObservacion") Long idObservacion, @Path("idComentario") Long idComentario);
 
 
-    // ── LIKES ─────────────────────────────────────────────────────────
-    // GET /api/observaciones/{id}/likes/count
-    @GET("api/observaciones/{id}/likes/count")
-    Call<Map<String, Long>> getLikes(@Path("id") Long idObservacion);
+    // ── ME GUSTAS ─────────────────────────────────────────────────────
+    // GET /api/observaciones/{idObservacion}/megustas/count
+    // Respuesta: { "megustas": 42 }
+    @GET("api/observaciones/{idObservacion}/megustas/count")
+    Call<Map<String, Long>> getMeGustasCount(@Path("idObservacion") Long idObservacion);
 
-    // GET /api/observaciones/{id}/likes/existe?idUsuario=1
-    @GET("api/observaciones/{id}/likes/existe")
-    Call<Map<String, Boolean>> existeLike(@Path("id") Long idObservacion, @Query("idUsuario") Long idUsuario);
+    // GET /api/observaciones/{idObservacion}/megustas/existe?idUsuario=1
+    // Respuesta: { "yaMeGusta": true }
+    @GET("api/observaciones/{idObservacion}/megustas/existe")
+    Call<Map<String, Boolean>> existeMeGusta(@Path("idObservacion") Long idObservacion, @Query("idUsuario") Long idUsuario);
 
-    // POST /api/observaciones/{id}/likes?idUsuario=1
-    @POST("api/observaciones/{id}/likes")
-    Call<Void> darLike(@Path("id") Long idObservacion, @Query("idUsuario") Long idUsuario);
+    // POST /api/observaciones/{idObservacion}/megustas?idUsuario=1
+    @POST("api/observaciones/{idObservacion}/megustas")
+    Call<Void> darMeGusta(@Path("idObservacion") Long idObservacion, @Query("idUsuario") Long idUsuario);
 
-    // DELETE /api/observaciones/{id}/likes?idUsuario=1
-    @DELETE("api/observaciones/{id}/likes")
-    Call<Void> quitarLike(@Path("id") Long idObservacion, @Query("idUsuario") Long idUsuario);
+    // DELETE /api/observaciones/{idObservacion}/megustas?idUsuario=1
+    @DELETE("api/observaciones/{idObservacion}/megustas")
+    Call<Void> quitarMeGusta(@Path("idObservacion") Long idObservacion, @Query("idUsuario") Long idUsuario);
 
 
     // ── USUARIOS ──────────────────────────────────────────────────────
@@ -274,6 +296,18 @@ public interface ApiService {
     // GET /api/especies/{id}
     @GET("api/especies/{id}")
     Call<Especie> getEspecie(@Path("id") Long id);
+
+    // POST /api/especies
+    @POST("api/especies")
+    Call<Especie> crearEspecie(@Body Especie especie);
+
+    // PUT /api/especies/{id}
+    @PUT("api/especies/{id}")
+    Call<Especie> editarEspecie(@Path("id") Long id, @Body Especie especie);
+
+    // DELETE /api/especies/{id}
+    @DELETE("api/especies/{id}")
+    Call<Void> borrarEspecie(@Path("id") Long id);
 }
 ```
 
@@ -401,7 +435,7 @@ api.login(credenciales).enqueue(new Callback<Map<String, Object>>() {
 Long idObservacion = 1L;  // el id de la observación que estás viendo
 Long idUsuario = ...; // el que tienes guardado en SharedPreferences
 
-api.darLike(idObservacion, idUsuario).enqueue(new Callback<Void>() {
+api.darMeGusta(idObservacion, idUsuario).enqueue(new Callback<Void>() {
 
     @Override
     public void onResponse(Call<Void> call, Response<Void> response) {
@@ -475,7 +509,7 @@ y luego subir la imagen con el id que devuelve el servidor.
 ```
 1. Usuario rellena el formulario
 2. POST /api/observaciones  → servidor devuelve la observación con su id
-3. Con ese id: POST /api/observaciones/{id}/imagenes
+3. Con ese id: POST /api/observaciones/{idObservacion}/imagenes
 4. Mostrar confirmación al usuario
 ```
 
@@ -532,3 +566,38 @@ api.crearObservacion(observacion).enqueue(new Callback<Observacion>() {
 **El login devuelve el id como `Double` en vez de `Long`**
 - Gson convierte todos los números a `Double` por defecto en un `Map<String, Object>`
 - Conviértelo así: `Long id = ((Double) datos.get("id")).longValue();`
+
+---
+
+## 11. Chuleta rápida de endpoints (finales)
+
+Todas las rutas van después de tu `BASE_URL`. Ejemplo en local con emulador:
+`http://10.0.2.2:8080/api/observaciones`
+
+| Recurso | Método | Endpoint | Params / Body | Respuesta típica |
+|--------|--------|----------|---------------|------------------|
+| Tipos | GET | `/api/tipos-observacion` | — | `200 OK` → `List<TipoObservacion>` |
+| Tipos | GET | `/api/tipos-observacion/{id}` | Path: `id` | `200 OK` → `TipoObservacion` / `404` |
+| Observaciones | GET | `/api/observaciones` | Query opcional: `tipo`, `usuario`, `estado_observacion` (o `estado`) | `200 OK` → `List<Observacion>` |
+| Observaciones | GET | `/api/observaciones/{id}` | Path: `id` | `200 OK` → `Observacion` / `404` |
+| Observaciones | POST | `/api/observaciones` | Body: `Observacion` | `201 Created` → `Observacion` / `400` |
+| Observaciones | PUT | `/api/observaciones/{id}` | Path: `id` + Body: `Observacion` | `200 OK` → `Observacion` / `404` |
+| Observaciones | DELETE | `/api/observaciones/{id}` | Path: `id` | `204 No Content` / `404` |
+| Imágenes | GET | `/api/observaciones/{idObservacion}/imagenes` | Path: `idObservacion` | `200 OK` → `List<Imagen>` |
+| Imágenes | POST | `/api/observaciones/{idObservacion}/imagenes` | Path: `idObservacion` + Body: `Imagen` (`urlArchivo` obligatorio) | `201 Created` → `Imagen` / `400` / `404` |
+| Imágenes | DELETE | `/api/observaciones/{idObservacion}/imagenes/{idImagen}` | Path: `idObservacion`, `idImagen` | `204 No Content` / `404` |
+| Comentarios | GET | `/api/observaciones/{idObservacion}/comentarios` | Path: `idObservacion` | `200 OK` → `List<Comentario>` |
+| Comentarios | POST | `/api/observaciones/{idObservacion}/comentarios` | Path: `idObservacion` + Body: `Comentario` | `201 Created` → `Comentario` / `400` / `404` |
+| Comentarios | DELETE | `/api/observaciones/{idObservacion}/comentarios/{idComentario}` | Path: `idObservacion`, `idComentario` | `204 No Content` / `404` |
+| Me gustas | GET | `/api/observaciones/{idObservacion}/megustas/count` | Path: `idObservacion` | `200 OK` → `{ "megustas": 42 }` |
+| Me gustas | GET | `/api/observaciones/{idObservacion}/megustas/existe` | Path: `idObservacion` + Query: `idUsuario` | `200 OK` → `{ "yaMeGusta": true }` |
+| Me gustas | POST | `/api/observaciones/{idObservacion}/megustas` | Path: `idObservacion` + Query: `idUsuario` | `201 Created` / `409 Conflict` |
+| Me gustas | DELETE | `/api/observaciones/{idObservacion}/megustas` | Path: `idObservacion` + Query: `idUsuario` | `204 No Content` |
+| Auth | POST | `/api/auth/register` | Body: `Usuario` | `201 Created` → `Usuario` / `400` / `409` |
+| Auth | POST | `/api/auth/login` | Body: `{ "nick": "...", "password": "..." }` | `200 OK` → `{id, nick, nombre, rol, avatarUrl}` / `401` / `403` |
+| Usuarios | GET | `/api/usuarios/{id}` | Path: `id` | `200 OK` → `Usuario` / `404` |
+| Especies | GET | `/api/especies` | — | `200 OK` → `List<Especie>` |
+| Especies | GET | `/api/especies/{id}` | Path: `id` | `200 OK` → `Especie` / `404` |
+| Especies | POST | `/api/especies` | Body: `Especie` | `201 Created` → `Especie` / `400` |
+| Especies | PUT | `/api/especies/{id}` | Path: `id` + Body: `Especie` | `200 OK` → `Especie` / `404` |
+| Especies | DELETE | `/api/especies/{id}` | Path: `id` | `204 No Content` / `404` |
