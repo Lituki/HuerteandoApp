@@ -3,7 +3,6 @@ package com.huerteando.app.clases;
 /**
  * Representa la respuesta del login básico del backend.
  * Coincide con los campos devueltos por el UsuarioController (id, nick, nombre, rol, avatarUrl).
- * Se ha eliminado el campo 'token' ya que el backend no utiliza JWT.
  */
 public class LoginResponse {
 

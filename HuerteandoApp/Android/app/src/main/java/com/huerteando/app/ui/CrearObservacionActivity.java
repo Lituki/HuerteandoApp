@@ -33,7 +33,6 @@ import com.huerteando.app.utils.SessionManager;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -46,32 +45,20 @@ import retrofit2.Response;
 
 /**
  * Activity para crear una nueva observación.
- * 
- * Refactorizada para subir imágenes en formato Base64 (JSON) y evitar errores de Multipart.
- * Las coordenadas se envían como BigDecimal y la fecha en formato ISO.
+ * Sincronizada con el backend para envío de coordenadas como double y fechas ISO.
  */
 public class CrearObservacionActivity extends AppCompatActivity {
 
-    // Campos del formulario
-    private TextInputEditText editTitulo;
-    private TextInputEditText editDescripcion;
+    private TextInputEditText editTitulo, editDescripcion, editEspecie, editZona, editDireccion, editFecha, editNombreTradicional;
     private AutoCompleteTextView spinnerTipo;
-    private TextInputEditText editEspecie;
-    private TextInputEditText editZona;
-    private TextInputEditText editDireccion;
-    private TextInputEditText editFecha;
-    private TextInputEditText editNombreTradicional;
     private final List<Uri> imagenesSeleccionadas = new ArrayList<>();
     private android.widget.Button btnSeleccionarImagen;
     private android.widget.TextView tvImagenesSeleccionadas;
     private androidx.activity.result.ActivityResultLauncher<android.content.Intent> pickImageLauncher;
-    private MaterialButton btnGuardar;
-    private MaterialButton btnMiUbicacion;
+    private MaterialButton btnGuardar, btnMiUbicacion;
     private ProgressBar progressBar;
     private FusedLocationProviderClient fusedLocationClient;
-    private double latitud = 0;
-    private double longitud = 0;
-    private String direccionActual = "";
+    private double latitud = 0, longitud = 0;
     private boolean ubicacionObtenida = false;
     private SessionManager sessionManager;
 
@@ -83,38 +70,26 @@ public class CrearObservacionActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_crear_observacion);
         
-        pickImageLauncher = registerForActivityResult(
-                new androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                        android.content.Intent data = result.getData();
-                        imagenesSeleccionadas.clear();
-
-                        if (data.getClipData() != null) {
-                            int count = data.getClipData().getItemCount();
-                            for (int i = 0; i < count; i++) {
-                                Uri uri = data.getClipData().getItemAt(i).getUri();
-                                imagenesSeleccionadas.add(uri);
-                            }
-                        } else if (data.getData() != null) {
-                            imagenesSeleccionadas.add(data.getData());
-                        }
-
-                        String mensaje = imagenesSeleccionadas.size() + " imágenes seleccionadas";
-                        Toast.makeText(this, mensaje, Toast.LENGTH_SHORT).show();
-
-                        if (tvImagenesSeleccionadas != null) {
-                            tvImagenesSeleccionadas.setText(mensaje);
-                            tvImagenesSeleccionadas.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
-                        }
-                    }
-                }
-        );
-
         sessionManager = new SessionManager(this);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
-        // Conectar vistas
+        initViews();
+        setupImagePicker();
+        
+        // Configurar spinner
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, tipos);
+        spinnerTipo.setAdapter(adapter);
+
+        // Fecha actual
+        editFecha.setText(new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(new Date()));
+        editFecha.setEnabled(false);
+
+        btnMiUbicacion.setOnClickListener(v -> obtenerUbicacionActual());
+        btnGuardar.setOnClickListener(v -> guardarObservacion());
+        btnSeleccionarImagen.setOnClickListener(v -> abrirGaleria());
+    }
+
+    private void initViews() {
         editTitulo = findViewById(R.id.editTitulo);
         editDescripcion = findViewById(R.id.editDescripcion);
         spinnerTipo = findViewById(R.id.spinnerTipo);
@@ -127,77 +102,53 @@ public class CrearObservacionActivity extends AppCompatActivity {
         btnMiUbicacion = findViewById(R.id.btnMiUbicacion);
         btnSeleccionarImagen = findViewById(R.id.btnSeleccionarImagen);
         tvImagenesSeleccionadas = findViewById(R.id.tvImagenesSeleccionadas);
-        btnSeleccionarImagen.setOnClickListener(v -> abrirGaleria());
         progressBar = findViewById(R.id.progressBar);
+    }
 
-        // Configurar spinner de tipo
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, 
-                android.R.layout.simple_dropdown_item_1line, tipos);
-        spinnerTipo.setAdapter(adapter);
-
-        // Mostrar fecha y hora actual del teléfono
-        String fechaVisible = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(new Date());
-        editFecha.setText(fechaVisible);
-        editFecha.setEnabled(false);
-        editFecha.setFocusable(false);
-
-        // Botón de mi ubicación
-        btnMiUbicacion.setOnClickListener(v -> obtenerUbicacionActual());
-
-        // Botón guardar
-        btnGuardar.setOnClickListener(v -> guardarObservacion());
-        btnGuardar.setEnabled(true);
+    private void setupImagePicker() {
+        pickImageLauncher = registerForActivityResult(
+                new androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        imagenesSeleccionadas.clear();
+                        if (result.getData().getClipData() != null) {
+                            int count = result.getData().getClipData().getItemCount();
+                            for (int i = 0; i < count; i++) imagenesSeleccionadas.add(result.getData().getClipData().getItemAt(i).getUri());
+                        } else if (result.getData().getData() != null) {
+                            imagenesSeleccionadas.add(result.getData().getData());
+                        }
+                        tvImagenesSeleccionadas.setText(imagenesSeleccionadas.size() + " imágenes seleccionadas");
+                    }
+                }
+        );
     }
 
     private void obtenerUbicacionActual() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
             return;
         }
-
         progressBar.setVisibility(View.VISIBLE);
-
-        fusedLocationClient.getLastLocation()
-                .addOnSuccessListener(this, location -> {
-                    progressBar.setVisibility(View.GONE);
-                    if (location != null) {
-                        latitud = location.getLatitude();
-                        longitud = location.getLongitude();
-                        ubicacionObtenida = true;
-                        btnGuardar.setEnabled(true);
-                        obtenerDireccionDesdeCoordenadas(latitud, longitud);
-                    } else {
-                        ubicacionObtenida = false;
-                        Toast.makeText(this, "No se pudo obtener ubicación", Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    progressBar.setVisibility(View.GONE);
-                    ubicacionObtenida = false;
-                    btnGuardar.setEnabled(false);
-                    Toast.makeText(this, "Error al obtener ubicación", Toast.LENGTH_SHORT).show();
-                });
+        fusedLocationClient.getLastLocation().addOnSuccessListener(this, location -> {
+            progressBar.setVisibility(View.GONE);
+            if (location != null) {
+                latitud = location.getLatitude();
+                longitud = location.getLongitude();
+                ubicacionObtenida = true;
+                obtenerDireccion(latitud, longitud);
+            }
+        });
     }
 
-    private void obtenerDireccionDesdeCoordenadas(double lat, double lng) {
+    private void obtenerDireccion(double lat, double lng) {
         Geocoder geocoder = new Geocoder(this, Locale.getDefault());
         try {
             List<Address> addresses = geocoder.getFromLocation(lat, lng, 1);
             if (addresses != null && !addresses.isEmpty()) {
-                Address address = addresses.get(0);
-                direccionActual = address.getAddressLine(0);
-                editDireccion.setText(direccionActual);
-
-                String zonaTexto = address.getSubLocality();
-                if (zonaTexto == null) zonaTexto = address.getLocality();
-                if (zonaTexto == null) zonaTexto = "Sin zona";
-                editZona.setText(zonaTexto);
+                editDireccion.setText(addresses.get(0).getAddressLine(0));
+                editZona.setText(addresses.get(0).getLocality());
             }
-        } catch (IOException e) {
-            Toast.makeText(this, "No se pudo obtener la dirección", Toast.LENGTH_SHORT).show();
-        }
+        } catch (IOException ignored) {}
     }
 
     private void abrirGaleria() {
@@ -207,195 +158,46 @@ public class CrearObservacionActivity extends AppCompatActivity {
         pickImageLauncher.launch(android.content.Intent.createChooser(intent, "Selecciona imágenes"));
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == 1 && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            obtenerUbicacionActual();
-        } else {
-            ubicacionObtenida = false;
-            Toast.makeText(this, "Sin GPS no se puede geolocalizar la observación.", Toast.LENGTH_LONG).show();
-        }
-    }
-
-    /**
-     * Sube las imágenes seleccionadas al servidor convirtiéndolas a Base64.
-     * Se envían como objetos Imagen vía JSON.
-     */
-    private void subirImagenes(long idObservacion) {
-        if (imagenesSeleccionadas.isEmpty()) {
-            finalizarYSalir();
-            return;
-        }
-
-        progressBar.setVisibility(View.VISIBLE);
-        final int total = imagenesSeleccionadas.size();
-        final int[] contador = {0};
-
-        ApiService apiService = ApiClient.getClient().create(ApiService.class);
-
-        for (Uri uri : imagenesSeleccionadas) {
-            String base64Imagen = convertirUriABase64(uri);
-
-            if (base64Imagen != null) {
-                Imagen imagenObj = new Imagen();
-                // El Backend espera el Base64 en el campo urlArchivo
-                imagenObj.setUrlArchivo(base64Imagen);
-                imagenObj.setTitulo("Obs_" + idObservacion + "_" + System.currentTimeMillis());
-
-                apiService.subirImagen(idObservacion, imagenObj).enqueue(new Callback<Imagen>() {
-                    @Override
-                    public void onResponse(Call<Imagen> call, Response<Imagen> response) {
-                        contador[0]++;
-                        if (contador[0] == total) {
-                            finalizarYSalir();
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<Imagen> call, Throwable t) {
-                        contador[0]++;
-                        if (contador[0] == total) {
-                            finalizarYSalir();
-                        }
-                    }
-                });
-            } else {
-                contador[0]++;
-                if (contador[0] == total) {
-                    finalizarYSalir();
-                }
-            }
-        }
-    }
-
-    /**
-     * Procesa la imagen localmente: carga el Bitmap, lo redimensiona y lo comprime
-     * para evitar que el String Base64 sea demasiado grande (Error 413).
-     */
-    private String convertirUriABase64(Uri uri) {
-        try {
-            Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);
-            if (bitmap == null) return null;
-
-            // Redimensionado para evitar Payload Too Large (max 1024px)
-            int maxSize = 1024;
-            int width = bitmap.getWidth();
-            int height = bitmap.getHeight();
-
-            if (width > maxSize || height > maxSize) {
-                float ratio = (float) width / (float) height;
-                if (ratio > 1) {
-                    width = maxSize;
-                    height = (int) (width / ratio);
-                } else {
-                    height = maxSize;
-                    width = (int) (height * ratio);
-                }
-                bitmap = Bitmap.createScaledBitmap(bitmap, width, height, true);
-            }
-
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            // Compresión al 60% para balancear calidad y tamaño
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 60, baos);
-            byte[] imageBytes = baos.toByteArray();
-            
-            return Base64.encodeToString(imageBytes, Base64.DEFAULT);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    private void finalizarYSalir() {
-        progressBar.setVisibility(View.GONE);
-        Toast.makeText(this, "¡Observación e imágenes guardadas!", Toast.LENGTH_SHORT).show();
-        finish();
-    }
-
     private void guardarObservacion() {
-        String titulo = editTitulo.getText() != null ? editTitulo.getText().toString().trim() : "";
-        String descripcion = editDescripcion.getText() != null ? editDescripcion.getText().toString().trim() : "";
-        String tipo = spinnerTipo.getText() != null ? spinnerTipo.getText().toString().trim() : "";
-        String zona = editZona.getText() != null ? editZona.getText().toString().trim() : "";
-        String direccion = editDireccion.getText() != null ? editDireccion.getText().toString().trim() : "";
+        if (!validarFormulario()) return;
 
-        if (titulo.isEmpty()) {
-            editTitulo.setError("Campo obligatorio");
-            return;
-        }
-        if (tipo.isEmpty()) {
-            spinnerTipo.setError("Selecciona un tipo");
-            return;
-        }
-        if (descripcion.isEmpty()) {
-            editDescripcion.setError("Campo obligatorio");
-            return;
-        }
-        if (zona.isEmpty()) {
-            editZona.setError("Campo obligatorio");
-            return;
-        }
-        if (direccion.isEmpty()) {
-            editDireccion.setError("Campo obligatorio");
-            return;
-        }
-        if (!ubicacionObtenida) {
-            Toast.makeText(this, "Debes seleccionar una ubicación", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if ("DENUNCIA".equals(tipo) && imagenesSeleccionadas.isEmpty()) {
-            Toast.makeText(this, "Las denuncias ambientales requieren al menos una imagen.", Toast.LENGTH_LONG).show();
-            return;
-        }
+        String titulo = editTitulo.getText().toString().trim();
+        String descripcion = editDescripcion.getText().toString().trim();
+        String tipoStr = spinnerTipo.getText().toString().trim();
+        String especie = editEspecie.getText().toString().trim();
+        String zona = editZona.getText().toString().trim();
+        String direccion = editDireccion.getText().toString().trim();
+        String nombreTradicional = editNombreTradicional.getText().toString().trim();
+        
+        String fechaISO = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).format(new Date());
 
-        String especie = editEspecie.getText() != null ? editEspecie.getText().toString().trim() : "";
-        String nombreTradicional = editNombreTradicional.getText() != null ? 
-                editNombreTradicional.getText().toString().trim() : "";
-
-        // Fecha y hora automáticas en formato ISO (requerido por backend LocalDateTime)
-        String fechaActualISO = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).format(new Date());
-
-        // Obtenemos el ID del usuario logueado
-        Long idUsuario = sessionManager.getUserId();
-        ObservacionRequest.UsuarioRequest usuarioObjeto = new ObservacionRequest.UsuarioRequest(idUsuario);
-
-        // Mapeo del tipo de observación
-        int idTipo = 1; // PLANTA
-        if ("RINCON".equals(tipo)) idTipo = 2;
-        if ("DENUNCIA".equals(tipo)) idTipo = 3;
-        ObservacionRequest.TipoRequest tipoObjeto = new ObservacionRequest.TipoRequest(idTipo);
-
-        // Convertir coordenadas a BigDecimal para el backend
-        BigDecimal latBD = new BigDecimal(String.valueOf(latitud));
-        BigDecimal lonBD = new BigDecimal(String.valueOf(longitud));
+        int idTipo = "RINCON".equals(tipoStr) ? 2 : ("DENUNCIA".equals(tipoStr) ? 3 : 1);
+        
+        ObservacionRequest request = new ObservacionRequest(
+                titulo, descripcion, fechaISO, 
+                new ObservacionRequest.TipoRequest(idTipo), 
+                especie, latitud, longitud, direccion, zona, nombreTradicional,
+                new ObservacionRequest.UsuarioRequest(sessionManager.getUserId()),
+                "ABIERTA"
+        );
 
         progressBar.setVisibility(View.VISIBLE);
         btnGuardar.setEnabled(false);
 
-        ObservacionRequest request = new ObservacionRequest(
-                titulo, descripcion, fechaActualISO, tipoObjeto, especie,
-                latBD, lonBD, direccion, zona, nombreTradicional,
-                usuarioObjeto
-        );
-
         ApiService apiService = ApiClient.getClient().create(ApiService.class);
-        Call<Observacion> call = apiService.crearObservacion(request);
-        call.enqueue(new Callback<Observacion>() {
+        apiService.crearObservacion(request).enqueue(new Callback<Observacion>() {
             @Override
             public void onResponse(Call<Observacion> call, Response<Observacion> response) {
-                progressBar.setVisibility(View.GONE);
-                btnGuardar.setEnabled(true);
-
                 if (response.isSuccessful() && response.body() != null) {
                     if (!imagenesSeleccionadas.isEmpty()) {
                         subirImagenes(response.body().getId());
                     } else {
-                        Toast.makeText(CrearObservacionActivity.this, "¡Observación creada!", Toast.LENGTH_SHORT).show();
-                        finish();
+                        finalizar();
                     }
                 } else {
-                    Toast.makeText(CrearObservacionActivity.this, "Error: " + response.code(), Toast.LENGTH_LONG).show();
+                    progressBar.setVisibility(View.GONE);
+                    btnGuardar.setEnabled(true);
+                    Toast.makeText(CrearObservacionActivity.this, "Error al guardar", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -403,8 +205,52 @@ public class CrearObservacionActivity extends AppCompatActivity {
             public void onFailure(Call<Observacion> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
                 btnGuardar.setEnabled(true);
-                Toast.makeText(CrearObservacionActivity.this, "Error de conexión", Toast.LENGTH_SHORT).show();
+                Toast.makeText(CrearObservacionActivity.this, "Error de red", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private boolean validarFormulario() {
+        if (editTitulo.getText().toString().isEmpty()) return false;
+        if (!ubicacionObtenida) {
+            Toast.makeText(this, "Obtén tu ubicación primero", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
+    }
+
+    private void subirImagenes(long idObs) {
+        ApiService apiService = ApiClient.getClient().create(ApiService.class);
+        final int[] subidas = {0};
+        for (Uri uri : imagenesSeleccionadas) {
+            String b64 = convertirUriABase64(uri);
+            if (b64 != null) {
+                apiService.subirImagen(idObs, new Imagen(b64, "Foto")).enqueue(new Callback<Imagen>() {
+                    @Override public void onResponse(Call<Imagen> c, Response<Imagen> r) {
+                        subidas[0]++;
+                        if (subidas[0] == imagenesSeleccionadas.size()) finalizar();
+                    }
+                    @Override public void onFailure(Call<Imagen> c, Throwable t) {
+                        subidas[0]++;
+                        if (subidas[0] == imagenesSeleccionadas.size()) finalizar();
+                    }
+                });
+            }
+        }
+    }
+
+    private String convertirUriABase64(Uri uri) {
+        try {
+            Bitmap b = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            b.compress(Bitmap.CompressFormat.JPEG, 50, baos);
+            return Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
+        } catch (Exception e) { return null; }
+    }
+
+    private void finalizar() {
+        progressBar.setVisibility(View.GONE);
+        Toast.makeText(this, "¡Guardado!", Toast.LENGTH_SHORT).show();
+        finish();
     }
 }

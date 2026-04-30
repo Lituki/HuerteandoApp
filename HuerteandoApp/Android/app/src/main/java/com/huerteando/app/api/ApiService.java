@@ -2,12 +2,14 @@ package com.huerteando.app.api;
 
 import com.huerteando.app.clases.Comentario;
 import com.huerteando.app.clases.ComentarioRequest;
+import com.huerteando.app.clases.Especie;
 import com.huerteando.app.clases.Imagen;
 import com.huerteando.app.clases.LoginRequest;
 import com.huerteando.app.clases.LoginResponse;
 import com.huerteando.app.clases.Observacion;
 import com.huerteando.app.clases.ObservacionRequest;
 import com.huerteando.app.clases.RegistroRequest;
+import com.huerteando.app.clases.TipoObservacion;
 import com.huerteando.app.clases.Usuario;
 
 import java.util.List;
@@ -42,6 +44,7 @@ public interface ApiService {
     Call<List<Observacion>> getObservaciones(
             @Query("tipo")     String idTipo,
             @Query("usuario")  Long idUsuario,
+            @Query("estado")   String estado,
             @Query("orden")    String orden,
             @Query("busqueda") String busqueda
     );
@@ -61,6 +64,14 @@ public interface ApiService {
     @DELETE("api/observaciones/{id}")
     Call<Void> eliminarObservacion(@Path("id") Long id);
 
+    // ==================== IMÁGENES ====================
+
+    /**
+     * Obtiene la lista de imágenes de una observación específica.
+     */
+    @GET("api/observaciones/{id}/imagenes")
+    Call<List<Imagen>> getImagenes(@Path("id") Long idObservacion);
+
     /**
      * Sube una imagen vinculada a una observación.
      * Envía un objeto Imagen en formato JSON con la imagen codificada en Base64.
@@ -70,6 +81,17 @@ public interface ApiService {
             @Path("id") Long idObservacion,
             @Body Imagen imagen
     );
+
+    // ==================== CATÁLOGOS ====================
+
+    @GET("api/tipos-observacion")
+    Call<List<TipoObservacion>> getTipos();
+
+    @GET("api/especies")
+    Call<List<Especie>> getEspecies();
+
+    @GET("api/especies/{id}")
+    Call<Especie> getEspecie(@Path("id") Long id);
 
     // ==================== LIKES ====================
 

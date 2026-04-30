@@ -1,12 +1,9 @@
 package com.huerteando.app.clases;
-
+import com.google.gson.annotations.SerializedName;
 /**
  * Clase para crear o actualizar una observación.
- * Se envía al servidor cuando el usuario crea o edita una observación.
+ * Sincronizada con los tipos de datos del Backend y el esquema SQL.
  */
-import com.google.gson.annotations.SerializedName;
-import java.math.BigDecimal;
-
 public class ObservacionRequest {
     private final String titulo;
     private final String descripcion;
@@ -23,8 +20,9 @@ public class ObservacionRequest {
     @SerializedName("especieNombre")
     private final String especieNombre;
 
-    private final BigDecimal latitud;
-    private final BigDecimal longitud;
+    // Cambiado de BigDecimal a double para compatibilidad con Mapas y JSON simple
+    private final double latitud;
+    private final double longitud;
 
     @SerializedName("direccionTxt")
     private final String direccionTxt;
@@ -36,13 +34,13 @@ public class ObservacionRequest {
     private final String nombreTradicional;
 
     @SerializedName("estadoObservacion")
-    private final String estadoObservacion = "ABIERTA";
+    private final String estadoObservacion;
 
     public ObservacionRequest(String titulo, String descripcion, String fechaObservacion,
                               TipoRequest tipoObservacion, String especieNombre,
-                              BigDecimal latitud, BigDecimal longitud, String direccionTxt,
+                              double latitud, double longitud, String direccionTxt,
                               String nombreZona, String nombreTradicional,
-                              UsuarioRequest usuario) {
+                              UsuarioRequest usuario, String estado) {
         this.titulo = titulo;
         this.descripcion = descripcion;
         this.fechaObservacion = fechaObservacion;
@@ -54,37 +52,17 @@ public class ObservacionRequest {
         this.nombreZona = nombreZona;
         this.nombreTradicional = nombreTradicional;
         this.usuario = usuario;
+        this.estadoObservacion = (estado != null) ? estado : "ABIERTA";
     }
 
-    public String getTitulo() { return titulo; }
-    public String getDescripcion() { return descripcion; }
-    public String getFechaObservacion() { return fechaObservacion; }
-    public TipoRequest getTipoObservacion() { return tipoObservacion; }
-    public UsuarioRequest getUsuario() { return usuario; }
-    public String getEspecieNombre() { return especieNombre; }
-    public BigDecimal getLatitud() { return latitud; }
-    public BigDecimal getLongitud() { return longitud; }
-    public String getDireccionTxt() { return direccionTxt; }
-    public String getNombreZona() { return nombreZona; }
-    public String getNombreTradicional() { return nombreTradicional; }
-
-    /**
-     * Mini-clase interna para representar el objeto TipoObservacion que espera el backend.
-     */
+    // Clases internas para el mapeo de IDs que espera el Controller de Spring
     public static class TipoRequest {
         public int id;
-        public TipoRequest(int id) {
-            this.id = id;
-        }
+        public TipoRequest(int id) { this.id = id; }
     }
 
-    /**
-     * Mini-clase interna para representar el objeto Usuario que espera el backend.
-     */
     public static class UsuarioRequest {
         public Long id;
-        public UsuarioRequest(Long id) {
-            this.id = id;
-        }
+        public UsuarioRequest(Long id) { this.id = id; }
     }
 }

@@ -41,21 +41,19 @@ import retrofit2.Response;
  */
 public class ObservacionesActivity extends AppCompatActivity {
 
-    private RecyclerView         recyclerView;
-    private ProgressBar          progressBar;
-    private TextView             tvSinResultados;
-    private Spinner              spinnerTipo;
-    private Spinner              spinnerOrden;
+    private RecyclerView recyclerView;
+    private ProgressBar progressBar;
+    private TextView tvSinResultados;
+    private Spinner spinnerTipo, spinnerOrden;
     private FloatingActionButton fabNueva;
 
     private ObservacionAdapter adapter;
-    private final List<Observacion>  listaOriginal = new ArrayList<>();
-    private final List<Observacion>  listaAMostrar = new ArrayList<>();
+    private final List<Observacion> listaOriginal = new ArrayList<>();
+    private final List<Observacion> listaAMostrar = new ArrayList<>();
 
     private String idTipoSeleccionado = null; 
-    private String ordenSeleccionado  = "fecha";
-    private String textoBusqueda      = "";
-
+    private String ordenSeleccionado = "fecha";
+    private String textoBusqueda = "";
     private SessionManager session;
 
     @Override
@@ -64,29 +62,40 @@ public class ObservacionesActivity extends AppCompatActivity {
         setContentView(R.layout.activity_observaciones);
 
         session = new SessionManager(this);
+        setupToolbar();
+        initViews();
+        setupSpinners();
 
+        fabNueva.setOnClickListener(v -> startActivity(new Intent(this, CrearObservacionActivity.class)));
+        
+        cargarObservaciones();
+    }
+
+    private void setupToolbar() {
         Toolbar toolbar = findViewById(R.id.toolbarPrincipal);
         setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle("Huerteando");
-        }
+        if (getSupportActionBar() != null) getSupportActionBar().setTitle("Huerteando");
+    }
 
-        recyclerView    = findViewById(R.id.recyclerObservaciones);
-        progressBar     = findViewById(R.id.progressBar);
+    private void initViews() {
+        recyclerView = findViewById(R.id.recyclerObservaciones);
+        progressBar = findViewById(R.id.progressBar);
         tvSinResultados = findViewById(R.id.tvSinResultados);
-        spinnerTipo     = findViewById(R.id.spinnerTipo);
-        spinnerOrden    = findViewById(R.id.spinnerOrden);
-        fabNueva        = findViewById(R.id.fabCrearObservacion);
+        spinnerTipo = findViewById(R.id.spinnerTipo);
+        spinnerOrden = findViewById(R.id.spinnerOrden);
+        fabNueva = findViewById(R.id.fabCrearObservacion);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new ObservacionAdapter(listaAMostrar, observacion -> {
+        adapter = new ObservacionAdapter(listaAMostrar, obs -> {
             Intent intent = new Intent(this, DetalleObservacionActivity.class);
-            intent.putExtra("idObservacion", observacion.getId());
+            intent.putExtra("idObservacion", obs.getId());
             startActivity(intent);
         });
         recyclerView.setAdapter(adapter);
+    }
 
-        // Spinner TIPO
+    private void setupSpinners() {
+        // Spinner TIPO (Filtro en Servidor)
         ArrayAdapter<CharSequence> adapterTipo = ArrayAdapter.createFromResource(this,
                 R.array.array_tipos, android.R.layout.simple_spinner_item);
         adapterTipo.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -94,18 +103,23 @@ public class ObservacionesActivity extends AppCompatActivity {
         spinnerTipo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> p, View v, int pos, long id) {
+                String antiguoTipo = idTipoSeleccionado;
                 switch (pos) {
                     case 1: idTipoSeleccionado = "1"; break; 
                     case 2: idTipoSeleccionado = "2"; break; 
                     case 3: idTipoSeleccionado = "3"; break; 
                     default: idTipoSeleccionado = null;
                 }
-                cargarObservaciones();
+                // Solo recargar del servidor si el tipo ha cambiado
+                if ((antiguoTipo == null && idTipoSeleccionado != null) || 
+                    (antiguoTipo != null && !antiguoTipo.equals(idTipoSeleccionado))) {
+                    cargarObservaciones();
+                }
             }
             @Override public void onNothingSelected(AdapterView<?> p) {}
         });
 
-        // Spinner ORDEN
+        // Spinner ORDEN (Ordenación Local)
         final String[] valoresOrden = {"fecha", "likes", "comentarios"};
         ArrayAdapter<CharSequence> adapterOrden = ArrayAdapter.createFromResource(this,
                 R.array.array_orden, android.R.layout.simple_spinner_item);
@@ -115,19 +129,62 @@ public class ObservacionesActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> p, View v, int pos, long id) {
                 ordenSeleccionado = valoresOrden[pos];
-                if (!listaOriginal.isEmpty()) {
-                    procesarYMostrarLista();
-                } else {
-                    cargarObservaciones();
-                }
+                procesarYMostrarLista();
             }
             @Override public void onNothingSelected(AdapterView<?> p) {}
         });
+    }
 
-        fabNueva.setOnClickListener(v ->
-                startActivity(new Intent(this, CrearObservacionActivity.class)));
+    private void cargarObservaciones() {
+        progressBar.setVisibility(View.VISIBLE);
+        ApiService api = ApiClient.getClient().create(ApiService.class);
+        
+        // Llamada limpia: Solo pasamos el TIPO al servidor. El resto es local.
+        api.getObservaciones(idTipoSeleccionado, null, null, null, null)
+                .enqueue(new Callback<List<Observacion>>() {
+                    @Override
+                    public void onResponse(Call<List<Observacion>> call, Response<List<Observacion>> response) {
+                        progressBar.setVisibility(View.GONE);
+                        if (response.isSuccessful() && response.body() != null) {
+                            listaOriginal.clear();
+                            listaOriginal.addAll(response.body());
+                            procesarYMostrarLista();
+                        }
+                    }
+                    @Override
+                    public void onFailure(Call<List<Observacion>> call, Throwable t) {
+                        progressBar.setVisibility(View.GONE);
+                        tvSinResultados.setVisibility(View.VISIBLE);
+                    }
+                });
+    }
 
-        cargarObservaciones();
+    private void procesarYMostrarLista() {
+        List<Observacion> temp = new ArrayList<>(listaOriginal);
+
+        // 1. Ordenación Local
+        Collections.sort(temp, (o1, o2) -> {
+            switch (ordenSeleccionado) {
+                case "likes": return Integer.compare(o2.getNumLikes(), o1.getNumLikes());
+                case "comentarios": return Integer.compare(o2.getNumComentarios(), o1.getNumComentarios());
+                default: 
+                    String f1 = o1.getFechaObservacion() != null ? o1.getFechaObservacion() : "";
+                    String f2 = o2.getFechaObservacion() != null ? o2.getFechaObservacion() : "";
+                    return f2.compareTo(f1);
+            }
+        });
+
+        // 2. Búsqueda Local
+        listaAMostrar.clear();
+        String query = textoBusqueda.toLowerCase().trim();
+        for (Observacion o : temp) {
+            if (query.isEmpty() || o.getTitulo().toLowerCase().contains(query)) {
+                listaAMostrar.add(o);
+            }
+        }
+        
+        adapter.notifyDataSetChanged();
+        tvSinResultados.setVisibility(listaAMostrar.isEmpty() ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -136,7 +193,6 @@ public class ObservacionesActivity extends AppCompatActivity {
         MenuItem searchItem = menu.findItem(R.id.action_search);
         if (searchItem != null) {
             SearchView searchView = (SearchView) searchItem.getActionView();
-            searchView.setQueryHint("Buscar por título...");
             searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                 @Override
                 public boolean onQueryTextSubmit(String query) {
@@ -153,40 +209,6 @@ public class ObservacionesActivity extends AppCompatActivity {
             });
         }
         return true;
-    }
-
-    /**
-     * Ordenación descendente garantizada y filtro local.
-     */
-    private void procesarYMostrarLista() {
-        List<Observacion> temp = new ArrayList<>(listaOriginal);
-
-        Collections.sort(temp, (o1, o2) -> {
-            if ("likes".equals(ordenSeleccionado)) {
-                return Integer.compare(o2.getNumLikes(), o1.getNumLikes());
-            } else if ("comentarios".equals(ordenSeleccionado)) {
-                return Integer.compare(o2.getNumComentarios(), o1.getNumComentarios());
-            } else {
-                String f1 = o1.getFechaObservacion() != null ? o1.getFechaObservacion() : "";
-                String f2 = o2.getFechaObservacion() != null ? o2.getFechaObservacion() : "";
-                return f2.compareTo(f1);
-            }
-        });
-
-        listaAMostrar.clear();
-        String query = (textoBusqueda == null) ? "" : textoBusqueda.toLowerCase().trim();
-        if (query.isEmpty()) {
-            listaAMostrar.addAll(temp);
-        } else {
-            for (Observacion o : temp) {
-                if (o.getTitulo().toLowerCase().contains(query) || 
-                   (o.getDescripcion() != null && o.getDescripcion().toLowerCase().contains(query))) {
-                    listaAMostrar.add(o);
-                }
-            }
-        }
-        adapter.notifyDataSetChanged();
-        tvSinResultados.setVisibility(listaAMostrar.isEmpty() ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -206,34 +228,9 @@ public class ObservacionesActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void cargarObservaciones() {
-        progressBar.setVisibility(View.VISIBLE);
-        tvSinResultados.setVisibility(View.GONE);
-
-        ApiService api = ApiClient.getClient().create(ApiService.class);
-        api.getObservaciones(idTipoSeleccionado, null, ordenSeleccionado, null)
-                .enqueue(new Callback<List<Observacion>>() {
-                    @Override
-                    public void onResponse(Call<List<Observacion>> call, Response<List<Observacion>> response) {
-                        progressBar.setVisibility(View.GONE);
-                        if (response.isSuccessful() && response.body() != null) {
-                            listaOriginal.clear();
-                            listaOriginal.addAll(response.body());
-                            procesarYMostrarLista();
-                        }
-                    }
-                    @Override
-                    public void onFailure(Call<List<Observacion>> call, Throwable t) {
-                        progressBar.setVisibility(View.GONE);
-                        tvSinResultados.setVisibility(View.VISIBLE);
-                    }
-                });
-    }
-
     @Override
     protected void onResume() {
         super.onResume();
-        // Recargamos siempre al volver (para actualizar contadores de likes/comentarios)
         cargarObservaciones();
     }
 }

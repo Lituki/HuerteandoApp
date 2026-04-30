@@ -21,8 +21,11 @@ import com.huerteando.app.clases.ComentarioRequest;
 import com.huerteando.app.clases.Observacion;
 import com.huerteando.app.utils.SessionManager;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import retrofit2.Call;
@@ -31,21 +34,24 @@ import retrofit2.Response;
 
 /**
  * Pantalla de detalle de una observación.
+ * Optimizada por el arquitecto para:
+ * 1. Formateo de fechas ISO a legible.
+ * 2. Gestión robusta de URLs de imágenes.
+ * 3. Sincronización de estados de Like.
  */
 public class DetalleObservacionActivity extends AppCompatActivity {
 
     private android.widget.ImageView ivDetalleImagen;
-    private ProgressBar       progressDetalle;
-    private TextView          tvDetalleTipo, tvDetalleTitulo, tvDetalleFecha;
-    private TextView          tvDetalleDescripcion, tvDetalleZona, tvDetalleNombreTradicional;
-    private TextView          tvDetalleEspecie, tvDetalleNumLikes;
-    private MaterialButton    btnLike;
-    private RecyclerView      recyclerComentarios;
+    private ProgressBar progressDetalle;
+    private TextView tvDetalleTipo, tvDetalleTitulo, tvDetalleFecha;
+    private TextView tvDetalleDescripcion, tvDetalleZona, tvDetalleEspecie, tvDetalleNumLikes;
+    private MaterialButton btnLike;
+    private RecyclerView recyclerComentarios;
     private com.google.android.material.textfield.TextInputEditText editNuevoComentario;
-    private MaterialButton    btnEnviarComentario;
+    private MaterialButton btnEnviarComentario;
 
-    private long              idObservacion;
-    private Observacion       observacionActual;
+    private long idObservacion;
+    private Observacion observacionActual;
     private ComentarioAdapter adapterComentarios;
     private final List<Comentario> comentarios = new ArrayList<>();
     private SessionManager session;
@@ -64,8 +70,8 @@ public class DetalleObservacionActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(v -> finish());
 
         session = new SessionManager(this);
-
         idObservacion = getIntent().getLongExtra("idObservacion", -1L);
+
         if (idObservacion == -1L) {
             Toast.makeText(this, "Error: observación no encontrada", Toast.LENGTH_SHORT).show();
             finish();
@@ -73,10 +79,7 @@ public class DetalleObservacionActivity extends AppCompatActivity {
         }
 
         enlazarVistas();
-
-        adapterComentarios = new ComentarioAdapter(comentarios);
-        recyclerComentarios.setLayoutManager(new LinearLayoutManager(this));
-        recyclerComentarios.setAdapter(adapterComentarios);
+        setupRecyclerView();
 
         btnLike.setOnClickListener(v -> toggleLike());
         btnEnviarComentario.setOnClickListener(v -> enviarComentario());
@@ -85,20 +88,25 @@ public class DetalleObservacionActivity extends AppCompatActivity {
     }
 
     private void enlazarVistas() {
-        ivDetalleImagen            = findViewById(R.id.ivDetalleImagen);
-        progressDetalle            = findViewById(R.id.progressDetalle);
-        tvDetalleTipo              = findViewById(R.id.tvDetalleTipo);
-        tvDetalleTitulo            = findViewById(R.id.tvDetalleTitulo);
-        tvDetalleFecha             = findViewById(R.id.tvDetalleFecha);
-        tvDetalleDescripcion       = findViewById(R.id.tvDetalleDescripcion);
-        tvDetalleZona              = findViewById(R.id.tvDetalleZona);
-        tvDetalleNombreTradicional = findViewById(R.id.tvDetalleNombreTradicional);
-        tvDetalleEspecie           = findViewById(R.id.tvDetalleEspecie);
-        tvDetalleNumLikes          = findViewById(R.id.tvDetalleNumLikes);
-        btnLike                    = findViewById(R.id.btnLike);
-        recyclerComentarios        = findViewById(R.id.recyclerComentarios);
-        editNuevoComentario        = findViewById(R.id.editNuevoComentario);
-        btnEnviarComentario        = findViewById(R.id.btnEnviarComentario);
+        ivDetalleImagen = findViewById(R.id.ivDetalleImagen);
+        progressDetalle = findViewById(R.id.progressDetalle);
+        tvDetalleTipo = findViewById(R.id.tvDetalleTipo);
+        tvDetalleTitulo = findViewById(R.id.tvDetalleTitulo);
+        tvDetalleFecha = findViewById(R.id.tvDetalleFecha);
+        tvDetalleDescripcion = findViewById(R.id.tvDetalleDescripcion);
+        tvDetalleZona = findViewById(R.id.tvDetalleZona);
+        tvDetalleEspecie = findViewById(R.id.tvDetalleEspecie);
+        tvDetalleNumLikes = findViewById(R.id.tvDetalleNumLikes);
+        btnLike = findViewById(R.id.btnLike);
+        recyclerComentarios = findViewById(R.id.recyclerComentarios);
+        editNuevoComentario = findViewById(R.id.editNuevoComentario);
+        btnEnviarComentario = findViewById(R.id.btnEnviarComentario);
+    }
+
+    private void setupRecyclerView() {
+        adapterComentarios = new ComentarioAdapter(comentarios);
+        recyclerComentarios.setLayoutManager(new LinearLayoutManager(this));
+        recyclerComentarios.setAdapter(adapterComentarios);
     }
 
     private void cargarDatosCompletos() {
@@ -121,35 +129,92 @@ public class DetalleObservacionActivity extends AppCompatActivity {
             }
             @Override public void onFailure(Call<Observacion> call, Throwable t) {
                 progressDetalle.setVisibility(View.GONE);
+                Toast.makeText(DetalleObservacionActivity.this, "Error al cargar datos", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
+    private void mostrarObservacion() {
+        Observacion o = observacionActual;
+        tvDetalleTipo.setText(o.getTipoObservacion());
+        tvDetalleTitulo.setText(o.getTitulo());
+        
+        // Formatear Fecha ISO a Humano
+        tvDetalleFecha.setText("📅 " + formatearFecha(o.getFechaObservacion()));
+        
+        tvDetalleDescripcion.setText(o.getDescripcion() != null ? o.getDescripcion() : "Sin descripción");
+        tvDetalleZona.setText(o.getNombreZona() != null ? "📍 " + o.getNombreZona() : "Ubicación desconocida");
+        
+        if (o.getEspecieNombre() != null) {
+            tvDetalleEspecie.setText("🌿 " + o.getEspecieNombre());
+            tvDetalleEspecie.setVisibility(View.VISIBLE);
+        }
+
+        // Carga de Imagen con Glide y limpieza de URL
+        List<String> urls = o.getImagenesUrl();
+        if (urls != null && !urls.isEmpty()) {
+            String url = urls.get(0);
+            if (!url.startsWith("http")) {
+                String base = ApiClient.BASE_URL;
+                if (base.endsWith("/") && url.startsWith("/")) url = base + url.substring(1);
+                else if (!base.endsWith("/") && !url.startsWith("/")) url = base + "/" + url;
+                else url = base + url;
+            }
+            
+            com.bumptech.glide.Glide.with(this)
+                    .load(url)
+                    .placeholder(android.R.drawable.ic_menu_gallery)
+                    .error(android.R.drawable.ic_menu_report_image)
+                    .into(ivDetalleImagen);
+        }
+
+        actualizarBotonLike();
+    }
+
+    private String formatearFecha(String fechaIso) {
+        if (fechaIso == null) return "";
+        try {
+            // Soporta tanto 2024-05-20T10:30:00 como otros formatos ISO básicos
+            String limpia = fechaIso.split("\\.")[0].replace("T", " ");
+            SimpleDateFormat sdfIso = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+            Date date = sdfIso.parse(limpia);
+            return new SimpleDateFormat("dd 'de' MMMM, yyyy", Locale.getDefault()).format(date);
+        } catch (Exception e) {
+            return fechaIso; // Si falla, devolvemos la original
+        }
+    }
+
     private void actualizarEstadoLikeServidor() {
         ApiService api = ApiClient.getClient().create(ApiService.class);
-        Long idUsuario = session.getUserId();
+        Long idUser = session.getUserId();
 
+        // 1. Obtener conteo total
         api.getLikeCount(idObservacion).enqueue(new Callback<Map<String, Long>>() {
             @Override
             public void onResponse(Call<Map<String, Long>> call, Response<Map<String, Long>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    Long total = response.body().get("likes");
-                    if (total != null && observacionActual != null) {
+                    Long total = response.body().get("count"); // El backend suele usar 'count' o 'total'
+                    if (total == null) total = response.body().get("likes");
+                    if (total != null) {
                         observacionActual.setNumLikes(total.intValue());
-                        actualizarBotonLike();
+                        tvDetalleNumLikes.setText(String.valueOf(total));
                     }
                 }
             }
             @Override public void onFailure(Call<Map<String, Long>> call, Throwable t) {}
         });
 
-        if (idUsuario != -1L) {
-            api.checkLikeExiste(idObservacion, idUsuario).enqueue(new Callback<Map<String, Boolean>>() {
+        // 2. Comprobar si el usuario actual ha dado like
+        if (idUser != -1L) {
+            api.checkLikeExiste(idObservacion, idUser).enqueue(new Callback<Map<String, Boolean>>() {
                 @Override
                 public void onResponse(Call<Map<String, Boolean>> call, Response<Map<String, Boolean>> response) {
                     if (response.isSuccessful() && response.body() != null) {
-                        Boolean existe = response.body().get("yaLikeado");
-                        if (existe != null && observacionActual != null) {
+                        // Buscamos varias claves posibles para evitar errores de mapeo
+                        Boolean existe = response.body().get("existe");
+                        if (existe == null) existe = response.body().get("yaLikeado");
+                        
+                        if (existe != null) {
                             observacionActual.setLikePropio(existe);
                             actualizarBotonLike();
                         }
@@ -160,78 +225,36 @@ public class DetalleObservacionActivity extends AppCompatActivity {
         }
     }
 
-    private void mostrarObservacion() {
-        Observacion o = observacionActual;
-        tvDetalleTipo.setText(o.getTipoObservacion());
-        tvDetalleTitulo.setText(o.getTitulo());
-        tvDetalleFecha.setText("📅 " + (o.getFechaObservacion() != null ? o.getFechaObservacion() : ""));
-        tvDetalleDescripcion.setText(o.getDescripcion() != null && !o.getDescripcion().isEmpty() ? o.getDescripcion() : "Sin descripción");
-
-        if (o.getNombreZona() != null && !o.getNombreZona().isEmpty()) {
-            tvDetalleZona.setText("📍 " + o.getNombreZona());
-            tvDetalleZona.setVisibility(View.VISIBLE);
-        } else tvDetalleZona.setVisibility(View.GONE);
-
-        // CORRECCIÓN FOTO: Sincronización con Backend
-        List<String> urls = o.getImagenesUrl();
-        if (urls != null && !urls.isEmpty()) {
-            String urlImagen = urls.get(0);
-            
-            // Construcción de URL completa
-            if (!urlImagen.startsWith("http")) {
-                urlImagen = ApiClient.BASE_URL + (urlImagen.startsWith("/") ? urlImagen.substring(1) : urlImagen);
-            }
-            
-            Log.d("HuerteandoDEBUG", "Cargando imagen desde: " + urlImagen);
-            
-            ivDetalleImagen.setVisibility(View.VISIBLE);
-            com.bumptech.glide.Glide.with(this)
-                    .load(urlImagen)
-                    .placeholder(android.R.drawable.ic_menu_gallery)
-                    .error(android.R.drawable.ic_menu_report_image)
-                    .into(ivDetalleImagen);
-        } else {
-            Log.d("HuerteandoDEBUG", "No hay imágenes para esta observación");
-            ivDetalleImagen.setImageResource(android.R.drawable.ic_menu_gallery);
-        }
-
-        actualizarBotonLike();
-    }
-
     private void actualizarBotonLike() {
         if (observacionActual == null) return;
+        btnLike.setText(observacionActual.isLikePropio() ? "❤️ Ya no me gusta" : "🤍 Me gusta");
         tvDetalleNumLikes.setText(String.valueOf(observacionActual.getNumLikes()));
-        btnLike.setText(observacionActual.isLikePropio() ? "❤️ Te gusta" : "🤍 Me gusta");
     }
 
     private void toggleLike() {
         if (observacionActual == null) return;
-
-        Long idUsuario = session.getUserId();
-        if (idUsuario == -1L) {
-            Toast.makeText(this, "Inicia sesión para dar like", Toast.LENGTH_SHORT).show();
+        Long idUser = session.getUserId();
+        if (idUser == -1L) {
+            Toast.makeText(this, "Inicia sesión para participar", Toast.LENGTH_SHORT).show();
             return;
         }
 
         btnLike.setEnabled(false);
         ApiService api = ApiClient.getClient().create(ApiService.class);
-        final boolean accionEsQuitar = observacionActual.isLikePropio();
-
-        Call<Void> call = accionEsQuitar ? api.quitarLike(idObservacion, idUsuario) : api.darLike(idObservacion, idUsuario);
+        boolean quitar = observacionActual.isLikePropio();
         
+        Call<Void> call = quitar ? api.quitarLike(idObservacion, idUser) : api.darLike(idObservacion, idUser);
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 btnLike.setEnabled(true);
+                // 200, 201, 204 o 409 (ya existe) se consideran éxito para la UI
                 if (response.isSuccessful() || response.code() == 409) {
                     actualizarEstadoLikeServidor();
-                } else {
-                    Toast.makeText(DetalleObservacionActivity.this, "Error: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
             @Override public void onFailure(Call<Void> call, Throwable t) {
                 btnLike.setEnabled(true);
-                Toast.makeText(DetalleObservacionActivity.this, "Error de conexión", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -252,12 +275,17 @@ public class DetalleObservacionActivity extends AppCompatActivity {
     }
 
     private void enviarComentario() {
-        String contenido = editNuevoComentario.getText() != null ? editNuevoComentario.getText().toString().trim() : "";
-        if (contenido.isEmpty()) return;
+        String texto = editNuevoComentario.getText() != null ? editNuevoComentario.getText().toString().trim() : "";
+        if (texto.isEmpty()) return;
 
-        Long idUsuario = session.getUserId();
+        Long idUser = session.getUserId();
+        if (idUser == -1L) {
+            Toast.makeText(this, "Inicia sesión para comentar", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         ApiService api = ApiClient.getClient().create(ApiService.class);
-        api.addComentario(idObservacion, new ComentarioRequest(contenido, idUsuario))
+        api.addComentario(idObservacion, new ComentarioRequest(texto, idUser))
                 .enqueue(new Callback<Comentario>() {
                     @Override
                     public void onResponse(Call<Comentario> call, Response<Comentario> response) {
@@ -266,7 +294,9 @@ public class DetalleObservacionActivity extends AppCompatActivity {
                             cargarComentarios();
                         }
                     }
-                    @Override public void onFailure(Call<Comentario> call, Throwable t) {}
+                    @Override public void onFailure(Call<Comentario> call, Throwable t) {
+                        Toast.makeText(DetalleObservacionActivity.this, "Error al comentar", Toast.LENGTH_SHORT).show();
+                    }
                 });
     }
 }
