@@ -93,6 +93,10 @@ public class Observacion {
         return (usuario != null) ? usuario.avatarUrl : null;
     }
 
+    public Long getUsuarioId() {
+        return (usuario != null) ? usuario.id : null;
+    }
+
     public int getNumMeGustas() { return numMeGustas; }
     public void setNumMeGustas(int numMeGustas) { this.numMeGustas = numMeGustas; }
     public int getNumComentarios() { return numComentarios; }
@@ -122,6 +126,7 @@ public class Observacion {
     }
 
     private static class UsuarioResponse {
+        public Long id;
         public String nick;
         public String avatarUrl;
     }

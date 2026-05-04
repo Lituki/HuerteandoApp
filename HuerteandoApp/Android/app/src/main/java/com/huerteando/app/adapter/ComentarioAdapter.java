@@ -21,9 +21,17 @@ import java.util.List;
 public class ComentarioAdapter extends RecyclerView.Adapter<ComentarioAdapter.ViewHolder> {
 
     private final List<Comentario> comentarios;
+    private final OnComentarioActionListener listener;
+    private final Long currentUserId;
 
-    public ComentarioAdapter(List<Comentario> comentarios) {
+    public interface OnComentarioActionListener {
+        void onDelete(Comentario comentario);
+    }
+
+    public ComentarioAdapter(List<Comentario> comentarios, Long currentUserId, OnComentarioActionListener listener) {
         this.comentarios = comentarios;
+        this.currentUserId = currentUserId;
+        this.listener = listener;
     }
 
     @NonNull
@@ -44,11 +52,12 @@ public class ComentarioAdapter extends RecyclerView.Adapter<ComentarioAdapter.Vi
         return comentarios.size();
     }
 
-    static class ViewHolder extends RecyclerView.ViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder {
         private final ImageView ivAvatar;
         private final TextView tvAutor;
         private final TextView tvContenido;
         private final TextView tvFecha;
+        private final View btnEliminar;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -56,12 +65,21 @@ public class ComentarioAdapter extends RecyclerView.Adapter<ComentarioAdapter.Vi
             tvAutor = itemView.findViewById(R.id.tvAutor);
             tvContenido = itemView.findViewById(R.id.tvContenido);
             tvFecha = itemView.findViewById(R.id.tvFecha);
+            btnEliminar = itemView.findViewById(R.id.btnEliminarComentario);
         }
 
         public void bind(Comentario comentario) {
             tvAutor.setText(comentario.getAutorNick());
             tvContenido.setText(comentario.getContenido());
             tvFecha.setText(comentario.getCreadoEn());
+
+            // Solo mostrar botón eliminar si el comentario es del usuario actual
+            if (currentUserId != null && currentUserId.equals(comentario.getUsuarioId())) {
+                btnEliminar.setVisibility(View.VISIBLE);
+                btnEliminar.setOnClickListener(v -> listener.onDelete(comentario));
+            } else {
+                btnEliminar.setVisibility(View.GONE);
+            }
 
             // Cargar avatar
             if (comentario.getAutorAvatarUrl() != null && !comentario.getAutorAvatarUrl().isEmpty()) {

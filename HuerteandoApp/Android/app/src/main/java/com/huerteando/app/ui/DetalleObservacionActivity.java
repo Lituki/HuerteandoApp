@@ -17,6 +17,7 @@ import com.huerteando.app.api.ApiClient;
 import com.huerteando.app.api.ApiService;
 import com.huerteando.app.clases.Comentario;
 import com.huerteando.app.clases.ComentarioRequest;
+import com.huerteando.app.clases.Imagen;
 import com.huerteando.app.clases.Observacion;
 import com.huerteando.app.utils.SessionManager;
 
@@ -104,7 +105,12 @@ public class DetalleObservacionActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerView() {
-        adapterComentarios = new ComentarioAdapter(comentarios);
+        adapterComentarios = new ComentarioAdapter(comentarios, session.getUserId(), new ComentarioAdapter.OnComentarioActionListener() {
+            @Override
+            public void onDelete(Comentario comentario) {
+                confirmarEliminarComentario(comentario);
+            }
+        });
         recyclerComentarios.setLayoutManager(new LinearLayoutManager(this));
         recyclerComentarios.setAdapter(adapterComentarios);
     }
@@ -151,9 +157,10 @@ public class DetalleObservacionActivity extends AppCompatActivity {
         }
 
         // Carga de Imagen con Glide y limpieza de URL
-        List<String> urls = o.getImagenesUrl();
-        if (urls != null && !urls.isEmpty()) {
-            String url = urls.get(0);
+        List<Imagen> imagenes = o.getImagenes();
+        if (imagenes != null && !imagenes.isEmpty()) {
+            Imagen img = imagenes.get(0);
+            String url = img.getUrlArchivo();
             if (!url.startsWith("http")) {
                 String base = ApiClient.BASE_URL;
                 if (base.endsWith("/") && url.startsWith("/")) url = base + url.substring(1);
@@ -166,9 +173,38 @@ public class DetalleObservacionActivity extends AppCompatActivity {
                     .placeholder(android.R.drawable.ic_menu_gallery)
                     .error(android.R.drawable.ic_menu_report_image)
                     .into(ivDetalleImagen);
+
+            // Si la observación es del usuario actual, permitir borrar la imagen
+            if (session.getUserId() != -1L && session.getUserId().equals(o.getUsuarioId())) {
+                ivDetalleImagen.setOnLongClickListener(v -> {
+                    confirmarEliminarImagen(img);
+                    return true;
+                });
+            }
         }
 
         actualizarBotonMeGusta();
+    }
+
+    private void confirmarEliminarImagen(Imagen imagen) {
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Eliminar Imagen")
+                .setMessage("¿Estás seguro de que deseas eliminar esta imagen?")
+                .setPositiveButton("Eliminar", (dialog, which) -> {
+                    ApiService api = ApiClient.getClient().create(ApiService.class);
+                    api.eliminarImagen(idObservacion, imagen.getId()).enqueue(new Callback<Void>() {
+                        @Override
+                        public void onResponse(Call<Void> call, Response<Void> response) {
+                            if (response.isSuccessful()) {
+                                cargarObservacion();
+                                Toast.makeText(DetalleObservacionActivity.this, "Imagen eliminada", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                        @Override public void onFailure(Call<Void> call, Throwable t) {}
+                    });
+                })
+                .setNegativeButton("Cancelar", null)
+                .show();
     }
 
     private String formatearFecha(String fechaIso) {
@@ -278,6 +314,27 @@ public class DetalleObservacionActivity extends AppCompatActivity {
             }
             @Override public void onFailure(Call<List<Comentario>> call, Throwable t) {}
         });
+    }
+
+    private void confirmarEliminarComentario(Comentario comentario) {
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Eliminar Comentario")
+                .setMessage("¿Estás seguro de que deseas eliminar este comentario?")
+                .setPositiveButton("Eliminar", (dialog, which) -> {
+                    ApiService api = ApiClient.getClient().create(ApiService.class);
+                    api.eliminarComentario(idObservacion, comentario.getId()).enqueue(new Callback<Void>() {
+                        @Override
+                        public void onResponse(Call<Void> call, Response<Void> response) {
+                            if (response.isSuccessful()) {
+                                cargarComentarios();
+                                Toast.makeText(DetalleObservacionActivity.this, "Comentario eliminado", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                        @Override public void onFailure(Call<Void> call, Throwable t) {}
+                    });
+                })
+                .setNegativeButton("Cancelar", null)
+                .show();
     }
 
     private void enviarComentario() {

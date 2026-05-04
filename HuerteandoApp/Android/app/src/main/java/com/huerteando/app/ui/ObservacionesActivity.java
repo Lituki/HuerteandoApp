@@ -217,6 +217,9 @@ public class ObservacionesActivity extends AppCompatActivity {
         if (id == R.id.action_perfil) {
             startActivity(new Intent(this, PerfilActivity.class));
             return true;
+        } else if (id == R.id.action_especies) {
+            startActivity(new Intent(this, EspeciesActivity.class));
+            return true;
         } else if (id == R.id.action_logout) {
             session.cerrarSesion();
             Intent intent = new Intent(this, LoginActivity.class);

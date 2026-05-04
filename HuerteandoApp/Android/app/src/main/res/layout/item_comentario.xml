@@ -57,4 +57,14 @@
 
     </LinearLayout>
 
+    <ImageButton
+        android:id="@+id/btnEliminarComentario"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@android:drawable/ic_menu_delete"
+        app:tint="#D32F2F"
+        android:visibility="gone"
+        xmlns:app="http://schemas.android.com/apk/res-auto" />
+
 </LinearLayout>

@@ -67,6 +67,13 @@
             android:exported="false"
             android:parentActivityName=".ui.ObservacionesActivity" />
 
+        <!-- Gestión de Especies -->
+        <activity
+            android:name=".ui.EspeciesActivity"
+            android:exported="false"
+            android:label="Catálogo de Especies"
+            android:parentActivityName=".ui.ObservacionesActivity" />
+
     </application>
 
 </manifest>

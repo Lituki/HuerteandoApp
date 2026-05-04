@@ -33,10 +33,15 @@ public class Comentario {
         return (usuario != null) ? usuario.avatarUrl : null;
     }
 
+    public Long getUsuarioId() {
+        return (usuario != null) ? usuario.id : null;
+    }
+
     /**
      * Clase interna para mapear el objeto usuario del JSON.
      */
     private static class UsuarioResponse {
+        public Long id;
         public String nick;
         public String avatarUrl;
     }

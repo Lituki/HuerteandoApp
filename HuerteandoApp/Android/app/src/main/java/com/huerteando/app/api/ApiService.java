@@ -82,16 +82,37 @@ public interface ApiService {
             @Body Imagen imagen
     );
 
+    @DELETE("api/observaciones/{idObs}/imagenes/{idImg}")
+    Call<Void> eliminarImagen(
+            @Path("idObs") Long idObservacion,
+            @Path("idImg") Long idImagen
+    );
+
     // ==================== CATÁLOGOS ====================
 
     @GET("api/tipos-observacion")
     Call<List<TipoObservacion>> getTipos();
+
+    @GET("api/tipos-observacion/{id}")
+    Call<TipoObservacion> getTipo(@Path("id") Integer id);
 
     @GET("api/especies")
     Call<List<Especie>> getEspecies();
 
     @GET("api/especies/{id}")
     Call<Especie> getEspecie(@Path("id") Long id);
+
+    @POST("api/especies")
+    Call<Especie> crearEspecie(@Body Especie especie);
+
+    @PUT("api/especies/{id}")
+    Call<Especie> actualizarEspecie(
+            @Path("id") Long id,
+            @Body Especie especie
+    );
+
+    @DELETE("api/especies/{id}")
+    Call<Void> eliminarEspecie(@Path("id") Long id);
 
     // ==================== ME GUSTAS ====================
 
