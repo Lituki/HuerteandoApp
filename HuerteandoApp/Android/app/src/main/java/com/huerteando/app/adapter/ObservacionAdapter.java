@@ -62,19 +62,20 @@ public class ObservacionAdapter extends RecyclerView.Adapter<ObservacionAdapter.
      */
     class ViewHolder extends RecyclerView.ViewHolder {
 
-        private final ImageView ivImagen;
-        private final TextView tvTitulo, tvTipo, tvZona, tvFecha, tvMeGustas, tvComentarios;
+        private final ImageView ivImagen, ivMeGusta;
+        private final TextView tvTitulo, tvTipo, tvZona, tvFecha, tvMeGusta, tvComentarios;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
             // Conectar con los elementos del layout
             ivImagen = itemView.findViewById(R.id.ivImagen);
+            ivMeGusta = itemView.findViewById(R.id.ivMeGusta);
             tvTitulo = itemView.findViewById(R.id.tvTitulo);
             tvTipo = itemView.findViewById(R.id.tvTipo);
             tvZona = itemView.findViewById(R.id.tvZona);
             tvFecha = itemView.findViewById(R.id.tvFecha);
-            tvMeGustas = itemView.findViewById(R.id.tvMeGustas);
+            tvMeGusta = itemView.findViewById(R.id.tvMeGusta);
             tvComentarios = itemView.findViewById(R.id.tvComentarios);
 
             // Click en la tarjeta
@@ -100,8 +101,19 @@ public class ObservacionAdapter extends RecyclerView.Adapter<ObservacionAdapter.
 
             // --- CORRECCIÓN DE CONTADORES ---
             // Pintamos los valores actuales. Si el servidor no los envía, se mostrará 0.
-            tvMeGustas.setText(String.valueOf(obs.getNumMeGustas()));
+            tvMeGusta.setText(String.valueOf(obs.getNumMeGustas()));
             tvComentarios.setText(String.valueOf(obs.getNumComentarios()));
+
+            // Icono de Me Gusta según estado
+            if (ivMeGusta != null) {
+                ivMeGusta.setImageResource(obs.isMeGustaPropio() ? R.drawable.ic_heart_full : R.drawable.ic_heart_empty);
+                // Si está relleno, forzamos el tinte rojo por si acaso el XML tiene otro por defecto
+                if (obs.isMeGustaPropio()) {
+                    ivMeGusta.setColorFilter(android.graphics.Color.RED);
+                } else {
+                    ivMeGusta.clearColorFilter();
+                }
+            }
 
             // --- CARGA DE IMAGEN CORREGIDA ---
             if (obs.getImagenesUrl() != null && !obs.getImagenesUrl().isEmpty()) {

@@ -3,21 +3,20 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FAFAF7">
+    android:background="@color/fondo_pantalla">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_gradient_header">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbarEspecies"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="#4A7C59"
             app:title="Gestión de Especies"
-            app:titleTextColor="#FFFFFF"
+            app:titleTextColor="@color/white"
             app:navigationIcon="?attr/homeAsUpIndicator" />
-
     </com.google.android.material.appbar.AppBarLayout>
 
     <FrameLayout
@@ -29,8 +28,9 @@
             android:id="@+id/recyclerEspecies"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="8dp"
-            android:clipToPadding="false" />
+            android:clipToPadding="false"
+            android:padding="16dp"
+            android:paddingBottom="88dp" />
 
         <ProgressBar
             android:id="@+id/progressEspecies"
@@ -45,6 +45,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="No hay especies registradas"
+            android:textColor="@color/texto_secundario"
             android:visibility="gone" />
 
     </FrameLayout>
@@ -54,9 +55,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
+        android:layout_margin="24dp"
         android:src="@android:drawable/ic_input_add"
-        app:backgroundTint="#4A7C59"
-        app:tint="#FFFFFF" />
+        app:backgroundTint="@color/verde_principal"
+        app:tint="@color/white"
+        app:elevation="8dp" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

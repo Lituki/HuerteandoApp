@@ -26,6 +26,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.huerteando.app.R;
 import com.huerteando.app.api.ApiClient;
 import com.huerteando.app.api.ApiService;
+import com.huerteando.app.clases.Especie;
 import com.huerteando.app.clases.Imagen;
 import com.huerteando.app.clases.ObservacionRequest;
 import com.huerteando.app.clases.Observacion;
@@ -49,8 +50,8 @@ import retrofit2.Response;
  */
 public class CrearObservacionActivity extends AppCompatActivity {
 
-    private TextInputEditText editTitulo, editDescripcion, editEspecie, editZona, editDireccion, editFecha, editNombreTradicional;
-    private AutoCompleteTextView spinnerTipo;
+    private TextInputEditText editTitulo, editDescripcion, editZona, editDireccion, editFecha, editNombreTradicional;
+    private AutoCompleteTextView spinnerTipo, spinnerEspecie;
     private final List<Uri> imagenesSeleccionadas = new ArrayList<>();
     private android.widget.Button btnSeleccionarImagen;
     private android.widget.TextView tvImagenesSeleccionadas;
@@ -61,6 +62,7 @@ public class CrearObservacionActivity extends AppCompatActivity {
     private double latitud = 0, longitud = 0;
     private boolean ubicacionObtenida = false;
     private SessionManager sessionManager;
+    private List<Especie> especiesCatalogo = new ArrayList<>();
 
     // Tipos de observación
     private final String[] tipos = {"PLANTA", "RINCON", "DENUNCIA"};
@@ -75,10 +77,11 @@ public class CrearObservacionActivity extends AppCompatActivity {
 
         initViews();
         setupImagePicker();
+        cargarEspecies();
         
-        // Configurar spinner
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, tipos);
-        spinnerTipo.setAdapter(adapter);
+        // Configurar spinner tipos
+        ArrayAdapter<String> adapterTipos = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, tipos);
+        spinnerTipo.setAdapter(adapterTipos);
 
         // Fecha actual
         editFecha.setText(new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(new Date()));
@@ -93,7 +96,7 @@ public class CrearObservacionActivity extends AppCompatActivity {
         editTitulo = findViewById(R.id.editTitulo);
         editDescripcion = findViewById(R.id.editDescripcion);
         spinnerTipo = findViewById(R.id.spinnerTipo);
-        editEspecie = findViewById(R.id.editEspecie);
+        spinnerEspecie = findViewById(R.id.spinnerEspecie);
         editZona = findViewById(R.id.editZona);
         editDireccion = findViewById(R.id.editDireccion);
         editFecha = findViewById(R.id.editFecha);
@@ -103,6 +106,26 @@ public class CrearObservacionActivity extends AppCompatActivity {
         btnSeleccionarImagen = findViewById(R.id.btnSeleccionarImagen);
         tvImagenesSeleccionadas = findViewById(R.id.tvImagenesSeleccionadas);
         progressBar = findViewById(R.id.progressBar);
+    }
+
+    private void cargarEspecies() {
+        ApiService apiService = ApiClient.getClient().create(ApiService.class);
+        apiService.getEspecies().enqueue(new Callback<List<Especie>>() {
+            @Override
+            public void onResponse(Call<List<Especie>> call, Response<List<Especie>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    especiesCatalogo = response.body();
+                    List<String> nombres = new ArrayList<>();
+                    for (Especie e : especiesCatalogo) {
+                        nombres.add(e.getNombreComun() + " (" + e.getNombreCientifico() + ")");
+                    }
+                    ArrayAdapter<String> adapterEspecies = new ArrayAdapter<>(CrearObservacionActivity.this,
+                            android.R.layout.simple_dropdown_item_1line, nombres);
+                    spinnerEspecie.setAdapter(adapterEspecies);
+                }
+            }
+            @Override public void onFailure(Call<List<Especie>> call, Throwable t) {}
+        });
     }
 
     private void setupImagePicker() {
@@ -164,10 +187,20 @@ public class CrearObservacionActivity extends AppCompatActivity {
         String titulo = editTitulo.getText().toString().trim();
         String descripcion = editDescripcion.getText().toString().trim();
         String tipoStr = spinnerTipo.getText().toString().trim();
-        String especie = editEspecie.getText().toString().trim();
+        String especieSeleccionada = spinnerEspecie.getText().toString().trim();
         String zona = editZona.getText().toString().trim();
         String direccion = editDireccion.getText().toString().trim();
         String nombreTradicional = editNombreTradicional.getText().toString().trim();
+
+        // Obtener solo el nombre común de la especie seleccionada para enviar
+        String especieNombre = null;
+        if (!especieSeleccionada.isEmpty()) {
+            if (especieSeleccionada.contains("(")) {
+                especieNombre = especieSeleccionada.split("\\(")[0].trim();
+            } else {
+                especieNombre = especieSeleccionada;
+            }
+        }
         
         String fechaISO = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).format(new Date());
 
@@ -176,7 +209,7 @@ public class CrearObservacionActivity extends AppCompatActivity {
         ObservacionRequest request = new ObservacionRequest(
                 titulo, descripcion, fechaISO, 
                 new ObservacionRequest.TipoRequest(idTipo), 
-                especie, latitud, longitud, direccion, zona, nombreTradicional,
+                especieNombre, latitud, longitud, direccion, zona, nombreTradicional,
                 new ObservacionRequest.UsuarioRequest(sessionManager.getUserId()),
                 "ABIERTA"
         );

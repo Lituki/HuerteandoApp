@@ -1,214 +1,267 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FAFAF7">
+    android:background="@color/fondo_pantalla">
 
-    <LinearLayout
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:background="@drawable/bg_gradient_header">
 
-        <!-- Toolbar simple -->
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="#4A7C59"
-            app:title="Nueva observación"
-            app:titleTextColor="#FFFFFF" />
+            app:title="@string/nueva_observacion"
+            app:titleTextColor="@color/white"
+            app:navigationIcon="?attr/homeAsUpIndicator" />
+    </com.google.android.material.appbar.AppBarLayout>
 
-        <!-- Título -->
-        <com.google.android.material.textfield.TextInputLayout
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:hint="Título *">
+            android:orientation="vertical"
+            android:padding="20dp">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/editTitulo"
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textCapSentences" />
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp">
 
-        </com.google.android.material.textfield.TextInputLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-        <!-- Tipo (spinner) -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-            android:hint="Tipo *">
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Título *">
 
-            <AutoCompleteTextView
-                android:id="@+id/spinnerTipo"
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editTitulo"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textCapSentences" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:hint="Tipo *">
+
+                        <AutoCompleteTextView
+                            android:id="@+id/spinnerTipo"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="none" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:hint="Descripción">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editDescripcion"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="top"
+                            android:inputType="textMultiLine"
+                            android:minLines="3" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:hint="@string/fecha">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editFecha"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:focusable="false"
+                            android:clickable="false"
+                            android:inputType="none" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="none" />
+                android:layout_marginTop="24dp"
+                android:layout_marginStart="4dp"
+                android:text="Detalles botánicos"
+                android:textColor="@color/texto_principal"
+                android:textStyle="bold"
+                android:textSize="16sp" />
 
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Descripción -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:hint="Descripción">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/editDescripcion"
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textMultiLine"
-                android:minLines="3"
-                android:gravity="top" />
+                android:layout_marginTop="8dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp">
 
-        </com.google.android.material.textfield.TextInputLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-        <!-- Fecha -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:hint="Fecha de observación">
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Especie (opcional)">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/editFecha"
+                        <AutoCompleteTextView
+                            android:id="@+id/spinnerEspecie"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="none" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:hint="Nombre tradicional (opcional)">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editNombreTradicional"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textCapWords" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="none"
-                android:focusable="false"
-                android:clickable="true" />
+                android:layout_marginTop="24dp"
+                android:layout_marginStart="4dp"
+                android:text="Ubicación"
+                android:textColor="@color/texto_principal"
+                android:textStyle="bold"
+                android:textSize="16sp" />
 
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Especie (opcional) -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:hint="Nombre de especie (opcional)">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/editEspecie"
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textCapWords" />
+                android:layout_marginTop="8dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp">
 
-        </com.google.android.material.textfield.TextInputLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-        <!-- Nombre tradicional huertano -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:hint="Nombre tradicional huertano (opcional)">
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnMiUbicacion"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Obtener ubicación actual"
+                        app:icon="@android:drawable/ic_menu_mylocation"
+                        app:iconTint="@color/verde_principal"
+                        android:textColor="@color/verde_principal" />
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/editNombreTradicional"
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:hint="Zona / Barrio">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editZona"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textCapWords" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:hint="Dirección">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editDireccion"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textPostalAddress" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSeleccionarImagen"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="24dp"
+                android:text="Seleccionar imágenes"
+                app:cornerRadius="12dp"
+                app:icon="@android:drawable/ic_menu_camera" />
+
+            <TextView
+                android:id="@+id/tvImagenesSeleccionadas"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textCapWords" />
+                android:layout_marginTop="4dp"
+                android:gravity="center"
+                android:text="Ninguna imagen seleccionada"
+                android:textColor="@color/texto_secundario"
+                android:textSize="12sp" />
 
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Ubicación -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="Ubicación"
-            android:textColor="#333333"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnMiUbicacion"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Obtener mi ubicación actual"
-            app:icon="@android:drawable/ic_menu_mylocation"
-            app:strokeColor="#4A7C59" />
-
-        <!-- Zona -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:hint="Zona / Barrio">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/editZona"
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnGuardar"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textCapWords" />
+                android:layout_height="64dp"
+                android:layout_marginTop="32dp"
+                android:layout_marginBottom="32dp"
+                android:text="@string/guardar_observacion"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:cornerRadius="16dp"
+                app:backgroundTint="@color/verde_principal"
+                android:elevation="4dp" />
 
-        </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
-        <!-- Dirección -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:hint="Dirección">
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone" />
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/editDireccion"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textPostalAddress" />
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSeleccionarImagen"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="Seleccionar imágenes" />
-
-        <TextView
-            android:id="@+id/tvImagenesSeleccionadas"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:gravity="center"
-            android:text="Ninguna imagen seleccionada"
-            android:textColor="#666666"
-            android:textSize="12sp" />
-
-        <!-- Loading -->
-        <ProgressBar
-            android:id="@+id/progressBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="16dp"
-            android:visibility="gone" />
-
-        <!-- Botón guardar -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnGuardar"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginTop="24dp"
-            android:text="Guardar observación"
-            android:textSize="16sp"
-            app:backgroundTint="#4A7C59" />
-
-    </LinearLayout>
-
-</ScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

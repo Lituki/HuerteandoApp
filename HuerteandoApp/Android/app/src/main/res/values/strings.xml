@@ -34,12 +34,17 @@
     <!-- Registro -->
     <string name="registro_titulo">Crear cuenta</string>
     <string name="registro_subtitulo">Únete a Huerteando</string>
+    <string name="registro_nombre_hint">Nombre</string>
+    <string name="registro_apellidos_hint">Apellidos</string>
+    <string name="registro_email_hint">Correo electrónico</string>
+    <string name="registro_confirmar_password_hint">Confirmar contraseña</string>
     <string name="registro_boton">Registrarse</string>
     <string name="registro_ir_login">¿Ya tienes cuenta? Inicia sesión</string>
 
     <!-- Observaciones -->
     <string name="nueva_observacion">Nueva observación</string>
     <string name="guardar_observacion">Guardar observación</string>
+    <string name="fecha">Fecha</string>
     <string name="obtener_ubicacion">📍 Obtener mi ubicación</string>
     <string name="sin_ubicacion">Sin ubicación — pulsa el botón para obtenerla</string>
     <string name="ubicacion_obteniendo">Obteniendo ubicación…</string>

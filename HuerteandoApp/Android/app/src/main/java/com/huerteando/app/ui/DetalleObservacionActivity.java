@@ -235,11 +235,11 @@ public class DetalleObservacionActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<Map<String, Long>> call, Response<Map<String, Long>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    Long total = response.body().get("count"); // El backend suele usar 'count' o 'total'
-                    if (total == null) total = response.body().get("Me gusta");
+                    // El backend usa la clave "megustas"
+                    Long total = response.body().get("megustas");
                     if (total != null) {
                         observacionActual.setNumMeGustas(total.intValue());
-                        tvDetalleNumMeGusta.setText(String.valueOf(total));
+                        actualizarBotonMeGusta();
                     }
                 }
             }
@@ -252,10 +252,8 @@ public class DetalleObservacionActivity extends AppCompatActivity {
                 @Override
                 public void onResponse(Call<Map<String, Boolean>> call, Response<Map<String, Boolean>> response) {
                     if (response.isSuccessful() && response.body() != null) {
-                        // Buscamos varias claves posibles para evitar errores de mapeo
-                        Boolean existe = response.body().get("existe");
-                        if (existe == null) existe = response.body().get("ya le has dado a me gusta");
-                        
+                        // El backend usa la clave "yaMeGusta"
+                        Boolean existe = response.body().get("yaMeGusta");
                         if (existe != null) {
                             observacionActual.setMeGustaPropio(existe);
                             actualizarBotonMeGusta();
@@ -269,7 +267,14 @@ public class DetalleObservacionActivity extends AppCompatActivity {
 
     private void actualizarBotonMeGusta() {
         if (observacionActual == null) return;
-        btnMeGusta.setText(observacionActual.isMeGustaPropio() ? "❤️ Ya no me gusta" : "🤍 Me gusta");
+        btnMeGusta.setText("Me gusta");
+        if (observacionActual.isMeGustaPropio()) {
+            btnMeGusta.setIconResource(R.drawable.ic_heart_full);
+            btnMeGusta.setIconTint(android.content.res.ColorStateList.valueOf(android.graphics.Color.RED));
+        } else {
+            btnMeGusta.setIconResource(R.drawable.ic_heart_empty);
+            btnMeGusta.setIconTint(null); // Usa el color por defecto del tema/layout
+        }
         tvDetalleNumMeGusta.setText(String.valueOf(observacionActual.getNumMeGustas()));
     }
 
@@ -283,20 +288,34 @@ public class DetalleObservacionActivity extends AppCompatActivity {
 
         btnMeGusta.setEnabled(false);
         ApiService api = ApiClient.getClient().create(ApiService.class);
-        boolean quitar = observacionActual.isMeGustaPropio();
+        boolean yaDabaMeGusta = observacionActual.isMeGustaPropio();
         
-        Call<Void> call = quitar ? api.quitarMeGusta(idObservacion, idUser) : api.darMeGusta(idObservacion, idUser);
+        Call<Void> call = yaDabaMeGusta ? api.quitarMeGusta(idObservacion, idUser) : api.darMeGusta(idObservacion, idUser);
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 btnMeGusta.setEnabled(true);
-                // 200, 201, 204 o 409 (ya existe) se consideran éxito para la UI
                 if (response.isSuccessful() || response.code() == 409) {
+                    // Actualizamos el estado local inmediatamente para mejorar la respuesta visual
+                    boolean nuevoEstado = !yaDabaMeGusta;
+                    observacionActual.setMeGustaPropio(nuevoEstado);
+                    
+                    int numActual = observacionActual.getNumMeGustas();
+                    observacionActual.setNumMeGustas(nuevoEstado ? numActual + 1 : Math.max(0, numActual - 1));
+                    
+                    actualizarBotonMeGusta();
+                    
+                    // Refrescamos del servidor para asegurar sincronización
                     actualizarEstadoMeGustaServidor();
+                } else {
+                    Toast.makeText(DetalleObservacionActivity.this, "Error al procesar Me gusta", Toast.LENGTH_SHORT).show();
                 }
             }
-            @Override public void onFailure(Call<Void> call, Throwable t) {
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
                 btnMeGusta.setEnabled(true);
+                Toast.makeText(DetalleObservacionActivity.this, "Error de conexión", Toast.LENGTH_SHORT).show();
             }
         });
     }

@@ -105,16 +105,13 @@ public class ObservacionesActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> p, View v, int pos, long id) {
                 String antiguoTipo = idTipoSeleccionado;
                 switch (pos) {
-                    case 1: idTipoSeleccionado = "1"; break; 
-                    case 2: idTipoSeleccionado = "2"; break; 
-                    case 3: idTipoSeleccionado = "3"; break; 
-                    default: idTipoSeleccionado = null;
+                    case 1: idTipoSeleccionado = "1"; break; // Planta
+                    case 2: idTipoSeleccionado = "2"; break; // Rincón
+                    case 3: idTipoSeleccionado = "3"; break; // Incidencia
+                    default: idTipoSeleccionado = null; // Todos
                 }
-                // Solo recargar del servidor si el tipo ha cambiado
-                if ((antiguoTipo == null && idTipoSeleccionado != null) || 
-                    (antiguoTipo != null && !antiguoTipo.equals(idTipoSeleccionado))) {
-                    cargarObservaciones();
-                }
+                // Recargar del servidor siempre para asegurar que "Todos" funciona
+                cargarObservaciones();
             }
             @Override public void onNothingSelected(AdapterView<?> p) {}
         });
@@ -139,8 +136,11 @@ public class ObservacionesActivity extends AppCompatActivity {
         progressBar.setVisibility(View.VISIBLE);
         ApiService api = ApiClient.getClient().create(ApiService.class);
         
-        // Llamada limpia: Solo pasamos el TIPO al servidor. El resto es local.
-        api.getObservaciones(idTipoSeleccionado, null, null, null, null)
+        // CORRECCIÓN: Pasamos el id del usuario logueado para que el servidor nos diga 
+        // si ya le hemos dado "Me gusta" a cada observación (meGustaPropio = true/false).
+        Long currentUserId = session.getUserId() != -1L ? session.getUserId() : null;
+
+        api.getObservaciones(idTipoSeleccionado, currentUserId, null, null, null)
                 .enqueue(new Callback<List<Observacion>>() {
                     @Override
                     public void onResponse(Call<List<Observacion>> call, Response<List<Observacion>> response) {
