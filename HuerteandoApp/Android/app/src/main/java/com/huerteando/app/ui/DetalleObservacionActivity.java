@@ -16,9 +16,9 @@ import com.huerteando.app.adapter.ComentarioAdapter;
 import com.huerteando.app.api.ApiClient;
 import com.huerteando.app.api.ApiService;
 import com.huerteando.app.clases.Comentario;
-import com.huerteando.app.clases.ComentarioRequest;
 import com.huerteando.app.clases.Imagen;
 import com.huerteando.app.clases.Observacion;
+import com.huerteando.app.clases.Usuario;
 import com.huerteando.app.utils.SessionManager;
 
 import java.text.SimpleDateFormat;
@@ -35,10 +35,7 @@ import retrofit2.Response;
 
 /**
  * Pantalla de detalle de una observación.
- * Optimizada por el arquitecto para:
- * 1. Formateo de fechas ISO a legible.
- * 2. Gestión robusta de URLs de imágenes.
- * 3. Sincronización de estados de Me Gusta.
+ * Adaptada al nuevo manual.
  */
 public class DetalleObservacionActivity extends AppCompatActivity {
 
@@ -142,87 +139,52 @@ public class DetalleObservacionActivity extends AppCompatActivity {
 
     private void mostrarObservacion() {
         Observacion o = observacionActual;
-        tvDetalleTipo.setText(o.getTipoObservacion());
+        if (o.getTipoObservacion() != null) {
+            tvDetalleTipo.setText(o.getTipoObservacion().getNombre());
+        }
         tvDetalleTitulo.setText(o.getTitulo());
-        
-        // Formatear Fecha ISO a Humano
         tvDetalleFecha.setText("📅 " + formatearFecha(o.getFechaObservacion()));
-        
         tvDetalleDescripcion.setText(o.getDescripcion() != null ? o.getDescripcion() : "Sin descripción");
         tvDetalleZona.setText(o.getNombreZona() != null ? "📍 " + o.getNombreZona() : "Ubicación desconocida");
         
-        if (o.getEspecieNombre() != null) {
-            tvDetalleEspecie.setText("🌿 " + o.getEspecieNombre());
+        if (o.getEspecie() != null) {
+            tvDetalleEspecie.setText("🌿 " + o.getEspecie().getNombreComun());
             tvDetalleEspecie.setVisibility(View.VISIBLE);
         }
 
-        // Carga de Imagen con Glide y limpieza de URL
-        List<Imagen> imagenes = o.getImagenes();
-        if (imagenes != null && !imagenes.isEmpty()) {
-            Imagen img = imagenes.get(0);
-            String url = img.getUrlArchivo();
-            if (!url.startsWith("http")) {
-                String base = ApiClient.BASE_URL;
-                if (base.endsWith("/") && url.startsWith("/")) url = base + url.substring(1);
-                else if (!base.endsWith("/") && !url.startsWith("/")) url = base + "/" + url;
-                else url = base + url;
-            }
-            
-            com.bumptech.glide.Glide.with(this)
-                    .load(url)
-                    .placeholder(android.R.drawable.ic_menu_gallery)
-                    .error(android.R.drawable.ic_menu_report_image)
-                    .into(ivDetalleImagen);
-
-            // Si la observación es del usuario actual, permitir borrar la imagen
-            if (session.getUserId() != -1L && session.getUserId().equals(o.getUsuarioId())) {
-                ivDetalleImagen.setOnLongClickListener(v -> {
-                    confirmarEliminarImagen(img);
-                    return true;
-                });
+        // Imagen
+        if (o.getImagenes() != null && !o.getImagenes().isEmpty()) {
+            String url = o.getImagenes().get(0).getUrlArchivo();
+            if (url != null) {
+                if (!url.startsWith("http")) {
+                    String base = ApiClient.BASE_URL;
+                    if (base.endsWith("/") && url.startsWith("/")) url = base + url.substring(1);
+                    else if (!base.endsWith("/") && !url.startsWith("/")) url = base + "/" + url;
+                    else url = base + url;
+                }
+                
+                com.bumptech.glide.Glide.with(this)
+                        .load(url)
+                        .placeholder(android.R.drawable.ic_menu_gallery)
+                        .error(android.R.drawable.ic_menu_report_image)
+                        .into(ivDetalleImagen);
             }
         }
 
         actualizarBotonMeGusta();
     }
 
-    private void confirmarEliminarImagen(Imagen imagen) {
-        new androidx.appcompat.app.AlertDialog.Builder(this)
-                .setTitle("Eliminar Imagen")
-                .setMessage("¿Estás seguro de que deseas eliminar esta imagen?")
-                .setPositiveButton("Eliminar", (dialog, which) -> {
-                    ApiService api = ApiClient.getClient().create(ApiService.class);
-                    api.eliminarImagen(idObservacion, imagen.getId()).enqueue(new Callback<Void>() {
-                        @Override
-                        public void onResponse(Call<Void> call, Response<Void> response) {
-                            if (response.isSuccessful()) {
-                                cargarObservacion();
-                                Toast.makeText(DetalleObservacionActivity.this, "Imagen eliminada", Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                        @Override public void onFailure(Call<Void> call, Throwable t) {}
-                    });
-                })
-                .setNegativeButton("Cancelar", null)
-                .show();
-    }
-
     private String formatearFecha(String fechaIso) {
         if (fechaIso == null) return "";
         try {
-            // Soporta tanto 2024-05-20T10:30:00 como otros formatos ISO básicos
             String limpia = fechaIso.split("\\.")[0].replace("T", " ");
             SimpleDateFormat sdfIso = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
             Date date = sdfIso.parse(limpia);
-
-            // Configuramos el formato de hora para España
             Locale localeES = new Locale("es", "ES");
             SimpleDateFormat sdfSalida = new SimpleDateFormat("dd 'de' MMMM, yyyy 'a las' HH:mm", localeES);
-            sdfSalida.setTimeZone(TimeZone.getTimeZone("Europe/Madrid"));
-
             return sdfSalida.format(date);
         } catch (Exception e) {
-            return fechaIso; // Si falla, devolvemos la original
+            return fechaIso;
         }
     }
 
@@ -230,12 +192,10 @@ public class DetalleObservacionActivity extends AppCompatActivity {
         ApiService api = ApiClient.getClient().create(ApiService.class);
         Long idUser = session.getUserId();
 
-        // 1. Obtener conteo total
         api.getMeGustasCount(idObservacion).enqueue(new Callback<Map<String, Long>>() {
             @Override
             public void onResponse(Call<Map<String, Long>> call, Response<Map<String, Long>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    // El backend usa la clave "megustas"
                     Long total = response.body().get("megustas");
                     if (total != null) {
                         observacionActual.setNumMeGustas(total.intValue());
@@ -246,13 +206,11 @@ public class DetalleObservacionActivity extends AppCompatActivity {
             @Override public void onFailure(Call<Map<String, Long>> call, Throwable t) {}
         });
 
-        // 2. Comprobar si el usuario actual ha dado me gusta
         if (idUser != -1L) {
             api.checkMeGustaExiste(idObservacion, idUser).enqueue(new Callback<Map<String, Boolean>>() {
                 @Override
                 public void onResponse(Call<Map<String, Boolean>> call, Response<Map<String, Boolean>> response) {
                     if (response.isSuccessful() && response.body() != null) {
-                        // El backend usa la clave "yaMeGusta"
                         Boolean existe = response.body().get("yaMeGusta");
                         if (existe != null) {
                             observacionActual.setMeGustaPropio(existe);
@@ -273,7 +231,7 @@ public class DetalleObservacionActivity extends AppCompatActivity {
             btnMeGusta.setIconTint(android.content.res.ColorStateList.valueOf(android.graphics.Color.RED));
         } else {
             btnMeGusta.setIconResource(R.drawable.ic_heart_empty);
-            btnMeGusta.setIconTint(null); // Usa el color por defecto del tema/layout
+            btnMeGusta.setIconTint(null);
         }
         tvDetalleNumMeGusta.setText(String.valueOf(observacionActual.getNumMeGustas()));
     }
@@ -296,26 +254,16 @@ public class DetalleObservacionActivity extends AppCompatActivity {
             public void onResponse(Call<Void> call, Response<Void> response) {
                 btnMeGusta.setEnabled(true);
                 if (response.isSuccessful() || response.code() == 409) {
-                    // Actualizamos el estado local inmediatamente para mejorar la respuesta visual
                     boolean nuevoEstado = !yaDabaMeGusta;
                     observacionActual.setMeGustaPropio(nuevoEstado);
-                    
                     int numActual = observacionActual.getNumMeGustas();
                     observacionActual.setNumMeGustas(nuevoEstado ? numActual + 1 : Math.max(0, numActual - 1));
-                    
                     actualizarBotonMeGusta();
-                    
-                    // Refrescamos del servidor para asegurar sincronización
                     actualizarEstadoMeGustaServidor();
-                } else {
-                    Toast.makeText(DetalleObservacionActivity.this, "Error al procesar Me gusta", Toast.LENGTH_SHORT).show();
                 }
             }
-
-            @Override
-            public void onFailure(Call<Void> call, Throwable t) {
+            @Override public void onFailure(Call<Void> call, Throwable t) {
                 btnMeGusta.setEnabled(true);
-                Toast.makeText(DetalleObservacionActivity.this, "Error de conexión", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -367,18 +315,23 @@ public class DetalleObservacionActivity extends AppCompatActivity {
         }
 
         ApiService api = ApiClient.getClient().create(ApiService.class);
-        api.addComentario(idObservacion, new ComentarioRequest(texto, idUser))
-                .enqueue(new Callback<Comentario>() {
-                    @Override
-                    public void onResponse(Call<Comentario> call, Response<Comentario> response) {
-                        if (response.isSuccessful()) {
-                            editNuevoComentario.setText("");
-                            cargarComentarios();
-                        }
-                    }
-                    @Override public void onFailure(Call<Comentario> call, Throwable t) {
-                        Toast.makeText(DetalleObservacionActivity.this, "Error al comentar", Toast.LENGTH_SHORT).show();
-                    }
-                });
+        Comentario c = new Comentario();
+        c.setContenido(texto);
+        Usuario u = new Usuario();
+        u.setId(idUser);
+        c.setUsuario(u);
+
+        api.crearComentario(idObservacion, c).enqueue(new Callback<Comentario>() {
+            @Override
+            public void onResponse(Call<Comentario> call, Response<Comentario> response) {
+                if (response.isSuccessful()) {
+                    editNuevoComentario.setText("");
+                    cargarComentarios();
+                }
+            }
+            @Override public void onFailure(Call<Comentario> call, Throwable t) {
+                Toast.makeText(DetalleObservacionActivity.this, "Error al comentar", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

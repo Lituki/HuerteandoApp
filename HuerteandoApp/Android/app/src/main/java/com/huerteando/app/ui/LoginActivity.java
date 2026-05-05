@@ -16,9 +16,10 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.huerteando.app.R;
 import com.huerteando.app.api.ApiClient;
 import com.huerteando.app.api.ApiService;
-import com.huerteando.app.clases.LoginRequest;
-import com.huerteando.app.clases.LoginResponse;
 import com.huerteando.app.utils.SessionManager;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -26,12 +27,7 @@ import retrofit2.Response;
 
 /**
  * Pantalla de inicio de sesión.
- *
- * Flujo:
- *   1. Si ya hay sesión activa → va directamente a ObservacionesActivity.
- *   2. El usuario introduce nick + contraseña → POST /api/auth/login.
- *   3. Si OK → guarda sesión en SessionManager → va a ObservacionesActivity.
- *   4. Si error → muestra mensaje debajo del botón.
+ * Actualizada para usar Map como respuesta segun el Manual.
  */
 public class LoginActivity extends AppCompatActivity {
 
@@ -76,8 +72,6 @@ public class LoginActivity extends AppCompatActivity {
                 startActivity(new Intent(LoginActivity.this, RegistroActivity.class)));
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-
     private void realizarLogin() {
         String nick     = texto(editNick);
         String password = texto(editPassword);
@@ -91,42 +85,38 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        // --- 🚧 INICIO BLOQUE BYPASS PRUEBAS (DESCOMENTADO PARA PRUEBAS) ---
-        if (nick.equals("admin")) {
-            // Inyectamos un usuario falso para poder entrar a la app sin servidor
-            LoginResponse mock = new LoginResponse();
-            mock.setId(1L);
-            mock.setNick("admin");
-            mock.setNombre("Administrador Test");
-            mock.setRol("ADMIN");
-            
-            sessionManager.guardarSesion(mock);
-            irAObservaciones();
-            return;
-        }
-        // --- 🚧 FIN BLOQUE BYPASS PRUEBAS ---
-
         tvError.setVisibility(View.GONE);
         btnLogin.setEnabled(false);
         btnLogin.setText("Cargando…");
 
         ApiService api = ApiClient.getClient().create(ApiService.class);
+        
+        Map<String, String> credenciales = new HashMap<>();
+        credenciales.put("nick", nick);
+        credenciales.put("password", password);
 
-        api.login(new LoginRequest(nick, password)).enqueue(new Callback<LoginResponse>() {
+        api.login(credenciales).enqueue(new Callback<Map<String, Object>>() {
             @Override
-            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+            public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
                 btnLogin.setEnabled(true);
                 btnLogin.setText("Entrar");
 
                 if (response.isSuccessful() && response.body() != null) {
-                    sessionManager.guardarSesion(response.body());
+                    Map<String, Object> datos = response.body();
+                    
+                    // GSON convierte numeros a Double en Map<String, Object>
+                    Long idUsuario = ((Double) datos.get("id")).longValue();
+                    String nickUsuario = (String) datos.get("nick");
+                    String nombre = (String) datos.get("nombre");
+                    
+                    // Guardamos en sesion
+                    sessionManager.guardarDatosSimples(idUsuario, nickUsuario, nombre);
+                    
                     irAObservaciones();
                 } else {
                     int code = response.code();
                     if (code == 401 || code == 403) {
                         mostrarError("Usuario o contraseña incorrectos");
-                    } else if (code == 404) {
-                        mostrarError("Usuario no encontrado");
                     } else {
                         mostrarError("Error del servidor (" + code + ")");
                     }
@@ -134,15 +124,13 @@ public class LoginActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<LoginResponse> call, Throwable t) {
+            public void onFailure(Call<Map<String, Object>> call, Throwable t) {
                 btnLogin.setEnabled(true);
                 btnLogin.setText("Entrar");
                 mostrarError("Error de conexión. ¿Tienes internet?");
             }
         });
     }
-
-    // ─────────────────────────────────────────────────────────────────────────
 
     private void irAObservaciones() {
         Intent intent = new Intent(LoginActivity.this, ObservacionesActivity.class);
@@ -155,7 +143,6 @@ public class LoginActivity extends AppCompatActivity {
         tvError.setVisibility(View.VISIBLE);
     }
 
-    /** Devuelve el texto del campo recortado, o "" si es null. */
     private String texto(TextInputEditText campo) {
         return campo.getText() != null ? campo.getText().toString().trim() : "";
     }

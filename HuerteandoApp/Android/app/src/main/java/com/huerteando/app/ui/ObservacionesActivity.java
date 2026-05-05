@@ -34,10 +34,8 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
- * Pantalla principal: lista de observaciones con filtros y ordenación.
- *
- * RF cubiertos: RF-09 (listar), RF-11 (filtrar), RF-12 (búsqueda texto),
- *               RF-13 (ordenar), RF-14 (combinar filtros).
+ * Pantalla principal: lista de observaciones.
+ * Actualizada para cargar todas las observaciones por defecto segun Manual.
  */
 public class ObservacionesActivity extends AppCompatActivity {
 
@@ -51,7 +49,7 @@ public class ObservacionesActivity extends AppCompatActivity {
     private final List<Observacion> listaOriginal = new ArrayList<>();
     private final List<Observacion> listaAMostrar = new ArrayList<>();
 
-    private String idTipoSeleccionado = null; 
+    private Long idTipoSeleccionado = null; 
     private String ordenSeleccionado = "fecha";
     private String textoBusqueda = "";
     private SessionManager session;
@@ -67,8 +65,6 @@ public class ObservacionesActivity extends AppCompatActivity {
         setupSpinners();
 
         fabNueva.setOnClickListener(v -> startActivity(new Intent(this, CrearObservacionActivity.class)));
-        
-        cargarObservaciones();
     }
 
     private void setupToolbar() {
@@ -95,7 +91,6 @@ public class ObservacionesActivity extends AppCompatActivity {
     }
 
     private void setupSpinners() {
-        // Spinner TIPO (Filtro en Servidor)
         ArrayAdapter<CharSequence> adapterTipo = ArrayAdapter.createFromResource(this,
                 R.array.array_tipos, android.R.layout.simple_spinner_item);
         adapterTipo.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -103,21 +98,18 @@ public class ObservacionesActivity extends AppCompatActivity {
         spinnerTipo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> p, View v, int pos, long id) {
-                String antiguoTipo = idTipoSeleccionado;
                 switch (pos) {
-                    case 1: idTipoSeleccionado = "1"; break; // Planta
-                    case 2: idTipoSeleccionado = "2"; break; // Rincón
-                    case 3: idTipoSeleccionado = "3"; break; // Incidencia
-                    default: idTipoSeleccionado = null; // Todos
+                    case 1: idTipoSeleccionado = 1L; break; 
+                    case 2: idTipoSeleccionado = 2L; break; 
+                    case 3: idTipoSeleccionado = 3L; break; 
+                    default: idTipoSeleccionado = null;
                 }
-                // Recargar del servidor siempre para asegurar que "Todos" funciona
                 cargarObservaciones();
             }
             @Override public void onNothingSelected(AdapterView<?> p) {}
         });
 
-        // Spinner ORDEN (Ordenación Local)
-        final String[] valoresOrden = {"fecha", "me gustas", "comentarios"};
+        final String[] valoresOrden = {"fecha", "me gusta", "comentarios"};
         ArrayAdapter<CharSequence> adapterOrden = ArrayAdapter.createFromResource(this,
                 R.array.array_orden, android.R.layout.simple_spinner_item);
         adapterOrden.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -136,33 +128,34 @@ public class ObservacionesActivity extends AppCompatActivity {
         progressBar.setVisibility(View.VISIBLE);
         ApiService api = ApiClient.getClient().create(ApiService.class);
         
-        // CORRECCIÓN: Pasamos el id del usuario logueado para que el servidor nos diga 
-        // si ya le hemos dado "Me gusta" a cada observación (meGustaPropio = true/false).
-        Long currentUserId = session.getUserId() != -1L ? session.getUserId() : null;
+        Call<List<Observacion>> call;
+        if (idTipoSeleccionado != null) {
+            call = api.getObservacionesPorTipo(idTipoSeleccionado);
+        } else {
+            call = api.getObservaciones(); // Carga todas por defecto
+        }
 
-        api.getObservaciones(idTipoSeleccionado, currentUserId, null, null, null)
-                .enqueue(new Callback<List<Observacion>>() {
-                    @Override
-                    public void onResponse(Call<List<Observacion>> call, Response<List<Observacion>> response) {
-                        progressBar.setVisibility(View.GONE);
-                        if (response.isSuccessful() && response.body() != null) {
-                            listaOriginal.clear();
-                            listaOriginal.addAll(response.body());
-                            procesarYMostrarLista();
-                        }
-                    }
-                    @Override
-                    public void onFailure(Call<List<Observacion>> call, Throwable t) {
-                        progressBar.setVisibility(View.GONE);
-                        tvSinResultados.setVisibility(View.VISIBLE);
-                    }
-                });
+        call.enqueue(new Callback<List<Observacion>>() {
+            @Override
+            public void onResponse(Call<List<Observacion>> call, Response<List<Observacion>> response) {
+                progressBar.setVisibility(View.GONE);
+                if (response.isSuccessful() && response.body() != null) {
+                    listaOriginal.clear();
+                    listaOriginal.addAll(response.body());
+                    procesarYMostrarLista();
+                }
+            }
+            @Override
+            public void onFailure(Call<List<Observacion>> call, Throwable t) {
+                progressBar.setVisibility(View.GONE);
+                tvSinResultados.setVisibility(View.VISIBLE);
+            }
+        });
     }
 
     private void procesarYMostrarLista() {
         List<Observacion> temp = new ArrayList<>(listaOriginal);
 
-        // 1. Ordenación Local
         Collections.sort(temp, (o1, o2) -> {
             switch (ordenSeleccionado) {
                 case "me gusta": return Integer.compare(o2.getNumMeGustas(), o1.getNumMeGustas());
@@ -174,7 +167,6 @@ public class ObservacionesActivity extends AppCompatActivity {
             }
         });
 
-        // 2. Búsqueda Local
         listaAMostrar.clear();
         String query = textoBusqueda.toLowerCase().trim();
         for (Observacion o : temp) {

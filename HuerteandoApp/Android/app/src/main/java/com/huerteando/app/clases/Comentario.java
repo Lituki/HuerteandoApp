@@ -1,48 +1,28 @@
 package com.huerteando.app.clases;
 
-import com.google.gson.annotations.SerializedName;
-
-/**
- * Clase que representa un comentario sincronizada con el Backend.
- */
 public class Comentario {
     private Long id;
     private String contenido;
-
-    @SerializedName("creadoEn")
-    private String creadoEn; // Formato ISO
-
-    @SerializedName("usuario")
-    private UsuarioResponse usuario; // El backend devuelve el objeto usuario anidado
+    private String creadoEn;
+    private Usuario usuario;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-
     public String getContenido() { return contenido; }
     public void setContenido(String contenido) { this.contenido = contenido; }
-
     public String getCreadoEn() { return creadoEn; }
     public void setCreadoEn(String creadoEn) { this.creadoEn = creadoEn; }
+    public Usuario getUsuario() { return usuario; }
+    public void setUsuario(Usuario usuario) { this.usuario = usuario; }
 
-    // Helpers para obtener datos del autor sin romper la lógica del Adapter
+    // Helpers para compatibilidad con Adapters
     public String getAutorNick() {
-        return (usuario != null) ? usuario.nick : "Anónimo";
+        return (usuario != null) ? usuario.getNick() : "Anónimo";
     }
-
     public String getAutorAvatarUrl() {
-        return (usuario != null) ? usuario.avatarUrl : null;
+        return (usuario != null) ? usuario.getAvatarUrl() : null;
     }
-
     public Long getUsuarioId() {
-        return (usuario != null) ? usuario.id : null;
-    }
-
-    /**
-     * Clase interna para mapear el objeto usuario del JSON.
-     */
-    private static class UsuarioResponse {
-        public Long id;
-        public String nick;
-        public String avatarUrl;
+        return (usuario != null) ? usuario.getId() : null;
     }
 }

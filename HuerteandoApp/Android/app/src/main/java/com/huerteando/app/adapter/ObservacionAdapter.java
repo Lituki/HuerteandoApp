@@ -12,23 +12,20 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.huerteando.app.R;
 import com.huerteando.app.api.ApiClient;
 import com.huerteando.app.clases.Observacion;
+import com.huerteando.app.clases.Imagen;
 import com.bumptech.glide.Glide;
 
 import java.util.List;
 
 /**
- * Adapter para el RecyclerView de observaciones
- *
- * ¿Qué hace esta clase?
- * Se encarga de mostrar cada observación en una "tarjeta" de la lista.
- * Convierte cada objeto Observacion en una vista visual.
+ * Adapter para el RecyclerView de observaciones.
+ * Actualizado para el nuevo modelo del Manual.
  */
 public class ObservacionAdapter extends RecyclerView.Adapter<ObservacionAdapter.ViewHolder> {
 
     private final List<Observacion> observaciones;
     private final OnObservacionClickListener listener;
 
-    // Interface para manejar clicks en las tarjetas
     public interface OnObservacionClickListener {
         void onObservacionClick(Observacion observacion);
     }
@@ -41,7 +38,6 @@ public class ObservacionAdapter extends RecyclerView.Adapter<ObservacionAdapter.
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // Crear la vista para cada tarjeta
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_observacion, parent, false);
         return new ViewHolder(view);
@@ -57,9 +53,6 @@ public class ObservacionAdapter extends RecyclerView.Adapter<ObservacionAdapter.
         return observaciones.size();
     }
 
-    /**
-     * Clase interna que representa cada tarjeta de la lista
-     */
     class ViewHolder extends RecyclerView.ViewHolder {
 
         private final ImageView ivImagen, ivMeGusta;
@@ -67,8 +60,6 @@ public class ObservacionAdapter extends RecyclerView.Adapter<ObservacionAdapter.
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-
-            // Conectar con los elementos del layout
             ivImagen = itemView.findViewById(R.id.ivImagen);
             ivMeGusta = itemView.findViewById(R.id.ivMeGusta);
             tvTitulo = itemView.findViewById(R.id.tvTitulo);
@@ -78,7 +69,6 @@ public class ObservacionAdapter extends RecyclerView.Adapter<ObservacionAdapter.
             tvMeGusta = itemView.findViewById(R.id.tvMeGusta);
             tvComentarios = itemView.findViewById(R.id.tvComentarios);
 
-            // Click en la tarjeta
             itemView.setOnClickListener(v -> {
                 int position = getAdapterPosition();
                 if (position != RecyclerView.NO_POSITION && listener != null) {
@@ -88,26 +78,21 @@ public class ObservacionAdapter extends RecyclerView.Adapter<ObservacionAdapter.
         }
 
         public void bind(Observacion obs) {
-            // Título
             tvTitulo.setText(obs.getTitulo());
+            
+            if (obs.getTipoObservacion() != null) {
+                tvTipo.setText(obs.getTipoObservacion().getNombre());
+                tvTipo.setBackgroundColor(getColorTipo(obs.getTipoObservacion().getNombre()));
+            }
 
-            // Tipo (con color según el tipo)
-            tvTipo.setText(obs.getTipoObservacion());
-            tvTipo.setBackgroundColor(getColorTipo(obs.getTipoObservacion()));
-
-            // Zona y Fecha
             tvZona.setText(obs.getNombreZona() != null ? obs.getNombreZona() : "Sin zona");
             tvFecha.setText(obs.getFechaObservacion());
 
-            // --- CORRECCIÓN DE CONTADORES ---
-            // Pintamos los valores actuales. Si el servidor no los envía, se mostrará 0.
             tvMeGusta.setText(String.valueOf(obs.getNumMeGustas()));
             tvComentarios.setText(String.valueOf(obs.getNumComentarios()));
 
-            // Icono de Me Gusta según estado
             if (ivMeGusta != null) {
                 ivMeGusta.setImageResource(obs.isMeGustaPropio() ? R.drawable.ic_heart_full : R.drawable.ic_heart_empty);
-                // Si está relleno, forzamos el tinte rojo por si acaso el XML tiene otro por defecto
                 if (obs.isMeGustaPropio()) {
                     ivMeGusta.setColorFilter(android.graphics.Color.RED);
                 } else {
@@ -115,43 +100,37 @@ public class ObservacionAdapter extends RecyclerView.Adapter<ObservacionAdapter.
                 }
             }
 
-            // --- CARGA DE IMAGEN CORREGIDA ---
-            if (obs.getImagenesUrl() != null && !obs.getImagenesUrl().isEmpty()) {
-                String urlImagen = obs.getImagenesUrl().get(0);
-                
-                // Si la URL no es completa (no empieza por http), le pegamos la BASE_URL
-                if (!urlImagen.startsWith("http")) {
-                    // Aseguramos que solo haya una barra entre la BASE_URL y la ruta
-                    String base = ApiClient.BASE_URL;
-                    if (base.endsWith("/") && urlImagen.startsWith("/")) {
-                        urlImagen = base + urlImagen.substring(1);
-                    } else if (!base.endsWith("/") && !urlImagen.startsWith("/")) {
-                        urlImagen = base + "/" + urlImagen;
-                    } else {
-                        urlImagen = base + urlImagen;
+            // Imagen
+            if (obs.getImagenes() != null && !obs.getImagenes().isEmpty()) {
+                String url = obs.getImagenes().get(0).getUrlArchivo();
+                if (url != null && !url.isEmpty()) {
+                    if (!url.startsWith("http")) {
+                        String base = ApiClient.BASE_URL;
+                        if (base.endsWith("/") && url.startsWith("/")) url = base + url.substring(1);
+                        else if (!base.endsWith("/") && !url.startsWith("/")) url = base + "/" + url;
+                        else url = base + url;
                     }
-                }
 
-                Glide.with(itemView.getContext())
-                        .load(urlImagen)
-                        .placeholder(android.R.drawable.ic_menu_gallery)
-                        .error(android.R.drawable.ic_menu_report_image)
-                        .centerCrop()
-                        .into(ivImagen);
-                ivImagen.setVisibility(View.VISIBLE);
+                    Glide.with(itemView.getContext())
+                            .load(url)
+                            .placeholder(android.R.drawable.ic_menu_gallery)
+                            .error(android.R.drawable.ic_menu_report_image)
+                            .centerCrop()
+                            .into(ivImagen);
+                    ivImagen.setVisibility(View.VISIBLE);
+                }
             } else {
                 ivImagen.setVisibility(View.GONE);
             }
         }
 
-        private int getColorTipo(String tipo) {
-            if (tipo == null) return 0xFF888888;
-            switch (tipo) {
-                case "PLANTA": return 0xFF4CAF50;
-                case "RINCON": return 0xFF2196F3;
-                case "INCIDENCIA": return 0xFFF44336;
-                default: return 0xFF888888;
-            }
+        private int getColorTipo(String nombre) {
+            if (nombre == null) return 0xFF888888;
+            String n = nombre.toUpperCase();
+            if (n.contains("PLANTA")) return 0xFF4CAF50;
+            if (n.contains("RINCON") || n.contains("RINCÓN")) return 0xFF2196F3;
+            if (n.contains("INCIDENCIA") || n.contains("DENUNCIA")) return 0xFFF44336;
+            return 0xFF888888;
         }
     }
 }

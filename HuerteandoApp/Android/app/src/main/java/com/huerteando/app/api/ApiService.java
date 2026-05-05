@@ -1,13 +1,9 @@
 package com.huerteando.app.api;
 
 import com.huerteando.app.clases.Comentario;
-import com.huerteando.app.clases.ComentarioRequest;
 import com.huerteando.app.clases.Especie;
 import com.huerteando.app.clases.Imagen;
-import com.huerteando.app.clases.LoginRequest;
-import com.huerteando.app.clases.LoginResponse;
 import com.huerteando.app.clases.Observacion;
-import com.huerteando.app.clases.ObservacionRequest;
 import com.huerteando.app.clases.RegistroRequest;
 import com.huerteando.app.clases.TipoObservacion;
 import com.huerteando.app.clases.Usuario;
@@ -24,78 +20,84 @@ import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
-/**
- * ApiService — Definición de endpoints sincronizada con el Backend.
- * Se ha eliminado el soporte para Multipart en favor de JSON con Base64.
- */
 public interface ApiService {
 
-    // ==================== AUTENTICACIÓN ====================
+    // ── TIPOS DE OBSERVACIÓN ──────────────────────────────────────────
+    @GET("api/tipos-observacion")
+    Call<List<TipoObservacion>> getTipos();
 
-    @POST("api/auth/login")
-    Call<LoginResponse> login(@Body LoginRequest request);
+    @GET("api/tipos-observacion/{id}")
+    Call<TipoObservacion> getTipo(@Path("id") short id);
 
-    @POST("api/auth/register")
-    Call<Usuario> registrar(@Body RegistroRequest request);
-
-    // ==================== OBSERVACIONES ====================
+    // ── OBSERVACIONES ─────────────────────────────────────────────────
+    @GET("api/observaciones")
+    Call<List<Observacion>> getObservaciones();
 
     @GET("api/observaciones")
-    Call<List<Observacion>> getObservaciones(
-            @Query("tipo")     String idTipo,
-            @Query("usuario")  Long idUsuario,
-            @Query("estado")   String estado,
-            @Query("orden")    String orden,
-            @Query("busqueda") String busqueda
-    );
+    Call<List<Observacion>> getObservacionesPorTipo(@Query("tipo") Long idTipo);
+
+    @GET("api/observaciones")
+    Call<List<Observacion>> getObservacionesPorUsuario(@Query("usuario") Long idUsuario);
+
+    @GET("api/observaciones")
+    Call<List<Observacion>> getObservacionesPorEstado(@Query("estado_observacion") String estado);
 
     @GET("api/observaciones/{id}")
     Call<Observacion> getObservacion(@Path("id") Long id);
 
     @POST("api/observaciones")
-    Call<Observacion> crearObservacion(@Body ObservacionRequest request);
+    Call<Observacion> crearObservacion(@Body Observacion observacion);
 
     @PUT("api/observaciones/{id}")
-    Call<Observacion> actualizarObservacion(
-            @Path("id") Long id,
-            @Body ObservacionRequest request
-    );
+    Call<Observacion> editarObservacion(@Path("id") Long id, @Body Observacion observacion);
 
     @DELETE("api/observaciones/{id}")
-    Call<Void> eliminarObservacion(@Path("id") Long id);
+    Call<Void> borrarObservacion(@Path("id") Long id);
 
-    // ==================== IMÁGENES ====================
-
-    /**
-     * Obtiene la lista de imágenes de una observación específica.
-     */
+    // ── IMÁGENES ──────────────────────────────────────────────────────
     @GET("api/observaciones/{id}/imagenes")
     Call<List<Imagen>> getImagenes(@Path("id") Long idObservacion);
 
-    /**
-     * Sube una imagen vinculada a una observación.
-     * Envía un objeto Imagen en formato JSON con la imagen codificada en Base64.
-     */
     @POST("api/observaciones/{id}/imagenes")
-    Call<Imagen> subirImagen(
-            @Path("id") Long idObservacion,
-            @Body Imagen imagen
-    );
+    Call<Imagen> subirImagen(@Path("id") Long idObservacion, @Body Imagen imagen);
 
     @DELETE("api/observaciones/{idObs}/imagenes/{idImg}")
-    Call<Void> eliminarImagen(
-            @Path("idObs") Long idObservacion,
-            @Path("idImg") Long idImagen
-    );
+    Call<Void> eliminarImagen(@Path("idObs") Long idObservacion, @Path("idImg") Long idImagen);
 
-    // ==================== CATÁLOGOS ====================
+    // ── COMENTARIOS ───────────────────────────────────────────────────
+    @GET("api/observaciones/{id}/comentarios")
+    Call<List<Comentario>> getComentarios(@Path("id") Long idObservacion);
 
-    @GET("api/tipos-observacion")
-    Call<List<TipoObservacion>> getTipos();
+    @POST("api/observaciones/{id}/comentarios")
+    Call<Comentario> crearComentario(@Path("id") Long idObservacion, @Body Comentario comentario);
 
-    @GET("api/tipos-observacion/{id}")
-    Call<TipoObservacion> getTipo(@Path("id") Integer id);
+    @DELETE("api/observaciones/{idObs}/comentarios/{idCom}")
+    Call<Void> eliminarComentario(@Path("idObs") Long idObservacion, @Path("idCom") Long idComentario);
 
+    // ── ME GUSTAS ─────────────────────────────────────────────────────
+    @GET("api/observaciones/{id}/megustas/count")
+    Call<Map<String, Long>> getMeGustasCount(@Path("id") Long idObservacion);
+
+    @GET("api/observaciones/{id}/megustas/existe")
+    Call<Map<String, Boolean>> checkMeGustaExiste(@Path("id") Long idObservacion, @Query("idUsuario") Long idUsuario);
+
+    @POST("api/observaciones/{id}/megustas")
+    Call<Void> darMeGusta(@Path("id") Long idObservacion, @Query("idUsuario") Long idUsuario);
+
+    @DELETE("api/observaciones/{id}/megustas")
+    Call<Void> quitarMeGusta(@Path("id") Long idObservacion, @Query("idUsuario") Long idUsuario);
+
+    // ── USUARIOS ──────────────────────────────────────────────────────
+    @POST("api/auth/register")
+    Call<Usuario> registrar(@Body RegistroRequest request);
+
+    @POST("api/auth/login")
+    Call<Map<String, Object>> login(@Body Map<String, String> credenciales);
+
+    @GET("api/usuarios/{id}")
+    Call<Usuario> getPerfil(@Path("id") Long id);
+
+    // ── ESPECIES ──────────────────────────────────────────────────────
     @GET("api/especies")
     Call<List<Especie>> getEspecies();
 
@@ -106,56 +108,8 @@ public interface ApiService {
     Call<Especie> crearEspecie(@Body Especie especie);
 
     @PUT("api/especies/{id}")
-    Call<Especie> actualizarEspecie(
-            @Path("id") Long id,
-            @Body Especie especie
-    );
+    Call<Especie> actualizarEspecie(@Path("id") Long id, @Body Especie especie);
 
     @DELETE("api/especies/{id}")
     Call<Void> eliminarEspecie(@Path("id") Long id);
-
-    // ==================== ME GUSTAS ====================
-
-    @POST("api/observaciones/{id}/megustas")
-    Call<Void> darMeGusta(
-            @Path("id") Long idObservacion,
-            @Query("idUsuario") Long idUsuario
-    );
-
-    @DELETE("api/observaciones/{id}/megustas")
-    Call<Void> quitarMeGusta(
-            @Path("id") Long idObservacion,
-            @Query("idUsuario") Long idUsuario
-    );
-
-    @GET("api/observaciones/{id}/megustas/count")
-    Call<Map<String, Long>> getMeGustasCount(@Path("id") Long idObservacion);
-
-    @GET("api/observaciones/{id}/megustas/existe")
-    Call<Map<String, Boolean>> checkMeGustaExiste(
-            @Path("id") Long idObservacion,
-            @Query("idUsuario") Long idUsuario
-    );
-
-    // ==================== COMENTARIOS ====================
-
-    @GET("api/observaciones/{id}/comentarios")
-    Call<List<Comentario>> getComentarios(@Path("id") Long idObservacion);
-
-    @POST("api/observaciones/{id}/comentarios")
-    Call<Comentario> addComentario(
-            @Path("id") Long idObservacion,
-            @Body ComentarioRequest request
-    );
-
-    @DELETE("api/observaciones/{idObs}/comentarios/{idCom}")
-    Call<Void> eliminarComentario(
-            @Path("idObs") Long idObservacion,
-            @Path("idCom") Long idComentario
-    );
-
-    // ==================== USUARIOS ====================
-
-    @GET("api/usuarios/{id}")
-    Call<Usuario> getUsuario(@Path("id") Long id);
 }

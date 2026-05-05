@@ -1,33 +1,29 @@
 package com.huerteando.app.clases;
 
-/**
- * Modelo de Usuario sincronizado con el Backend.
- */
 public class Usuario {
     private Long id;
     private String nick;
     private String nombre;
-    private String password;
-    private String rol;
+    private String apellidos;
+    private String email;
     private String avatarUrl;
-
-    public Usuario() {}
+    private String rol;
+    private String fechaRegistro;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-
     public String getNick() { return nick; }
     public void setNick(String nick) { this.nick = nick; }
-
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
-
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
-
-    public String getRol() { return rol; }
-    public void setRol(String rol) { this.rol = rol; }
-
+    public String getApellidos() { return apellidos; }
+    public void setApellidos(String apellidos) { this.apellidos = apellidos; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
     public String getAvatarUrl() { return avatarUrl; }
     public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
+    public String getRol() { return rol; }
+    public void setRol(String rol) { this.rol = rol; }
+    public String getFechaRegistro() { return fechaRegistro; }
+    public void setFechaRegistro(String fechaRegistro) { this.fechaRegistro = fechaRegistro; }
 }

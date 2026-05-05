@@ -28,8 +28,9 @@ import com.huerteando.app.api.ApiClient;
 import com.huerteando.app.api.ApiService;
 import com.huerteando.app.clases.Especie;
 import com.huerteando.app.clases.Imagen;
-import com.huerteando.app.clases.ObservacionRequest;
 import com.huerteando.app.clases.Observacion;
+import com.huerteando.app.clases.TipoObservacion;
+import com.huerteando.app.clases.Usuario;
 import com.huerteando.app.utils.SessionManager;
 
 import java.io.ByteArrayOutputStream;
@@ -46,7 +47,7 @@ import retrofit2.Response;
 
 /**
  * Activity para crear una nueva observación.
- * Sincronizada con el backend para envío de coordenadas como double y fechas ISO.
+ * Adaptada al nuevo manual (uso directo de Observacion model).
  */
 public class CrearObservacionActivity extends AppCompatActivity {
 
@@ -64,8 +65,8 @@ public class CrearObservacionActivity extends AppCompatActivity {
     private SessionManager sessionManager;
     private List<Especie> especiesCatalogo = new ArrayList<>();
 
-    // Tipos de observación
-    private final String[] tipos = {"PLANTA", "RINCON", "DENUNCIA"};
+    // Nombres para el spinner (IDs internos 1, 2, 3)
+    private final String[] nombresTipos = {"Planta", "Rincón de interés", "Incidencia ambiental"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,14 +77,15 @@ public class CrearObservacionActivity extends AppCompatActivity {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         initViews();
+        setupToolbar();
         setupImagePicker();
         cargarEspecies();
         
         // Configurar spinner tipos
-        ArrayAdapter<String> adapterTipos = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, tipos);
+        ArrayAdapter<String> adapterTipos = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, nombresTipos);
         spinnerTipo.setAdapter(adapterTipos);
 
-        // Fecha actual
+        // Fecha actual (formato legible para UI)
         editFecha.setText(new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(new Date()));
         editFecha.setEnabled(false);
 
@@ -106,6 +108,16 @@ public class CrearObservacionActivity extends AppCompatActivity {
         btnSeleccionarImagen = findViewById(R.id.btnSeleccionarImagen);
         tvImagenesSeleccionadas = findViewById(R.id.tvImagenesSeleccionadas);
         progressBar = findViewById(R.id.progressBar);
+    }
+
+    private void setupToolbar() {
+        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle(R.string.nueva_observacion);
+        }
+        toolbar.setNavigationOnClickListener(v -> finish());
     }
 
     private void cargarEspecies() {
@@ -184,41 +196,54 @@ public class CrearObservacionActivity extends AppCompatActivity {
     private void guardarObservacion() {
         if (!validarFormulario()) return;
 
-        String titulo = editTitulo.getText().toString().trim();
-        String descripcion = editDescripcion.getText().toString().trim();
-        String tipoStr = spinnerTipo.getText().toString().trim();
-        String especieSeleccionada = spinnerEspecie.getText().toString().trim();
-        String zona = editZona.getText().toString().trim();
-        String direccion = editDireccion.getText().toString().trim();
-        String nombreTradicional = editNombreTradicional.getText().toString().trim();
+        // Construir objeto Observacion segun manual
+        Observacion obs = new Observacion();
+        obs.setTitulo(editTitulo.getText().toString().trim());
+        obs.setDescripcion(editDescripcion.getText().toString().trim());
+        obs.setNombreZona(editZona.getText().toString().trim());
+        obs.setDireccionTxt(editDireccion.getText().toString().trim());
+        obs.setNombreTradicional(editNombreTradicional.getText().toString().trim());
+        obs.setLatitud(latitud);
+        obs.setLongitud(longitud);
+        obs.setEstadoObservacion("ABIERTA");
+        
+        // Formato ISO para el backend
+        String fechaISO = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).format(new Date());
+        obs.setFechaObservacion(fechaISO);
 
-        // Obtener solo el nombre común de la especie seleccionada para enviar
-        String especieNombre = null;
-        if (!especieSeleccionada.isEmpty()) {
-            if (especieSeleccionada.contains("(")) {
-                especieNombre = especieSeleccionada.split("\\(")[0].trim();
-            } else {
-                especieNombre = especieSeleccionada;
+        // Seteamos Tipo como objeto con ID
+        String tipoStr = spinnerTipo.getText().toString().trim();
+        TipoObservacion tipo = new TipoObservacion();
+        if (tipoStr.equals(nombresTipos[1])) tipo.setId(2);
+        else if (tipoStr.equals(nombresTipos[2])) tipo.setId(3);
+        else tipo.setId(1);
+        obs.setTipoObservacion(tipo);
+
+        // Seteamos Usuario como objeto con ID
+        Usuario user = new Usuario();
+        user.setId(sessionManager.getUserId());
+        obs.setUsuario(user);
+
+        // Seteamos Especie si hay
+        String especieTxt = spinnerEspecie.getText().toString().trim();
+        if (!especieTxt.isEmpty()) {
+            // Buscamos el ID en la lista local si lo necesitamos, 
+            // pero el manual solo muestra el objeto Especie.
+            // Para simplificar segun manual, si el backend permite crear/vincular por nombre, 
+            // pero normalmente se enviaria el ID si existe.
+            for (Especie e : especiesCatalogo) {
+                if (especieTxt.contains(e.getNombreCientifico())) {
+                    obs.setEspecie(e);
+                    break;
+                }
             }
         }
-        
-        String fechaISO = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).format(new Date());
-
-        int idTipo = "RINCON".equals(tipoStr) ? 2 : ("DENUNCIA".equals(tipoStr) ? 3 : 1);
-        
-        ObservacionRequest request = new ObservacionRequest(
-                titulo, descripcion, fechaISO, 
-                new ObservacionRequest.TipoRequest(idTipo), 
-                especieNombre, latitud, longitud, direccion, zona, nombreTradicional,
-                new ObservacionRequest.UsuarioRequest(sessionManager.getUserId()),
-                "ABIERTA"
-        );
 
         progressBar.setVisibility(View.VISIBLE);
         btnGuardar.setEnabled(false);
 
         ApiService apiService = ApiClient.getClient().create(ApiService.class);
-        apiService.crearObservacion(request).enqueue(new Callback<Observacion>() {
+        apiService.crearObservacion(obs).enqueue(new Callback<Observacion>() {
             @Override
             public void onResponse(Call<Observacion> call, Response<Observacion> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -245,6 +270,7 @@ public class CrearObservacionActivity extends AppCompatActivity {
 
     private boolean validarFormulario() {
         if (editTitulo.getText().toString().isEmpty()) return false;
+        if (spinnerTipo.getText().toString().isEmpty()) return false;
         if (!ubicacionObtenida) {
             Toast.makeText(this, "Obtén tu ubicación primero", Toast.LENGTH_SHORT).show();
             return false;
@@ -258,7 +284,11 @@ public class CrearObservacionActivity extends AppCompatActivity {
         for (Uri uri : imagenesSeleccionadas) {
             String b64 = convertirUriABase64(uri);
             if (b64 != null) {
-                apiService.subirImagen(idObs, new Imagen(b64, "Foto")).enqueue(new Callback<Imagen>() {
+                Imagen img = new Imagen();
+                img.setUrlArchivo(b64); // El manual dice urlArchivo obligatorio
+                img.setTitulo("Foto");
+
+                apiService.subirImagen(idObs, img).enqueue(new Callback<Imagen>() {
                     @Override public void onResponse(Call<Imagen> c, Response<Imagen> r) {
                         subidas[0]++;
                         if (subidas[0] == imagenesSeleccionadas.size()) finalizar();
