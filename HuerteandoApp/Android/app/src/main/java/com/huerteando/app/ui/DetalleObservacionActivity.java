@@ -1,6 +1,7 @@
 package com.huerteando.app.ui;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -14,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
@@ -62,6 +64,7 @@ public class DetalleObservacionActivity extends AppCompatActivity {
     private MaterialButton btnEnviarComentario;
 
     private long idObservacion;
+    private String imagenLocal;
     private Observacion observacionActual;
     private ComentarioAdapter adapterComentarios;
     private final List<Comentario> comentarios = new ArrayList<>();
@@ -81,7 +84,23 @@ public class DetalleObservacionActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(v -> finish());
 
         session = new SessionManager(this);
+
+        // Depuración de Intent para verificar extras
+        Log.d(TAG, "Iniciando DetalleObservacionActivity...");
+        if (getIntent() != null) {
+            Bundle extras = getIntent().getExtras();
+            if (extras != null) {
+                Log.d(TAG, "Extras encontrados en el Intent:");
+                for (String key : extras.keySet()) {
+                    Log.d(TAG, " - " + key + ": " + extras.get(key));
+                }
+            } else {
+                Log.d(TAG, "El Intent no tiene extras (getExtras() es null)");
+            }
+        }
+
         idObservacion = getIntent().getLongExtra("idObservacion", -1L);
+        imagenLocal = getIntent().getStringExtra("imagen"); // Recepción segura
 
         if (idObservacion == -1L) {
             Toast.makeText(this, "Error: observación no encontrada", Toast.LENGTH_SHORT).show();
@@ -272,8 +291,19 @@ public class DetalleObservacionActivity extends AppCompatActivity {
         } else {
             viewPagerImagenes.setVisibility(View.GONE);
             tabDots.setVisibility(View.GONE);
-            ivDetalleImagen.setVisibility(View.VISIBLE); // Fallback image
-            ivDetalleImagen.setImageResource(android.R.drawable.ic_menu_gallery);
+            ivDetalleImagen.setVisibility(View.VISIBLE);
+
+            if (imagenLocal != null && !imagenLocal.isEmpty()) {
+                Log.d(TAG, "Mostrando imagen local de previsualización: " + imagenLocal);
+                Glide.with(this)
+                        .load(Uri.parse(imagenLocal))
+                        .placeholder(android.R.drawable.ic_menu_gallery)
+                        .error(android.R.drawable.ic_menu_report_image)
+                        .into(ivDetalleImagen);
+            } else {
+                ivDetalleImagen.setImageResource(android.R.drawable.ic_menu_gallery);
+            }
+
             if (btnBorrarImagen != null) btnBorrarImagen.setVisibility(View.GONE);
         }
 

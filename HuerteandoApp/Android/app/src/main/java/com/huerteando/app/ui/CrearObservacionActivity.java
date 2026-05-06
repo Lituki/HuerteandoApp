@@ -2,6 +2,7 @@ package com.huerteando.app.ui;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.location.Address;
@@ -425,7 +426,7 @@ public class CrearObservacionActivity extends AppCompatActivity {
                     if (!imagenesSeleccionadas.isEmpty()) {
                         subirImagenes(idFinal);
                     } else {
-                        finalizar();
+                        finalizar(idFinal);
                     }
                 } else {
                     progressBar.setVisibility(View.GONE);
@@ -483,7 +484,7 @@ public class CrearObservacionActivity extends AppCompatActivity {
                 if (file == null || !file.exists()) {
                     Log.e(TAG, "Error: El archivo comprimido no se pudo crear para la URI: " + uri);
                     subidas[0]++;
-                    if (subidas[0] == imagenesSeleccionadas.size()) finalizar();
+                    if (subidas[0] == imagenesSeleccionadas.size()) finalizar(idObs);
                     continue;
                 }
 
@@ -515,19 +516,19 @@ public class CrearObservacionActivity extends AppCompatActivity {
                                         errores[0] + " imágenes fallaron",
                                         Toast.LENGTH_LONG).show();
                             }
-                            finalizar();
+                            finalizar(idObs);
                         }
                     }
                     @Override public void onFailure(Call<Imagen> c, Throwable t) {
                         subidas[0]++;
                         Log.e(TAG, "Fallo de red al subir imagen", t);
-                        if (subidas[0] == imagenesSeleccionadas.size()) finalizar();
+                        if (subidas[0] == imagenesSeleccionadas.size()) finalizar(idObs);
                     }
                 });
             } catch (Exception e) {
                 Log.e(TAG, "Error procesando imagen", e);
                 subidas[0]++;
-                if (subidas[0] == imagenesSeleccionadas.size()) finalizar();
+                if (subidas[0] == imagenesSeleccionadas.size()) finalizar(idObs);
             }
         }
     }
@@ -538,9 +539,23 @@ public class CrearObservacionActivity extends AppCompatActivity {
         tvError.setVisibility(View.VISIBLE);
     }
 
-    private void finalizar() {
+    private void finalizar(long idObs) {
         progressBar.setVisibility(View.GONE);
-        Log.d(TAG, "Proceso finalizado correctamente.");
+        Log.d(TAG, "Proceso finalizado correctamente. Navegando a detalle ID: " + idObs);
+
+        Intent intent = new Intent(this, DetalleObservacionActivity.class);
+        intent.putExtra("idObservacion", idObs);
+
+        // Si hay imágenes locales, pasamos la primera para previsualización inmediata
+        if (!imagenesSeleccionadas.isEmpty()) {
+            String uriStr = imagenesSeleccionadas.get(0).toString();
+            intent.putExtra("imagen", uriStr);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            Log.d(TAG, "Extras: idObservacion=" + idObs + ", imagen=" + uriStr);
+        }
+
+        startActivity(intent);
+
         String msg = idObservacionEdit != -1L ? "¡Observación actualizada! 🌱" : "¡Observación compartida con éxito! 🌱";
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
         finish();
