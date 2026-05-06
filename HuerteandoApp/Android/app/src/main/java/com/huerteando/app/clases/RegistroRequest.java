@@ -1,6 +1,5 @@
 package com.huerteando.app.clases;
 
-import com.google.gson.annotations.SerializedName;
 
 /**
  * Clase para enviar datos al servidor al registrar un nuevo usuario.
@@ -8,18 +7,19 @@ import com.google.gson.annotations.SerializedName;
  */
 public class RegistroRequest {
     private final String nick;
-    @SerializedName("passwordHash")
     private final String password;
     private final String nombre;
     private final String apellidos;
     private final String email;
+    private final String avatarUrl;
 
-    public RegistroRequest(String nick, String password, String nombre, String apellidos, String email) {
+    public RegistroRequest(String nick, String password, String nombre, String apellidos, String email, String avatarUrl) {
         this.nick = nick;
         this.password = password;
         this.nombre = nombre;
         this.apellidos = apellidos;
         this.email = email;
+        this.avatarUrl = avatarUrl;
     }
 
     public String getNick() { return nick; }
@@ -27,4 +27,5 @@ public class RegistroRequest {
     public String getNombre() { return nombre; }
     public String getApellidos() { return apellidos; }
     public String getEmail() { return email; }
+    public String getAvatarUrl() { return avatarUrl; }
 }

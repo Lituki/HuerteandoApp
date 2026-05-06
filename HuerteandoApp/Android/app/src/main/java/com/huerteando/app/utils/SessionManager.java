@@ -15,6 +15,7 @@ public class SessionManager {
     private static final String KEY_NICK   = "nick";
     private static final String KEY_NOMBRE = "nombre";
     private static final String KEY_ROL    = "rol";
+    private static final String KEY_AVATAR = "avatarUrl";
 
     private final SharedPreferences prefs;
     private final SharedPreferences.Editor editor;
@@ -27,10 +28,12 @@ public class SessionManager {
     /**
      * Guarda los datos del usuario recibidos en el login.
      */
-    public void guardarDatosSimples(Long id, String nick, String nombre) {
+    public void guardarDatosCompletos(Long id, String nick, String nombre, String rol, String avatarUrl) {
         editor.putLong(KEY_ID, id);
         editor.putString(KEY_NICK, nick);
         editor.putString(KEY_NOMBRE, nombre);
+        editor.putString(KEY_ROL, rol);
+        editor.putString(KEY_AVATAR, avatarUrl);
         editor.apply();
     }
 
@@ -38,6 +41,7 @@ public class SessionManager {
     public String getNick()   { return prefs.getString(KEY_NICK, null); }
     public String getNombre() { return prefs.getString(KEY_NOMBRE, null); }
     public String getRol()    { return prefs.getString(KEY_ROL, null); }
+    public String getAvatarUrl() { return prefs.getString(KEY_AVATAR, "default_avatar"); }
 
     public boolean haySesion() {
         return getUserId() != -1;

@@ -1,6 +1,7 @@
 package com.huerteando.app.ui;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
@@ -20,6 +21,7 @@ import com.huerteando.app.adapter.EspecieAdapter;
 import com.huerteando.app.api.ApiClient;
 import com.huerteando.app.api.ApiService;
 import com.huerteando.app.clases.Especie;
+import com.huerteando.app.utils.ErrorUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +31,8 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class EspeciesActivity extends AppCompatActivity {
+
+    private static final String TAG = "EspeciesActivity";
 
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
@@ -82,23 +86,29 @@ public class EspeciesActivity extends AppCompatActivity {
     }
 
     private void cargarEspecies() {
+        Log.d(TAG, "Cargando catálogo de especies...");
         progressBar.setVisibility(View.VISIBLE);
         apiService.getEspecies().enqueue(new Callback<List<Especie>>() {
             @Override
             public void onResponse(Call<List<Especie>> call, Response<List<Especie>> response) {
                 progressBar.setVisibility(View.GONE);
                 if (response.isSuccessful() && response.body() != null) {
+                    Log.d(TAG, "Especies cargadas: " + response.body().size());
                     listaEspecies.clear();
                     listaEspecies.addAll(response.body());
                     adapter.notifyDataSetChanged();
                     tvSinEspecies.setVisibility(listaEspecies.isEmpty() ? View.VISIBLE : View.GONE);
+                } else {
+                    Log.e(TAG, "Error al cargar especies: " + response.code());
+                    ErrorUtils.mostrarToastError(EspeciesActivity.this, response.code());
                 }
             }
 
             @Override
             public void onFailure(Call<List<Especie>> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
-                Toast.makeText(EspeciesActivity.this, "Error al cargar especies", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "Fallo de red al cargar especies", t);
+                Toast.makeText(EspeciesActivity.this, "Error de conexión", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -141,22 +151,40 @@ public class EspeciesActivity extends AppCompatActivity {
     }
 
     private void crearEspecie(Especie especie) {
+        Log.d(TAG, "Creando nueva especie: " + especie.getNombreComun());
         apiService.crearEspecie(especie).enqueue(new Callback<Especie>() {
             @Override
             public void onResponse(Call<Especie> call, Response<Especie> response) {
-                if (response.isSuccessful()) cargarEspecies();
+                if (response.isSuccessful()) {
+                    Log.d(TAG, "Especie creada con éxito");
+                    cargarEspecies();
+                } else {
+                    Log.e(TAG, "Error al crear especie: " + response.code());
+                    ErrorUtils.mostrarToastError(EspeciesActivity.this, response.code());
+                }
             }
-            @Override public void onFailure(Call<Especie> call, Throwable t) {}
+            @Override public void onFailure(Call<Especie> call, Throwable t) {
+                Log.e(TAG, "Fallo de red al crear especie", t);
+            }
         });
     }
 
     private void actualizarEspecie(Especie especie) {
+        Log.d(TAG, "Actualizando especie ID: " + especie.getId());
         apiService.actualizarEspecie(especie.getId(), especie).enqueue(new Callback<Especie>() {
             @Override
             public void onResponse(Call<Especie> call, Response<Especie> response) {
-                if (response.isSuccessful()) cargarEspecies();
+                if (response.isSuccessful()) {
+                    Log.d(TAG, "Especie actualizada OK");
+                    cargarEspecies();
+                } else {
+                    Log.e(TAG, "Error al actualizar: " + response.code());
+                    ErrorUtils.mostrarToastError(EspeciesActivity.this, response.code());
+                }
             }
-            @Override public void onFailure(Call<Especie> call, Throwable t) {}
+            @Override public void onFailure(Call<Especie> call, Throwable t) {
+                Log.e(TAG, "Fallo de red al actualizar", t);
+            }
         });
     }
 
@@ -165,12 +193,21 @@ public class EspeciesActivity extends AppCompatActivity {
                 .setTitle("Eliminar Especie")
                 .setMessage("¿Estás seguro de que deseas eliminar esta especie?")
                 .setPositiveButton("Eliminar", (dialog, which) -> {
+                    Log.d(TAG, "Eliminando especie ID: " + especie.getId());
                     apiService.eliminarEspecie(especie.getId()).enqueue(new Callback<Void>() {
                         @Override
                         public void onResponse(Call<Void> call, Response<Void> response) {
-                            if (response.isSuccessful()) cargarEspecies();
+                            if (response.isSuccessful()) {
+                                Log.d(TAG, "Especie eliminada");
+                                cargarEspecies();
+                            } else {
+                                Log.e(TAG, "Error al eliminar: " + response.code());
+                                ErrorUtils.mostrarToastError(EspeciesActivity.this, response.code());
+                            }
                         }
-                        @Override public void onFailure(Call<Void> call, Throwable t) {}
+                        @Override public void onFailure(Call<Void> call, Throwable t) {
+                            Log.e(TAG, "Fallo de red al eliminar", t);
+                        }
                     });
                 })
                 .setNegativeButton("Cancelar", null)

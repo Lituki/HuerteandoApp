@@ -43,6 +43,7 @@
                     android:padding="16dp">
 
                     <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/layoutTitulo"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -56,6 +57,7 @@
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/layoutTipo"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -231,6 +233,17 @@
                 app:cornerRadius="12dp"
                 app:icon="@android:drawable/ic_menu_camera" />
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnEliminarImagenes"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Eliminar imágenes"
+                android:textColor="@color/texto_error"
+                android:textAllCaps="false"
+                android:visibility="gone" />
+
             <TextView
                 android:id="@+id/tvImagenesSeleccionadas"
                 android:layout_width="match_parent"
@@ -240,6 +253,15 @@
                 android:text="Ninguna imagen seleccionada"
                 android:textColor="@color/texto_secundario"
                 android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/tvErrorCrear"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="center"
+                android:textColor="@android:color/holo_red_dark"
+                android:visibility="gone" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnGuardar"

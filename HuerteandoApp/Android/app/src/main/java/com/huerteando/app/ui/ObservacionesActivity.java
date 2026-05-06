@@ -2,6 +2,7 @@ package com.huerteando.app.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -39,10 +40,12 @@ import retrofit2.Response;
  */
 public class ObservacionesActivity extends AppCompatActivity {
 
+    private static final String TAG = "ObservacionesActivity";
+
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
     private TextView tvSinResultados;
-    private Spinner spinnerTipo, spinnerOrden;
+    private Spinner spinnerTipo, spinnerOrden, spinnerUsuario, spinnerEstado;
     private FloatingActionButton fabNueva;
 
     private ObservacionAdapter adapter;
@@ -50,6 +53,8 @@ public class ObservacionesActivity extends AppCompatActivity {
     private final List<Observacion> listaAMostrar = new ArrayList<>();
 
     private Long idTipoSeleccionado = null; 
+    private Long idUsuarioSeleccionado = null;
+    private String estadoSeleccionado = null;
     private String ordenSeleccionado = "fecha";
     private String textoBusqueda = "";
     private SessionManager session;
@@ -79,6 +84,8 @@ public class ObservacionesActivity extends AppCompatActivity {
         tvSinResultados = findViewById(R.id.tvSinResultados);
         spinnerTipo = findViewById(R.id.spinnerTipo);
         spinnerOrden = findViewById(R.id.spinnerOrden);
+        spinnerUsuario = findViewById(R.id.spinnerUsuario);
+        spinnerEstado = findViewById(R.id.spinnerEstado);
         fabNueva = findViewById(R.id.fabCrearObservacion);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -99,14 +106,48 @@ public class ObservacionesActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> p, View v, int pos, long id) {
                 switch (pos) {
-                    case 1: idTipoSeleccionado = 1L; break; 
-                    case 2: idTipoSeleccionado = 2L; break; 
-                    case 3: idTipoSeleccionado = 3L; break; 
+                    case 1: idTipoSeleccionado = 4L; break; // PLANTA
+                    case 2: idTipoSeleccionado = 5L; break; // RINCON
+                    case 3: idTipoSeleccionado = 6L; break; // INCIDENCIA
                     default: idTipoSeleccionado = null;
                 }
                 cargarObservaciones();
             }
             @Override public void onNothingSelected(AdapterView<?> p) {}
+        });
+
+        ArrayAdapter<CharSequence> adapterUsuario = ArrayAdapter.createFromResource(this,
+                R.array.array_filtro_usuario, android.R.layout.simple_spinner_item);
+        adapterUsuario.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerUsuario.setAdapter(adapterUsuario);
+        spinnerUsuario.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position == 1) {
+                    idUsuarioSeleccionado = session.getUserId();
+                } else {
+                    idUsuarioSeleccionado = null;
+                }
+                cargarObservaciones();
+            }
+            @Override public void onNothingSelected(AdapterView<?> parent) {}
+        });
+
+        ArrayAdapter<CharSequence> adapterEstado = ArrayAdapter.createFromResource(this,
+                R.array.array_estados, android.R.layout.simple_spinner_item);
+        adapterEstado.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerEstado.setAdapter(adapterEstado);
+        spinnerEstado.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                switch (position) {
+                    case 1: estadoSeleccionado = "ABIERTA"; break;
+                    case 2: estadoSeleccionado = "CERRADA"; break;
+                    default: estadoSeleccionado = null;
+                }
+                cargarObservaciones();
+            }
+            @Override public void onNothingSelected(AdapterView<?> parent) {}
         });
 
         final String[] valoresOrden = {"fecha", "me gusta", "comentarios"};
@@ -125,13 +166,22 @@ public class ObservacionesActivity extends AppCompatActivity {
     }
 
     private void cargarObservaciones() {
+        Log.d(TAG, "Cargando observaciones desde la API...");
         progressBar.setVisibility(View.VISIBLE);
         ApiService api = ApiClient.getClient().create(ApiService.class);
         
         Call<List<Observacion>> call;
         if (idTipoSeleccionado != null) {
+            Log.d(TAG, "Filtrando por tipo ID: " + idTipoSeleccionado);
             call = api.getObservacionesPorTipo(idTipoSeleccionado);
+        } else if (idUsuarioSeleccionado != null) {
+            Log.d(TAG, "Filtrando por usuario ID: " + idUsuarioSeleccionado);
+            call = api.getObservacionesPorUsuario(idUsuarioSeleccionado);
+        } else if (estadoSeleccionado != null) {
+            Log.d(TAG, "Filtrando por estado: " + estadoSeleccionado);
+            call = api.getObservacionesPorEstado(estadoSeleccionado);
         } else {
+            Log.d(TAG, "Cargando todas las observaciones");
             call = api.getObservaciones(); // Carga todas por defecto
         }
 
@@ -140,13 +190,17 @@ public class ObservacionesActivity extends AppCompatActivity {
             public void onResponse(Call<List<Observacion>> call, Response<List<Observacion>> response) {
                 progressBar.setVisibility(View.GONE);
                 if (response.isSuccessful() && response.body() != null) {
+                    Log.d(TAG, "Observaciones recibidas: " + response.body().size());
                     listaOriginal.clear();
                     listaOriginal.addAll(response.body());
                     procesarYMostrarLista();
+                } else {
+                    Log.e(TAG, "Error del servidor al cargar observaciones: " + response.code());
                 }
             }
             @Override
             public void onFailure(Call<List<Observacion>> call, Throwable t) {
+                Log.e(TAG, "Error crítico al conectar con la API", t);
                 progressBar.setVisibility(View.GONE);
                 tvSinResultados.setVisibility(View.VISIBLE);
             }

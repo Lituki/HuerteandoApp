@@ -19,13 +19,47 @@
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
             app:titleEnabled="false">
 
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/viewPagerImagenes"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_collapseMode="parallax" />
+
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/tabDots"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_marginBottom="32dp"
+                android:background="@android:color/transparent"
+                app:tabBackground="@drawable/dot_selector"
+                app:tabGravity="center"
+                app:tabIndicatorHeight="0dp"
+                app:tabMaxWidth="12dp"
+                app:tabRippleColor="@null" />
+
             <ImageView
                 android:id="@+id/ivDetalleImagen"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
+                android:visibility="gone"
                 app:layout_collapseMode="parallax"
                 tools:src="@android:drawable/ic_menu_gallery" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnBorrarImagen"
+                style="@style/Widget.MaterialComponents.Button.Icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|end"
+                android:layout_marginTop="64dp"
+                android:layout_marginEnd="16dp"
+                android:visibility="gone"
+                app:backgroundTint="#80000000"
+                app:icon="@android:drawable/ic_menu_delete"
+                app:iconTint="@color/white"
+                tools:visibility="visible" />
 
             <View
                 android:layout_width="match_parent"

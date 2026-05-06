@@ -41,6 +41,11 @@
     <string name="registro_boton">Registrarse</string>
     <string name="registro_ir_login">¿Ya tienes cuenta? Inicia sesión</string>
 
+    <!-- Avatar -->
+    <string name="avatar_seleccionar">Seleccionar avatar</string>
+    <string name="avatar_cambiar">Cambiar avatar</string>
+    <string name="avatar_eliminar">Eliminar avatar</string>
+
     <!-- Observaciones -->
     <string name="nueva_observacion">Nueva observación</string>
     <string name="guardar_observacion">Guardar observación</string>
@@ -60,12 +65,30 @@
     <string name="autor_prefijo">👤 </string>
 
 
+    <!-- Filtros Adicionales -->
+    <string name="filtro_todos">Todas las observaciones</string>
+    <string name="filtro_mis_observaciones">Mis observaciones</string>
+    <string name="estado_todos">Todos los estados</string>
+    <string name="estado_abierta">ABIERTA</string>
+    <string name="estado_cerrada">CERRADA</string>
+
     <!-- Arrays para los desplegables de ObservacionesActivity -->
     <string-array name="array_tipos">
         <item>@string/tipo_todos</item>
         <item>@string/tipo_planta</item>
         <item>@string/tipo_rincon</item>
         <item>@string/tipo_incidencia</item>
+    </string-array>
+
+    <string-array name="array_filtro_usuario">
+        <item>@string/filtro_todos</item>
+        <item>@string/filtro_mis_observaciones</item>
+    </string-array>
+
+    <string-array name="array_estados">
+        <item>@string/estado_todos</item>
+        <item>@string/estado_abierta</item>
+        <item>@string/estado_cerrada</item>
     </string-array>
 
     <string-array name="array_orden">

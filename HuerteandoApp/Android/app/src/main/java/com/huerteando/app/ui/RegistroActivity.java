@@ -1,20 +1,27 @@
 package com.huerteando.app.ui;
 
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.huerteando.app.R;
 import com.huerteando.app.api.ApiClient;
 import com.huerteando.app.api.ApiService;
 import com.huerteando.app.clases.RegistroRequest;
 import com.huerteando.app.clases.Usuario;
+import com.huerteando.app.utils.ErrorUtils;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -30,6 +37,8 @@ import retrofit2.Response;
  */
 public class RegistroActivity extends AppCompatActivity {
 
+    private static final String TAG = "RegistroActivity";
+
     // Elementos del layout
     private TextInputEditText editNick;
     private TextInputEditText editPassword;
@@ -40,6 +49,23 @@ public class RegistroActivity extends AppCompatActivity {
     private MaterialButton btnRegistro;
     private TextView tvError;
     private TextView tvIrALogin;
+
+    // Avatar
+    private ShapeableImageView imgAvatar;
+    private MaterialButton btnSeleccionarAvatar;
+    private String avatarUriString = "default_avatar"; // Valor por defecto
+
+    // Lanzador para abrir la galería
+    private final ActivityResultLauncher<String> galleryLauncher = registerForActivityResult(
+            new ActivityResultContracts.GetContent(),
+            uri -> {
+                if (uri != null) {
+                    // Si el usuario selecciona una imagen, la mostramos y guardamos su URI
+                    imgAvatar.setImageURI(uri);
+                    avatarUriString = uri.toString();
+                }
+            }
+    );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +83,19 @@ public class RegistroActivity extends AppCompatActivity {
         btnRegistro = findViewById(R.id.btnRegistro);
         tvError = findViewById(R.id.tvError);
         tvIrALogin = findViewById(R.id.tvIrALogin);
+
+        // Inicializar elementos del avatar
+        imgAvatar = findViewById(R.id.imgAvatar);
+        btnSeleccionarAvatar = findViewById(R.id.btnSeleccionarAvatar);
+
+        // Configurar botón para seleccionar avatar
+        btnSeleccionarAvatar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Abrir la galería para seleccionar solo imágenes
+                galleryLauncher.launch("image/*");
+            }
+        });
 
         // Volver al login al pulsar el texto
         tvIrALogin.setOnClickListener(new View.OnClickListener() {
@@ -83,18 +122,23 @@ public class RegistroActivity extends AppCompatActivity {
         String apellidos = editApellidos.getText() != null ? editApellidos.getText().toString().trim() : "";
         String email = editEmail.getText() != null ? editEmail.getText().toString().trim() : "";
 
+        Log.d(TAG, "Iniciando proceso de registro para: " + nick + " (" + email + ")");
+
         // Validaciones
         if (nick.isEmpty() || password.isEmpty() || nombre.isEmpty() || email.isEmpty()) {
+            Log.w(TAG, "Validación fallida: Campos obligatorios vacíos");
             mostrarError("Por favor, completa los campos obligatorios");
             return;
         }
 
         if (!password.equals(confirmarPassword)) {
+            Log.w(TAG, "Validación fallida: Contraseñas no coinciden");
             mostrarError("Las contraseñas no coinciden");
             return;
         }
 
         if (password.length() < 6) {
+            Log.w(TAG, "Validación fallida: Contraseña demasiado corta");
             mostrarError("La contraseña debe tener al menos 6 caracteres");
             return;
         }
@@ -105,8 +149,9 @@ public class RegistroActivity extends AppCompatActivity {
         btnRegistro.setText("Registrando...");
 
         // Llamar al API
+        Log.d(TAG, "Enviando datos al servidor...");
         ApiService apiService = ApiClient.getClient().create(ApiService.class);
-        RegistroRequest request = new RegistroRequest(nick, password, nombre, apellidos, email);
+        RegistroRequest request = new RegistroRequest(nick, password, nombre, apellidos, email, avatarUriString);
 
         Call<Usuario> call = apiService.registrar(request);
         call.enqueue(new Callback<Usuario>() {
@@ -116,15 +161,14 @@ public class RegistroActivity extends AppCompatActivity {
                 btnRegistro.setText("Registrarse");
 
                 if (response.isSuccessful()) {
-                    Toast.makeText(RegistroActivity.this, "¡Registro exitoso! Ya puedes iniciar sesión", Toast.LENGTH_LONG).show();
+                    Log.d(TAG, "¡Registro completado con éxito! Usuario creado.");
+                    Toast.makeText(RegistroActivity.this, "¡Bienvenido/a! Ya puedes iniciar sesión 🌿", Toast.LENGTH_LONG).show();
                     // Volver al login
                     finish();
                 } else {
-                    if (response.code() == 409) {
-                        mostrarError("El nick o email ya están en uso");
-                    } else {
-                        mostrarError("Error al registrar: " + response.code());
-                    }
+                    int code = response.code();
+                    Log.e(TAG, "Error en el servidor al registrar: " + code);
+                    mostrarError(ErrorUtils.getMensajeError(code));
                 }
             }
 
@@ -132,7 +176,8 @@ public class RegistroActivity extends AppCompatActivity {
             public void onFailure(Call<Usuario> call, Throwable t) {
                 btnRegistro.setEnabled(true);
                 btnRegistro.setText("Registrarse");
-                mostrarError("Error de conexión");
+                Log.e(TAG, "Fallo crítico de red en el registro", t);
+                mostrarError("No se ha podido conectar con el servidor. Revisa tu internet.");
             }
         });
     }

@@ -11,12 +11,16 @@ import com.huerteando.app.clases.Usuario;
 import java.util.List;
 import java.util.Map;
 
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
+import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
+import retrofit2.http.Part;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
@@ -55,11 +59,20 @@ public interface ApiService {
     Call<Void> borrarObservacion(@Path("id") Long id);
 
     // ── IMÁGENES ──────────────────────────────────────────────────────
-    @GET("api/observaciones/{id}/imagenes")
-    Call<List<Imagen>> getImagenes(@Path("id") Long idObservacion);
-
+    @Multipart
     @POST("api/observaciones/{id}/imagenes")
-    Call<Imagen> subirImagen(@Path("id") Long idObservacion, @Body Imagen imagen);
+    Call<Imagen> subirImagen(
+            @Path("id") Long idObservacion,
+            @Part MultipartBody.Part file,
+            @Part("titulo") RequestBody titulo
+    );
+
+    @Multipart
+    @POST("api/observaciones/{id}/imagenes")
+    Call<Imagen> subirImagen(
+            @Path("id") Long idObservacion,
+            @Part MultipartBody.Part file
+    );
 
     @DELETE("api/observaciones/{idObs}/imagenes/{idImg}")
     Call<Void> eliminarImagen(@Path("idObs") Long idObservacion, @Path("idImg") Long idImagen);
@@ -96,6 +109,10 @@ public interface ApiService {
 
     @GET("api/usuarios/{id}")
     Call<Usuario> getPerfil(@Path("id") Long id);
+
+    @Multipart
+    @POST("api/usuarios/{id}/avatar")
+    Call<Usuario> subirAvatar(@Path("id") Long idUsuario, @Part MultipartBody.Part file);
 
     // ── ESPECIES ──────────────────────────────────────────────────────
     @GET("api/especies")

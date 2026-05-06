@@ -51,6 +51,35 @@
                 android:orientation="vertical"
                 android:padding="32dp">
 
+                <!-- Sección de Avatar -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="24dp">
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/imgAvatar"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:padding="2dp"
+                        android:scaleType="centerCrop"
+                        app:strokeColor="@color/verde_principal"
+                        app:strokeWidth="2dp"
+                        app:shapeAppearanceOverlay="@style/ShapeAppearance.Huerteando.Circle"
+                        android:src="@drawable/ic_avatar_plant" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnSeleccionarAvatar"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/avatar_seleccionar"
+                        android:textColor="@color/verde_principal"
+                        android:textAllCaps="false" />
+                </LinearLayout>
+
                 <com.google.android.material.textfield.TextInputLayout
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"

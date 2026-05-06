@@ -2,6 +2,7 @@ package com.huerteando.app.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -16,6 +17,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.huerteando.app.R;
 import com.huerteando.app.api.ApiClient;
 import com.huerteando.app.api.ApiService;
+import com.huerteando.app.utils.ErrorUtils;
 import com.huerteando.app.utils.SessionManager;
 
 import java.util.HashMap;
@@ -30,6 +32,8 @@ import retrofit2.Response;
  * Actualizada para usar Map como respuesta segun el Manual.
  */
 public class LoginActivity extends AppCompatActivity {
+
+    private static final String TAG = "LoginActivity";
 
     private TextInputEditText editNick;
     private TextInputEditText editPassword;
@@ -76,6 +80,8 @@ public class LoginActivity extends AppCompatActivity {
         String nick     = texto(editNick);
         String password = texto(editPassword);
 
+        Log.d(TAG, "Intentando iniciar sesión para el usuario: " + nick);
+
         if (nick.isEmpty()) {
             mostrarError("Por favor, introduce el nick de usuario");
             return;
@@ -87,7 +93,7 @@ public class LoginActivity extends AppCompatActivity {
 
         tvError.setVisibility(View.GONE);
         btnLogin.setEnabled(false);
-        btnLogin.setText("Cargando…");
+        btnLogin.setText("Accediendo...");
 
         ApiService api = ApiClient.getClient().create(ApiService.class);
         
@@ -95,6 +101,7 @@ public class LoginActivity extends AppCompatActivity {
         credenciales.put("nick", nick);
         credenciales.put("password", password);
 
+        Log.d(TAG, "Llamando al endpoint de login...");
         api.login(credenciales).enqueue(new Callback<Map<String, Object>>() {
             @Override
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
@@ -102,24 +109,26 @@ public class LoginActivity extends AppCompatActivity {
                 btnLogin.setText("Entrar");
 
                 if (response.isSuccessful() && response.body() != null) {
+                    Log.d(TAG, "¡Login exitoso! Recibiendo datos del usuario...");
                     Map<String, Object> datos = response.body();
                     
                     // GSON convierte numeros a Double en Map<String, Object>
                     Long idUsuario = ((Double) datos.get("id")).longValue();
                     String nickUsuario = (String) datos.get("nick");
                     String nombre = (String) datos.get("nombre");
+                    String rol = (String) datos.get("rol");
+                    String avatarUrl = (String) datos.get("avatarUrl");
+                    
+                    Log.d(TAG, "ID: " + idUsuario + ", Nick: " + nickUsuario + ", Rol: " + rol);
                     
                     // Guardamos en sesion
-                    sessionManager.guardarDatosSimples(idUsuario, nickUsuario, nombre);
+                    sessionManager.guardarDatosCompletos(idUsuario, nickUsuario, nombre, rol, avatarUrl);
                     
                     irAObservaciones();
                 } else {
                     int code = response.code();
-                    if (code == 401 || code == 403) {
-                        mostrarError("Usuario o contraseña incorrectos");
-                    } else {
-                        mostrarError("Error del servidor (" + code + ")");
-                    }
+                    Log.e(TAG, "Error en el login. Código: " + code);
+                    mostrarError(ErrorUtils.getMensajeError(code));
                 }
             }
 
@@ -127,7 +136,8 @@ public class LoginActivity extends AppCompatActivity {
             public void onFailure(Call<Map<String, Object>> call, Throwable t) {
                 btnLogin.setEnabled(true);
                 btnLogin.setText("Entrar");
-                mostrarError("Error de conexión. ¿Tienes internet?");
+                Log.e(TAG, "Fallo de conexión en el login", t);
+                mostrarError("No se ha podido conectar. Comprueba tu conexión a internet.");
             }
         });
     }

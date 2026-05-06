@@ -20,42 +20,88 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:orientation="vertical"
             android:paddingHorizontal="16dp"
             android:paddingBottom="16dp">
 
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="0dp"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="0dp"
-                app:cardBackgroundColor="#33FFFFFF">
+                android:orientation="horizontal">
 
-                <Spinner
-                    android:id="@+id/spinnerTipo"
-                    android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:paddingHorizontal="8dp"
-                    android:backgroundTint="@color/white" />
-            </com.google.android.material.card.MaterialCardView>
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="0dp"
+                    app:cardBackgroundColor="#33FFFFFF">
 
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="0dp"
+                    <Spinner
+                        android:id="@+id/spinnerTipo"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:paddingHorizontal="8dp"
+                        android:backgroundTint="@color/white" />
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="0dp"
+                    app:cardBackgroundColor="#33FFFFFF">
+
+                    <Spinner
+                        android:id="@+id/spinnerOrden"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:paddingHorizontal="8dp"
+                        android:backgroundTint="@color/white" />
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="8dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="0dp"
-                app:cardBackgroundColor="#33FFFFFF">
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
 
-                <Spinner
-                    android:id="@+id/spinnerOrden"
-                    android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:paddingHorizontal="8dp"
-                    android:backgroundTint="@color/white" />
-            </com.google.android.material.card.MaterialCardView>
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="0dp"
+                    app:cardBackgroundColor="#33FFFFFF">
+
+                    <Spinner
+                        android:id="@+id/spinnerUsuario"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:paddingHorizontal="8dp"
+                        android:backgroundTint="@color/white" />
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="0dp"
+                    app:cardBackgroundColor="#33FFFFFF">
+
+                    <Spinner
+                        android:id="@+id/spinnerEstado"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:paddingHorizontal="8dp"
+                        android:backgroundTint="@color/white" />
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
 
         </LinearLayout>
     </com.google.android.material.appbar.AppBarLayout>

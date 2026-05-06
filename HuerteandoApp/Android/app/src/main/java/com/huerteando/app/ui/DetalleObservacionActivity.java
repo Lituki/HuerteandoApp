@@ -1,6 +1,10 @@
 package com.huerteando.app.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -11,6 +15,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
+import androidx.viewpager2.widget.ViewPager2;
+import com.huerteando.app.adapter.ImageCarouselAdapter;
 import com.huerteando.app.R;
 import com.huerteando.app.adapter.ComentarioAdapter;
 import com.huerteando.app.api.ApiClient;
@@ -19,6 +27,7 @@ import com.huerteando.app.clases.Comentario;
 import com.huerteando.app.clases.Imagen;
 import com.huerteando.app.clases.Observacion;
 import com.huerteando.app.clases.Usuario;
+import com.huerteando.app.utils.ErrorUtils;
 import com.huerteando.app.utils.SessionManager;
 
 import java.text.SimpleDateFormat;
@@ -39,11 +48,15 @@ import retrofit2.Response;
  */
 public class DetalleObservacionActivity extends AppCompatActivity {
 
+    private static final String TAG = "DetalleObservacionActivity";
+
     private android.widget.ImageView ivDetalleImagen;
     private ProgressBar progressDetalle;
     private TextView tvDetalleTipo, tvDetalleTitulo, tvDetalleFecha;
     private TextView tvDetalleDescripcion, tvDetalleZona, tvDetalleEspecie, tvDetalleNumMeGusta;
-    private MaterialButton btnMeGusta;
+    private ViewPager2 viewPagerImagenes;
+    private TabLayout tabDots;
+    private MaterialButton btnMeGusta, btnBorrarImagen;
     private RecyclerView recyclerComentarios;
     private com.google.android.material.textfield.TextInputEditText editNuevoComentario;
     private MaterialButton btnEnviarComentario;
@@ -81,6 +94,9 @@ public class DetalleObservacionActivity extends AppCompatActivity {
 
         btnMeGusta.setOnClickListener(v -> toggleMeGusta());
         btnEnviarComentario.setOnClickListener(v -> enviarComentario());
+        if (btnBorrarImagen != null) {
+            btnBorrarImagen.setOnClickListener(v -> confirmarEliminarImagen());
+        }
 
         cargarDatosCompletos();
     }
@@ -95,7 +111,10 @@ public class DetalleObservacionActivity extends AppCompatActivity {
         tvDetalleZona = findViewById(R.id.tvDetalleZona);
         tvDetalleEspecie = findViewById(R.id.tvDetalleEspecie);
         tvDetalleNumMeGusta = findViewById(R.id.tvDetalleNumMegusta);
+        viewPagerImagenes = findViewById(R.id.viewPagerImagenes);
+        tabDots = findViewById(R.id.tabDots);
         btnMeGusta = findViewById(R.id.btnMeGusta);
+        btnBorrarImagen = findViewById(R.id.btnBorrarImagen);
         recyclerComentarios = findViewById(R.id.recyclerComentarios);
         editNuevoComentario = findViewById(R.id.editNuevoComentario);
         btnEnviarComentario = findViewById(R.id.btnEnviarComentario);
@@ -118,6 +137,7 @@ public class DetalleObservacionActivity extends AppCompatActivity {
     }
 
     private void cargarObservacion() {
+        Log.d(TAG, "Cargando detalle de observación ID: " + idObservacion);
         progressDetalle.setVisibility(View.VISIBLE);
         ApiService api = ApiClient.getClient().create(ApiService.class);
         api.getObservacion(idObservacion).enqueue(new Callback<Observacion>() {
@@ -125,19 +145,95 @@ public class DetalleObservacionActivity extends AppCompatActivity {
             public void onResponse(Call<Observacion> call, Response<Observacion> response) {
                 progressDetalle.setVisibility(View.GONE);
                 if (response.isSuccessful() && response.body() != null) {
+                    Log.d(TAG, "Detalle cargado correctamente");
                     observacionActual = response.body();
                     mostrarObservacion();
                     actualizarEstadoMeGustaServidor();
+                    invalidateOptionsMenu(); // Actualizar menú basado en el dueño
+                } else {
+                    Log.e(TAG, "Error al cargar observación: " + response.code());
+                    ErrorUtils.mostrarToastError(DetalleObservacionActivity.this, response.code());
                 }
             }
             @Override public void onFailure(Call<Observacion> call, Throwable t) {
                 progressDetalle.setVisibility(View.GONE);
-                Toast.makeText(DetalleObservacionActivity.this, "Error al cargar datos", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "Fallo de red al cargar observación", t);
+                Toast.makeText(DetalleObservacionActivity.this, "Sin conexión", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if (observacionActual != null) {
+            Long currentUserId = session.getUserId();
+            String role = session.getRol();
+            boolean isOwner = observacionActual.getUsuario() != null && observacionActual.getUsuario().getId().equals(currentUserId);
+            boolean isAdmin = "ADMIN".equals(role);
+
+            if (isOwner || isAdmin) {
+                getMenuInflater().inflate(R.menu.menu_detalle, menu);
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_editar) {
+            irAEditar();
+            return true;
+        } else if (id == R.id.action_borrar) {
+            confirmarEliminarObservacion();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void irAEditar() {
+        Intent intent = new Intent(this, CrearObservacionActivity.class);
+        intent.putExtra("idObservacion", idObservacion);
+        startActivity(intent);
+    }
+
+    private void confirmarEliminarObservacion() {
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Eliminar Observación")
+                .setMessage("¿Estás seguro de que deseas eliminar esta observación? Esta acción no se puede deshacer.")
+                .setPositiveButton("Eliminar", (dialog, which) -> borrarObservacion())
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+    private void borrarObservacion() {
+        Log.d(TAG, "Borrando observación ID: " + idObservacion);
+        progressDetalle.setVisibility(View.VISIBLE);
+        ApiService api = ApiClient.getClient().create(ApiService.class);
+        api.borrarObservacion(idObservacion).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                progressDetalle.setVisibility(View.GONE);
+                if (response.isSuccessful()) {
+                    Toast.makeText(DetalleObservacionActivity.this, "Observación eliminada", Toast.LENGTH_SHORT).show();
+                    finish();
+                } else {
+                    Log.e(TAG, "Error al borrar observación: " + response.code());
+                    ErrorUtils.mostrarToastError(DetalleObservacionActivity.this, response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                progressDetalle.setVisibility(View.GONE);
+                Log.e(TAG, "Fallo de red al borrar observación", t);
+                Toast.makeText(DetalleObservacionActivity.this, "Error de conexión", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void mostrarObservacion() {
+        invalidateOptionsMenu();
         Observacion o = observacionActual;
         if (o.getTipoObservacion() != null) {
             tvDetalleTipo.setText(o.getTipoObservacion().getNombre());
@@ -152,23 +248,33 @@ public class DetalleObservacionActivity extends AppCompatActivity {
             tvDetalleEspecie.setVisibility(View.VISIBLE);
         }
 
-        // Imagen
+        // Carrusel de Imágenes
         if (o.getImagenes() != null && !o.getImagenes().isEmpty()) {
-            String url = o.getImagenes().get(0).getUrlArchivo();
-            if (url != null) {
-                if (!url.startsWith("http")) {
-                    String base = ApiClient.BASE_URL;
-                    if (base.endsWith("/") && url.startsWith("/")) url = base + url.substring(1);
-                    else if (!base.endsWith("/") && !url.startsWith("/")) url = base + "/" + url;
-                    else url = base + url;
-                }
-                
-                com.bumptech.glide.Glide.with(this)
-                        .load(url)
-                        .placeholder(android.R.drawable.ic_menu_gallery)
-                        .error(android.R.drawable.ic_menu_report_image)
-                        .into(ivDetalleImagen);
+            ImageCarouselAdapter carouselAdapter = new ImageCarouselAdapter(o.getImagenes());
+            viewPagerImagenes.setAdapter(carouselAdapter);
+            viewPagerImagenes.setVisibility(View.VISIBLE);
+            
+            if (o.getImagenes().size() > 1) {
+                tabDots.setVisibility(View.VISIBLE);
+                new TabLayoutMediator(tabDots, viewPagerImagenes, (tab, position) -> {}).attach();
+            } else {
+                tabDots.setVisibility(View.GONE);
             }
+
+            // Mostrar botón borrar imagen si es dueño o admin (borra la imagen actual)
+            if (btnBorrarImagen != null) {
+                Long currentUserId = session.getUserId();
+                String role = session.getRol();
+                boolean isOwner = o.getUsuario() != null && o.getUsuario().getId().equals(currentUserId);
+                boolean isAdmin = "ADMIN".equals(role);
+                btnBorrarImagen.setVisibility((isOwner || isAdmin) ? View.VISIBLE : View.GONE);
+            }
+        } else {
+            viewPagerImagenes.setVisibility(View.GONE);
+            tabDots.setVisibility(View.GONE);
+            ivDetalleImagen.setVisibility(View.VISIBLE); // Fallback image
+            ivDetalleImagen.setImageResource(android.R.drawable.ic_menu_gallery);
+            if (btnBorrarImagen != null) btnBorrarImagen.setVisibility(View.GONE);
         }
 
         actualizarBotonMeGusta();
@@ -236,6 +342,47 @@ public class DetalleObservacionActivity extends AppCompatActivity {
         tvDetalleNumMeGusta.setText(String.valueOf(observacionActual.getNumMeGustas()));
     }
 
+    private void confirmarEliminarImagen() {
+        if (observacionActual == null || observacionActual.getImagenes() == null || observacionActual.getImagenes().isEmpty()) return;
+        
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Eliminar Imagen")
+                .setMessage("¿Estás seguro de que deseas eliminar la imagen de esta observación?")
+                .setPositiveButton("Eliminar", (dialog, which) -> eliminarImagen())
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+    private void eliminarImagen() {
+        if (observacionActual == null || observacionActual.getImagenes() == null || observacionActual.getImagenes().isEmpty()) return;
+        
+        int currentPos = viewPagerImagenes.getCurrentItem();
+        Long idImg = observacionActual.getImagenes().get(currentPos).getId();
+        Log.d(TAG, "Eliminando imagen ID: " + idImg + " en posicion: " + currentPos);
+        progressDetalle.setVisibility(View.VISIBLE);
+        ApiService api = ApiClient.getClient().create(ApiService.class);
+        api.eliminarImagen(idObservacion, idImg).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                progressDetalle.setVisibility(View.GONE);
+                if (response.isSuccessful()) {
+                    Toast.makeText(DetalleObservacionActivity.this, "Imagen eliminada", Toast.LENGTH_SHORT).show();
+                    cargarObservacion(); // Recargar para actualizar vista
+                } else {
+                    Log.e(TAG, "Error al eliminar imagen: " + response.code());
+                    ErrorUtils.mostrarToastError(DetalleObservacionActivity.this, response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                progressDetalle.setVisibility(View.GONE);
+                Log.e(TAG, "Fallo de red al eliminar imagen", t);
+                Toast.makeText(DetalleObservacionActivity.this, "Error de conexión", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     private void toggleMeGusta() {
         if (observacionActual == null) return;
         Long idUser = session.getUserId();
@@ -244,6 +391,7 @@ public class DetalleObservacionActivity extends AppCompatActivity {
             return;
         }
 
+        Log.d(TAG, "Cambiando estado de Me Gusta...");
         btnMeGusta.setEnabled(false);
         ApiService api = ApiClient.getClient().create(ApiService.class);
         boolean yaDabaMeGusta = observacionActual.isMeGustaPropio();
@@ -254,16 +402,21 @@ public class DetalleObservacionActivity extends AppCompatActivity {
             public void onResponse(Call<Void> call, Response<Void> response) {
                 btnMeGusta.setEnabled(true);
                 if (response.isSuccessful() || response.code() == 409) {
+                    Log.d(TAG, "Me Gusta actualizado OK");
                     boolean nuevoEstado = !yaDabaMeGusta;
                     observacionActual.setMeGustaPropio(nuevoEstado);
                     int numActual = observacionActual.getNumMeGustas();
                     observacionActual.setNumMeGustas(nuevoEstado ? numActual + 1 : Math.max(0, numActual - 1));
                     actualizarBotonMeGusta();
                     actualizarEstadoMeGustaServidor();
+                } else {
+                    Log.e(TAG, "Error al cambiar Me Gusta: " + response.code());
+                    ErrorUtils.mostrarToastError(DetalleObservacionActivity.this, response.code());
                 }
             }
             @Override public void onFailure(Call<Void> call, Throwable t) {
                 btnMeGusta.setEnabled(true);
+                Log.e(TAG, "Fallo de red en Me Gusta", t);
             }
         });
     }
@@ -314,6 +467,7 @@ public class DetalleObservacionActivity extends AppCompatActivity {
             return;
         }
 
+        Log.d(TAG, "Enviando comentario...");
         ApiService api = ApiClient.getClient().create(ApiService.class);
         Comentario c = new Comentario();
         c.setContenido(texto);
@@ -325,11 +479,16 @@ public class DetalleObservacionActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<Comentario> call, Response<Comentario> response) {
                 if (response.isSuccessful()) {
+                    Log.d(TAG, "Comentario enviado con éxito");
                     editNuevoComentario.setText("");
                     cargarComentarios();
+                } else {
+                    Log.e(TAG, "Error al enviar comentario: " + response.code());
+                    ErrorUtils.mostrarToastError(DetalleObservacionActivity.this, response.code());
                 }
             }
             @Override public void onFailure(Call<Comentario> call, Throwable t) {
+                Log.e(TAG, "Fallo de red al comentar", t);
                 Toast.makeText(DetalleObservacionActivity.this, "Error al comentar", Toast.LENGTH_SHORT).show();
             }
         });

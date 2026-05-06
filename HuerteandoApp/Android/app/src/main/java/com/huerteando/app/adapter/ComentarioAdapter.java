@@ -85,8 +85,12 @@ public class ComentarioAdapter extends RecyclerView.Adapter<ComentarioAdapter.Vi
             if (comentario.getAutorAvatarUrl() != null && !comentario.getAutorAvatarUrl().isEmpty()) {
                 Glide.with(itemView.getContext())
                         .load(comentario.getAutorAvatarUrl())
+                        .placeholder(R.drawable.ic_avatar_plant)
+                        .error(R.drawable.ic_avatar_plant)
                         .circleCrop()
                         .into(ivAvatar);
+            } else {
+                ivAvatar.setImageResource(R.drawable.ic_avatar_plant);
             }
         }
     }

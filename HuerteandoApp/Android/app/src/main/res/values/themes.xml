@@ -22,4 +22,9 @@
     </style>
 
     <style name="Theme.Huerteando" parent="Base.Theme.Huerteando" />
+
+    <!-- Estilo para hacer que las imágenes sean circulares con ShapeableImageView -->
+    <style name="ShapeAppearance.Huerteando.Circle" parent="">
+        <item name="cornerSize">50%</item>
+    </style>
 </resources>

@@ -38,6 +38,7 @@ dependencies {
     implementation(libs.activity)
     implementation(libs.constraintlayout)
     implementation(libs.coordinatorlayout)
+    implementation(libs.viewpager2)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
@@ -46,6 +47,8 @@ dependencies {
     implementation(libs.converter.gson) // JSON -> Java objects
     // Glide: load images without blocking UI
     implementation(libs.glide)
+    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
+
     // OkHttp logging interceptor for debugging HTTP
     debugImplementation(libs.logging.interceptor)
     // OSMDroid for maps (if needed)

@@ -1,6 +1,8 @@
 package com.huerteando.app.ui;
 
 import android.Manifest;
+import android.content.ContentResolver;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.location.Address;
@@ -9,7 +11,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Base64;
+import android.util.Log;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ProgressBar;
@@ -23,6 +27,7 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.huerteando.app.R;
 import com.huerteando.app.api.ApiClient;
 import com.huerteando.app.api.ApiService;
@@ -31,16 +36,24 @@ import com.huerteando.app.clases.Imagen;
 import com.huerteando.app.clases.Observacion;
 import com.huerteando.app.clases.TipoObservacion;
 import com.huerteando.app.clases.Usuario;
+import com.huerteando.app.utils.ErrorUtils;
 import com.huerteando.app.utils.SessionManager;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -51,22 +64,30 @@ import retrofit2.Response;
  */
 public class CrearObservacionActivity extends AppCompatActivity {
 
+    private static final String TAG = "CrearObservacion";
+
     private TextInputEditText editTitulo, editDescripcion, editZona, editDireccion, editFecha, editNombreTradicional;
+    private TextInputLayout layoutTitulo, layoutTipo;
     private AutoCompleteTextView spinnerTipo, spinnerEspecie;
     private final List<Uri> imagenesSeleccionadas = new ArrayList<>();
     private android.widget.Button btnSeleccionarImagen;
+    private MaterialButton btnEliminarImagenes;
     private android.widget.TextView tvImagenesSeleccionadas;
     private androidx.activity.result.ActivityResultLauncher<android.content.Intent> pickImageLauncher;
     private MaterialButton btnGuardar, btnMiUbicacion;
+    private android.widget.TextView tvError;
     private ProgressBar progressBar;
     private FusedLocationProviderClient fusedLocationClient;
     private double latitud = 0, longitud = 0;
     private boolean ubicacionObtenida = false;
     private SessionManager sessionManager;
     private List<Especie> especiesCatalogo = new ArrayList<>();
+    private List<TipoObservacion> tiposCatalogo = new ArrayList<>();
+    private long idObservacionEdit = -1L;
+    private Observacion observacionAEditar;
 
-    // Nombres para el spinner (IDs internos 1, 2, 3)
-    private final String[] nombresTipos = {"Planta", "Rincón de interés", "Incidencia ambiental"};
+    // Nombres para el spinner (se cargarán de la API)
+    private String[] nombresTipos = {};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,22 +97,34 @@ public class CrearObservacionActivity extends AppCompatActivity {
         sessionManager = new SessionManager(this);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
+        idObservacionEdit = getIntent().getLongExtra("idObservacion", -1L);
+
         initViews();
         setupToolbar();
         setupImagePicker();
+        cargarTipos();
         cargarEspecies();
-        
-        // Configurar spinner tipos
-        ArrayAdapter<String> adapterTipos = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, nombresTipos);
-        spinnerTipo.setAdapter(adapterTipos);
 
-        // Fecha actual (formato legible para UI)
-        editFecha.setText(new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(new Date()));
+        if (idObservacionEdit != -1L) {
+            cargarDatosObservacion();
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setTitle("Editar Observación");
+            }
+            btnGuardar.setText("Actualizar");
+        } else {
+            // Fecha actual (formato legible para UI)
+            editFecha.setText(new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(new Date()));
+        }
         editFecha.setEnabled(false);
 
         btnMiUbicacion.setOnClickListener(v -> obtenerUbicacionActual());
         btnGuardar.setOnClickListener(v -> guardarObservacion());
         btnSeleccionarImagen.setOnClickListener(v -> abrirGaleria());
+        btnEliminarImagenes.setOnClickListener(v -> eliminarImagenes());
+
+        // Asegurar que los dropdowns se muestren al hacer clic
+        spinnerTipo.setOnClickListener(v -> spinnerTipo.showDropDown());
+        spinnerEspecie.setOnClickListener(v -> spinnerEspecie.showDropDown());
     }
 
     private void initViews() {
@@ -99,6 +132,8 @@ public class CrearObservacionActivity extends AppCompatActivity {
         editDescripcion = findViewById(R.id.editDescripcion);
         spinnerTipo = findViewById(R.id.spinnerTipo);
         spinnerEspecie = findViewById(R.id.spinnerEspecie);
+        layoutTitulo = findViewById(R.id.layoutTitulo);
+        layoutTipo = findViewById(R.id.layoutTipo);
         editZona = findViewById(R.id.editZona);
         editDireccion = findViewById(R.id.editDireccion);
         editFecha = findViewById(R.id.editFecha);
@@ -106,7 +141,9 @@ public class CrearObservacionActivity extends AppCompatActivity {
         btnGuardar = findViewById(R.id.btnGuardar);
         btnMiUbicacion = findViewById(R.id.btnMiUbicacion);
         btnSeleccionarImagen = findViewById(R.id.btnSeleccionarImagen);
+        btnEliminarImagenes = findViewById(R.id.btnEliminarImagenes);
         tvImagenesSeleccionadas = findViewById(R.id.tvImagenesSeleccionadas);
+        tvError = findViewById(R.id.tvErrorCrear);
         progressBar = findViewById(R.id.progressBar);
     }
 
@@ -120,12 +157,103 @@ public class CrearObservacionActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(v -> finish());
     }
 
+    private void cargarDatosObservacion() {
+        Log.d(TAG, "Cargando datos para editar observación ID: " + idObservacionEdit);
+        progressBar.setVisibility(View.VISIBLE);
+        ApiService api = ApiClient.getClient().create(ApiService.class);
+        api.getObservacion(idObservacionEdit).enqueue(new Callback<Observacion>() {
+            @Override
+            public void onResponse(Call<Observacion> call, Response<Observacion> response) {
+                progressBar.setVisibility(View.GONE);
+                if (response.isSuccessful() && response.body() != null) {
+                    observacionAEditar = response.body();
+                    rellenarCampos();
+                } else {
+                    Log.e(TAG, "Error al cargar datos de edición: " + response.code());
+                    Toast.makeText(CrearObservacionActivity.this, "Error al cargar datos", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Observacion> call, Throwable t) {
+                progressBar.setVisibility(View.GONE);
+                Log.e(TAG, "Fallo de red al cargar datos de edición", t);
+                Toast.makeText(CrearObservacionActivity.this, "Sin conexión", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void rellenarCampos() {
+        editTitulo.setText(observacionAEditar.getTitulo());
+        editDescripcion.setText(observacionAEditar.getDescripcion());
+        editZona.setText(observacionAEditar.getNombreZona());
+        editDireccion.setText(observacionAEditar.getDireccionTxt());
+        editNombreTradicional.setText(observacionAEditar.getNombreTradicional());
+        latitud = observacionAEditar.getLatitud();
+        longitud = observacionAEditar.getLongitud();
+        ubicacionObtenida = true;
+
+        if (observacionAEditar.getTipoObservacion() != null) {
+            spinnerTipo.setText(observacionAEditar.getTipoObservacion().getNombre(), false);
+        }
+
+        if (observacionAEditar.getEspecie() != null) {
+            String espText = observacionAEditar.getEspecie().getNombreComun() + " (" + observacionAEditar.getEspecie().getNombreCientifico() + ")";
+            spinnerEspecie.setText(espText, false);
+        }
+
+        // Formatear fecha para mostrar
+        try {
+            String iso = observacionAEditar.getFechaObservacion();
+            if (iso != null) {
+                String limpia = iso.split("\\.")[0].replace("T", " ");
+                SimpleDateFormat sdfIso = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+                Date date = sdfIso.parse(limpia);
+                editFecha.setText(new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(date));
+            }
+        } catch (Exception e) {
+            editFecha.setText(observacionAEditar.getFechaObservacion());
+        }
+
+        if (observacionAEditar.getImagenes() != null && !observacionAEditar.getImagenes().isEmpty()) {
+            tvImagenesSeleccionadas.setText("La observación ya tiene imágenes. Puedes añadir más.");
+        }
+    }
+
+    private void cargarTipos() {
+        Log.d(TAG, "Cargando tipos de observación...");
+        ApiService api = ApiClient.getClient().create(ApiService.class);
+        api.getTipos().enqueue(new Callback<List<TipoObservacion>>() {
+            @Override
+            public void onResponse(Call<List<TipoObservacion>> call, Response<List<TipoObservacion>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    tiposCatalogo = response.body();
+                    nombresTipos = new String[tiposCatalogo.size()];
+                    for (int i = 0; i < tiposCatalogo.size(); i++) {
+                        nombresTipos[i] = tiposCatalogo.get(i).getNombre();
+                    }
+                    ArrayAdapter<String> adapterTipos = new ArrayAdapter<>(CrearObservacionActivity.this,
+                            android.R.layout.simple_dropdown_item_1line, nombresTipos);
+                    spinnerTipo.setAdapter(adapterTipos);
+                    Log.d(TAG, "Tipos cargados: " + tiposCatalogo.size());
+                } else {
+                    Log.e(TAG, "Error al cargar tipos: " + response.code());
+                }
+            }
+            @Override public void onFailure(Call<List<TipoObservacion>> call, Throwable t) {
+                Log.e(TAG, "Fallo de red al cargar tipos", t);
+            }
+        });
+    }
+
     private void cargarEspecies() {
+        Log.d(TAG, "Cargando catálogo de especies...");
         ApiService apiService = ApiClient.getClient().create(ApiService.class);
         apiService.getEspecies().enqueue(new Callback<List<Especie>>() {
             @Override
             public void onResponse(Call<List<Especie>> call, Response<List<Especie>> response) {
                 if (response.isSuccessful() && response.body() != null) {
+                    Log.d(TAG, "Especies cargadas: " + response.body().size());
                     especiesCatalogo = response.body();
                     List<String> nombres = new ArrayList<>();
                     for (Especie e : especiesCatalogo) {
@@ -134,9 +262,14 @@ public class CrearObservacionActivity extends AppCompatActivity {
                     ArrayAdapter<String> adapterEspecies = new ArrayAdapter<>(CrearObservacionActivity.this,
                             android.R.layout.simple_dropdown_item_1line, nombres);
                     spinnerEspecie.setAdapter(adapterEspecies);
+                } else {
+                    Log.e(TAG, "Error al cargar especies: " + response.code());
                 }
             }
-            @Override public void onFailure(Call<List<Especie>> call, Throwable t) {}
+            @Override
+            public void onFailure(Call<List<Especie>> call, Throwable t) {
+                Log.e(TAG, "Fallo de red al cargar especies", t);
+            }
         });
     }
 
@@ -152,10 +285,26 @@ public class CrearObservacionActivity extends AppCompatActivity {
                         } else if (result.getData().getData() != null) {
                             imagenesSeleccionadas.add(result.getData().getData());
                         }
-                        tvImagenesSeleccionadas.setText(imagenesSeleccionadas.size() + " imágenes seleccionadas");
+                        actualizarVistaImagenes();
                     }
                 }
         );
+    }
+
+    private void actualizarVistaImagenes() {
+        if (imagenesSeleccionadas.isEmpty()) {
+            tvImagenesSeleccionadas.setText("Ninguna imagen seleccionada");
+            btnEliminarImagenes.setVisibility(View.GONE);
+        } else {
+            tvImagenesSeleccionadas.setText(imagenesSeleccionadas.size() + " imágenes seleccionadas");
+            btnEliminarImagenes.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void eliminarImagenes() {
+        imagenesSeleccionadas.clear();
+        actualizarVistaImagenes();
+        Log.d(TAG, "Imágenes deseleccionadas.");
     }
 
     private void obtenerUbicacionActual() {
@@ -211,12 +360,20 @@ public class CrearObservacionActivity extends AppCompatActivity {
         String fechaISO = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).format(new Date());
         obs.setFechaObservacion(fechaISO);
 
-        // Seteamos Tipo como objeto con ID
+        // Seteamos Tipo como objeto con ID real de la base de datos
         String tipoStr = spinnerTipo.getText().toString().trim();
-        TipoObservacion tipo = new TipoObservacion();
-        if (tipoStr.equals(nombresTipos[1])) tipo.setId(2);
-        else if (tipoStr.equals(nombresTipos[2])) tipo.setId(3);
-        else tipo.setId(1);
+        TipoObservacion tipo = null;
+        for (TipoObservacion t : tiposCatalogo) {
+            if (t.getNombre().equalsIgnoreCase(tipoStr)) {
+                tipo = t;
+                break;
+            }
+        }
+        
+        if (tipo == null) {
+            mostrarError("Selecciona un tipo válido");
+            return;
+        }
         obs.setTipoObservacion(tipo);
 
         // Seteamos Usuario como objeto con ID
@@ -224,38 +381,39 @@ public class CrearObservacionActivity extends AppCompatActivity {
         user.setId(sessionManager.getUserId());
         obs.setUsuario(user);
 
-        // Seteamos Especie si hay
-        String especieTxt = spinnerEspecie.getText().toString().trim();
-        if (!especieTxt.isEmpty()) {
-            // Buscamos el ID en la lista local si lo necesitamos, 
-            // pero el manual solo muestra el objeto Especie.
-            // Para simplificar segun manual, si el backend permite crear/vincular por nombre, 
-            // pero normalmente se enviaria el ID si existe.
-            for (Especie e : especiesCatalogo) {
-                if (especieTxt.contains(e.getNombreCientifico())) {
-                    obs.setEspecie(e);
-                    break;
-                }
-            }
-        }
-
         progressBar.setVisibility(View.VISIBLE);
         btnGuardar.setEnabled(false);
 
         ApiService apiService = ApiClient.getClient().create(ApiService.class);
-        apiService.crearObservacion(obs).enqueue(new Callback<Observacion>() {
+        Call<Observacion> call;
+
+        if (idObservacionEdit != -1L) {
+            Log.d(TAG, "Editando observación existente ID: " + idObservacionEdit);
+            obs.setId(idObservacionEdit);
+            // Mantenemos la fecha original si estamos editando
+            obs.setFechaObservacion(observacionAEditar.getFechaObservacion());
+            call = apiService.editarObservacion(idObservacionEdit, obs);
+        } else {
+            Log.d(TAG, "Enviando nueva observación al servidor...");
+            call = apiService.crearObservacion(obs);
+        }
+
+        call.enqueue(new Callback<Observacion>() {
             @Override
             public void onResponse(Call<Observacion> call, Response<Observacion> response) {
                 if (response.isSuccessful() && response.body() != null) {
+                    long idFinal = response.body().getId();
+                    Log.d(TAG, "¡Éxito! Observación guardada con ID: " + idFinal);
                     if (!imagenesSeleccionadas.isEmpty()) {
-                        subirImagenes(response.body().getId());
+                        subirImagenes(idFinal);
                     } else {
                         finalizar();
                     }
                 } else {
                     progressBar.setVisibility(View.GONE);
                     btnGuardar.setEnabled(true);
-                    Toast.makeText(CrearObservacionActivity.this, "Error al guardar", Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Error del servidor al guardar observación: " + response.code());
+                    ErrorUtils.mostrarToastError(CrearObservacionActivity.this, response.code());
                 }
             }
 
@@ -263,57 +421,96 @@ public class CrearObservacionActivity extends AppCompatActivity {
             public void onFailure(Call<Observacion> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
                 btnGuardar.setEnabled(true);
-                Toast.makeText(CrearObservacionActivity.this, "Error de red", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "Error crítico de conexión", t);
+                Toast.makeText(CrearObservacionActivity.this,
+                        "Sin conexión: Comprueba tu internet y el servidor",
+                        Toast.LENGTH_LONG).show();
             }
         });
     }
 
     private boolean validarFormulario() {
-        if (editTitulo.getText().toString().isEmpty()) return false;
-        if (spinnerTipo.getText().toString().isEmpty()) return false;
+        layoutTitulo.setError(null);
+        layoutTipo.setError(null);
+
+        boolean valido = true;
+
+        if (editTitulo.getText().toString().isEmpty()) {
+            layoutTitulo.setError("El título es obligatorio");
+            valido = false;
+        }
+        if (spinnerTipo.getText().toString().isEmpty()) {
+            layoutTipo.setError("Selecciona un tipo de observación");
+            valido = false;
+        }
         if (!ubicacionObtenida) {
             Toast.makeText(this, "Obtén tu ubicación primero", Toast.LENGTH_SHORT).show();
-            return false;
+            valido = false;
         }
-        return true;
+        return valido;
     }
 
     private void subirImagenes(long idObs) {
+        Log.d(TAG, "Subiendo " + imagenesSeleccionadas.size() + " imágenes usando Multipart...");
         ApiService apiService = ApiClient.getClient().create(ApiService.class);
         final int[] subidas = {0};
+        
         for (Uri uri : imagenesSeleccionadas) {
-            String b64 = convertirUriABase64(uri);
-            if (b64 != null) {
-                Imagen img = new Imagen();
-                img.setUrlArchivo(b64); // El manual dice urlArchivo obligatorio
-                img.setTitulo("Foto");
+            try {
+                File file = copiarUriACache(uri);
+                if (file == null) continue;
 
-                apiService.subirImagen(idObs, img).enqueue(new Callback<Imagen>() {
+                String mimeType = getContentResolver().getType(uri);
+                if (mimeType == null) mimeType = "image/jpeg";
+                
+                RequestBody requestFile = RequestBody.create(MediaType.parse(mimeType), file);
+                MultipartBody.Part body = MultipartBody.Part.createFormData("file", file.getName(), requestFile);
+                RequestBody titulo = RequestBody.create(MediaType.parse("text/plain"), "Foto");
+
+                apiService.subirImagen(idObs, body, titulo).enqueue(new Callback<Imagen>() {
                     @Override public void onResponse(Call<Imagen> c, Response<Imagen> r) {
                         subidas[0]++;
+                        Log.d(TAG, "Imagen " + subidas[0] + " subida OK");
                         if (subidas[0] == imagenesSeleccionadas.size()) finalizar();
                     }
                     @Override public void onFailure(Call<Imagen> c, Throwable t) {
                         subidas[0]++;
+                        Log.e(TAG, "Error al subir imagen " + subidas[0], t);
                         if (subidas[0] == imagenesSeleccionadas.size()) finalizar();
                     }
                 });
+            } catch (IOException e) {
+                Log.e(TAG, "Error al procesar archivo para subir", e);
+                subidas[0]++;
+                if (subidas[0] == imagenesSeleccionadas.size()) finalizar();
             }
         }
     }
 
-    private String convertirUriABase64(Uri uri) {
-        try {
-            Bitmap b = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            b.compress(Bitmap.CompressFormat.JPEG, 50, baos);
-            return Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
-        } catch (Exception e) { return null; }
+    private File copiarUriACache(Uri uri) throws IOException {
+        String extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(getContentResolver().getType(uri));
+        File outFile = new File(getCacheDir(), "upload_" + System.currentTimeMillis() + "." + (extension != null ? extension : "jpg"));
+        try (InputStream in = getContentResolver().openInputStream(uri);
+             OutputStream out = new FileOutputStream(outFile)) {
+            byte[] buffer = new byte[8192];
+            int len;
+            while ((len = in.read(buffer)) != -1) {
+                out.write(buffer, 0, len);
+            }
+        }
+        return outFile;
+    }
+
+    private void mostrarError(String mensaje) {
+        tvError.setText(mensaje);
+        tvError.setVisibility(View.VISIBLE);
     }
 
     private void finalizar() {
         progressBar.setVisibility(View.GONE);
-        Toast.makeText(this, "¡Guardado!", Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "Proceso finalizado correctamente.");
+        String msg = idObservacionEdit != -1L ? "¡Observación actualizada! 🌱" : "¡Observación compartida con éxito! 🌱";
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
         finish();
     }
 }

@@ -6,9 +6,10 @@ package com.huerteando.app.clases;
  */
 public class Imagen {
     private Long id;
-    private String urlArchivo; // Aquí viajará el String Base64 en el POST
+    private String urlArchivo;
     private String titulo;
     private String creadoEn;
+    private Observacion observacion;
 
     public Imagen() {}
 
@@ -29,4 +30,7 @@ public class Imagen {
 
     public String getCreadoEn() { return creadoEn; }
     public void setCreadoEn(String creadoEn) { this.creadoEn = creadoEn; }
+
+    public Observacion getObservacion() { return observacion; }
+    public void setObservacion(Observacion observacion) { this.observacion = observacion; }
 }
