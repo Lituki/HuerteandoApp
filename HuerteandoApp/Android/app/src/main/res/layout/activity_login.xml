@@ -5,7 +5,8 @@
     android:id="@+id/loginLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_gradient_header">
+    android:background="@drawable/bg_gradient_header"
+    android:fitsSystemWindows="true">
 
     <LinearLayout
         android:id="@+id/headerLayout"
@@ -59,7 +60,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="32dp">
+                android:padding="24dp">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -81,7 +82,7 @@
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="32dp"
+                    android:layout_marginTop="24dp"
                     android:hint="@string/login_nick_hint"
                     app:startIconDrawable="@android:drawable/ic_menu_myplaces"
                     app:boxStrokeColor="@color/verde_principal"
@@ -116,7 +117,7 @@
                     android:id="@+id/btnLogin"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
-                    android:layout_marginTop="32dp"
+                    android:layout_marginTop="24dp"
                     android:text="@string/login_boton"
                     android:textAllCaps="false"
                     android:textSize="16sp"

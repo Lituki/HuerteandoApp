@@ -116,13 +116,16 @@ public class LoginActivity extends AppCompatActivity {
                     Long idUsuario = ((Double) datos.get("id")).longValue();
                     String nickUsuario = (String) datos.get("nick");
                     String nombre = (String) datos.get("nombre");
+                    String apellidos = (String) datos.get("apellidos");
+                    String email = (String) datos.get("email");
+                    String fecha = (String) datos.get("fechaRegistro");
                     String rol = (String) datos.get("rol");
                     String avatarUrl = (String) datos.get("avatarUrl");
                     
                     Log.d(TAG, "ID: " + idUsuario + ", Nick: " + nickUsuario + ", Rol: " + rol);
                     
                     // Guardamos en sesion
-                    sessionManager.guardarDatosCompletos(idUsuario, nickUsuario, nombre, rol, avatarUrl);
+                    sessionManager.guardarDatosCompletos(idUsuario, nickUsuario, nombre, apellidos, email, fecha, rol, avatarUrl);
                     
                     irAObservaciones();
                 } else {

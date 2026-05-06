@@ -7,7 +7,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import android.util.Log;
-import android.webkit.MimeTypeMap;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -20,6 +19,7 @@ import com.huerteando.app.R;
 import com.huerteando.app.api.ApiClient;
 import com.huerteando.app.api.ApiService;
 import com.huerteando.app.clases.Usuario;
+import com.huerteando.app.utils.ImageUtils;
 import com.huerteando.app.utils.SessionManager;
 
 import java.io.File;
@@ -44,7 +44,7 @@ public class PerfilActivity extends AppCompatActivity {
 
     private static final String TAG = "PerfilActivity";
 
-    private TextView tvNombre, tvNick, tvRol;
+    private TextView tvNombre, tvApellidos, tvEmail, tvFecha, tvNick, tvRol;
     private ShapeableImageView ivAvatar;
     private SessionManager session;
 
@@ -82,6 +82,9 @@ public class PerfilActivity extends AppCompatActivity {
 
         // Enlazar vistas
         tvNombre = findViewById(R.id.tvPerfilNombre);
+        tvApellidos = findViewById(R.id.tvPerfilApellidos);
+        tvEmail = findViewById(R.id.tvPerfilEmail);
+        tvFecha = findViewById(R.id.tvPerfilFecha);
         tvNick = findViewById(R.id.tvPerfilNick);
         tvRol = findViewById(R.id.tvPerfilRol);
         ivAvatar = findViewById(R.id.ivPerfilAvatar);
@@ -113,13 +116,20 @@ public class PerfilActivity extends AppCompatActivity {
 
     private void subirAvatarAlServidor(Uri uri) {
         try {
-            File file = copiarUriACache(uri);
-            if (file == null) return;
+            // Usamos ImageUtils para comprimir el avatar < 1MB
+            File file = ImageUtils.compressImage(this, uri, "avatar", 0);
+            if (file == null || !file.exists()) {
+                Log.e(TAG, "Error: No se pudo comprimir el avatar");
+                Toast.makeText(this, "Error al procesar imagen", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            Log.d(TAG, "Avatar comprimido listo: " + file.getName() + " Tamaño: " + file.length() + " bytes");
 
             String mimeType = getContentResolver().getType(uri);
             if (mimeType == null) mimeType = "image/jpeg";
 
-            RequestBody requestFile = RequestBody.create(MediaType.parse(mimeType), file);
+            RequestBody requestFile = RequestBody.create(file, MediaType.parse(mimeType));
             MultipartBody.Part body = MultipartBody.Part.createFormData("file", file.getName(), requestFile);
 
             ApiService api = ApiClient.getClient().create(ApiService.class);
@@ -130,7 +140,7 @@ public class PerfilActivity extends AppCompatActivity {
                         Usuario u = response.body();
                         Log.d(TAG, "Avatar subido con éxito: " + u.getAvatarUrl());
                         // 3. Actualizar sesión con la URL remota
-                        session.guardarDatosCompletos(u.getId(), u.getNick(), u.getNombre(), u.getRol(), u.getAvatarUrl());
+                        session.guardarDatosCompletos(u.getId(), u.getNick(), u.getNombre(), u.getApellidos(), u.getEmail(), u.getFechaRegistro(), u.getRol(), u.getAvatarUrl());
                         // 4. Cargar desde URL remota para confirmar y evitar SecurityException
                         cargarDatosUsuario();
                         Toast.makeText(PerfilActivity.this, "Perfil actualizado", Toast.LENGTH_SHORT).show();
@@ -147,24 +157,12 @@ public class PerfilActivity extends AppCompatActivity {
                 }
             });
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             Log.e(TAG, "Error al procesar avatar para subir", e);
         }
     }
 
-    private File copiarUriACache(Uri uri) throws IOException {
-        String extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(getContentResolver().getType(uri));
-        File outFile = new File(getCacheDir(), "avatar_" + System.currentTimeMillis() + "." + (extension != null ? extension : "jpg"));
-        try (InputStream in = getContentResolver().openInputStream(uri);
-             OutputStream out = new FileOutputStream(outFile)) {
-            byte[] buffer = new byte[8192];
-            int len;
-            while ((len = in.read(buffer)) != -1) {
-                out.write(buffer, 0, len);
-            }
-        }
-        return outFile;
-    }
+    // El método copiarUriACache ya no es necesario
 
     private void sincronizarConServidor() {
         if (!session.haySesion()) return;
@@ -176,7 +174,7 @@ public class PerfilActivity extends AppCompatActivity {
             public void onResponse(Call<Usuario> call, Response<Usuario> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     Usuario u = response.body();
-                    session.guardarDatosCompletos(u.getId(), u.getNick(), u.getNombre(), u.getRol(), u.getAvatarUrl());
+                    session.guardarDatosCompletos(u.getId(), u.getNick(), u.getNombre(), u.getApellidos(), u.getEmail(), u.getFechaRegistro(), u.getRol(), u.getAvatarUrl());
                     cargarDatosUsuario();
                 }
             }
@@ -192,10 +190,23 @@ public class PerfilActivity extends AppCompatActivity {
         if (session.haySesion()) {
             // Añadimos comprobaciones de seguridad para evitar el crash
             String nombre = session.getNombre() != null ? session.getNombre() : "Usuario";
+            String apellidos = session.getApellidos() != null ? session.getApellidos() : "";
+            String email = session.getEmail() != null ? session.getEmail() : "";
+            String fecha = session.getFechaRegistro() != null ? session.getFechaRegistro() : "";
             String nick = session.getNick() != null ? session.getNick() : "sin_nick";
             String rol = session.getRol() != null ? session.getRol() : "USUARIO";
 
             tvNombre.setText(nombre);
+            tvApellidos.setText(apellidos);
+            tvEmail.setText(email);
+            
+            // Formatear fecha si es ISO
+            if (fecha.contains("T")) {
+                tvFecha.setText(fecha.split("T")[0]);
+            } else {
+                tvFecha.setText(fecha);
+            }
+
             tvNick.setText(String.format(Locale.getDefault(), "@%s", nick));
             tvRol.setText(rol);
 

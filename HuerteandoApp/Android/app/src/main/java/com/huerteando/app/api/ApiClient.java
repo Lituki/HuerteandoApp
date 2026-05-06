@@ -17,8 +17,7 @@ public class ApiClient {
     private static Retrofit retrofit = null;
 
     /**
-     * Devuelve una instancia única de Retrofit.
-     * Ya no necesitamos pasarle el token JWT.
+     * Devuelve una instancia única de Retrofit
      */
     public static Retrofit getClient() {
         if (retrofit == null) {

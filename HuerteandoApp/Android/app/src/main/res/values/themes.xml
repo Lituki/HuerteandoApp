@@ -16,9 +16,15 @@
         <item name="colorOnPrimary">@color/white</item>
         <!-- Color de fondo de la app -->
         <item name="android:colorBackground">@color/fondo_pantalla</item>
+        <item name="colorSurface">@color/white</item>
+        <item name="colorOnSurface">@color/texto_principal</item>
+        <item name="colorOnSurfaceVariant">@color/texto_secundario</item>
+
         <!-- Fuente de texto principal -->
         <item name="android:textColorPrimary">@color/texto_principal</item>
         <item name="android:textColorSecondary">@color/texto_secundario</item>
+        <item name="android:textColorHint">@color/texto_secundario</item>
+        <item name="android:editTextColor">@color/texto_principal</item>
     </style>
 
     <style name="Theme.Huerteando" parent="Base.Theme.Huerteando" />

@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/fondo_pantalla">
+    android:background="@color/fondo_pantalla"
+    android:fitsSystemWindows="true">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
@@ -28,13 +29,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="20dp">
+            android:padding="16dp">
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="2dp">
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@color/white">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -47,13 +49,16 @@
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Título *">
+                        android:hint="Título *"
+                        app:hintTextColor="@color/verde_principal"
+                        android:textColorHint="@color/texto_secundario">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/editTitulo"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="textCapSentences" />
+                            android:inputType="textCapSentences"
+                            android:textColor="@color/texto_principal" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
@@ -62,13 +67,19 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
-                        android:hint="Tipo *">
+                        android:hint="Tipo *"
+                        app:hintTextColor="@color/verde_principal"
+                        android:textColorHint="@color/texto_secundario">
 
-                        <AutoCompleteTextView
+                        <com.google.android.material.textfield.MaterialAutoCompleteTextView
                             android:id="@+id/spinnerTipo"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="none" />
+                            android:inputType="none"
+                            android:focusable="false"
+                            android:clickable="true"
+                            android:cursorVisible="false"
+                            android:textColor="@color/texto_principal" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
@@ -76,7 +87,9 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
-                        android:hint="Descripción">
+                        android:hint="Descripción"
+                        app:hintTextColor="@color/verde_principal"
+                        android:textColorHint="@color/texto_secundario">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/editDescripcion"
@@ -84,7 +97,8 @@
                             android:layout_height="wrap_content"
                             android:gravity="top"
                             android:inputType="textMultiLine"
-                            android:minLines="3" />
+                            android:minLines="3"
+                            android:textColor="@color/texto_principal" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
@@ -92,7 +106,9 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
-                        android:hint="@string/fecha">
+                        android:hint="@string/fecha"
+                        app:hintTextColor="@color/verde_principal"
+                        android:textColorHint="@color/texto_secundario">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/editFecha"
@@ -100,7 +116,8 @@
                             android:layout_height="wrap_content"
                             android:focusable="false"
                             android:clickable="false"
-                            android:inputType="none" />
+                            android:inputType="none"
+                            android:textColor="@color/texto_principal" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                 </LinearLayout>
@@ -109,7 +126,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="16dp"
                 android:layout_marginStart="4dp"
                 android:text="Detalles botánicos"
                 android:textColor="@color/texto_principal"
@@ -121,7 +138,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="2dp">
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@color/white">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -133,13 +151,19 @@
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Especie (opcional)">
+                        android:hint="Especie (opcional)"
+                        app:hintTextColor="@color/verde_principal"
+                        android:textColorHint="@color/texto_secundario">
 
-                        <AutoCompleteTextView
+                        <com.google.android.material.textfield.MaterialAutoCompleteTextView
                             android:id="@+id/spinnerEspecie"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="none" />
+                            android:inputType="none"
+                            android:focusable="false"
+                            android:clickable="true"
+                            android:cursorVisible="false"
+                            android:textColor="@color/texto_principal" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
@@ -147,13 +171,16 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
-                        android:hint="Nombre tradicional (opcional)">
+                        android:hint="Nombre tradicional (opcional)"
+                        app:hintTextColor="@color/verde_principal"
+                        android:textColorHint="@color/texto_secundario">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/editNombreTradicional"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="textCapWords" />
+                            android:inputType="textCapWords"
+                            android:textColor="@color/texto_principal" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                 </LinearLayout>
@@ -162,7 +189,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="16dp"
                 android:layout_marginStart="4dp"
                 android:text="Ubicación"
                 android:textColor="@color/texto_principal"
@@ -174,7 +201,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="2dp">
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@color/white">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -197,13 +225,16 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:hint="Zona / Barrio">
+                        android:hint="Zona / Barrio"
+                        app:hintTextColor="@color/verde_principal"
+                        android:textColorHint="@color/texto_secundario">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/editZona"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="textCapWords" />
+                            android:inputType="textCapWords"
+                            android:textColor="@color/texto_principal" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
@@ -211,13 +242,16 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
-                        android:hint="Dirección">
+                        android:hint="Dirección"
+                        app:hintTextColor="@color/verde_principal"
+                        android:textColorHint="@color/texto_secundario">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/editDireccion"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="textPostalAddress" />
+                            android:inputType="textPostalAddress"
+                            android:textColor="@color/texto_principal" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                 </LinearLayout>
@@ -228,7 +262,7 @@
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="16dp"
                 android:text="Seleccionar imágenes"
                 app:cornerRadius="12dp"
                 app:icon="@android:drawable/ic_menu_camera" />
@@ -267,8 +301,8 @@
                 android:id="@+id/btnGuardar"
                 android:layout_width="match_parent"
                 android:layout_height="64dp"
-                android:layout_marginTop="32dp"
-                android:layout_marginBottom="32dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="16dp"
                 android:text="@string/guardar_observacion"
                 android:textSize="16sp"
                 android:textStyle="bold"

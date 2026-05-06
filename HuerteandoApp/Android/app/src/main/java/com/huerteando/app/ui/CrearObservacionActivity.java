@@ -1,7 +1,6 @@
 package com.huerteando.app.ui;
 
 import android.Manifest;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -13,7 +12,6 @@ import android.provider.MediaStore;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
-import android.webkit.MimeTypeMap;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ProgressBar;
@@ -27,6 +25,7 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputLayout;
 import com.huerteando.app.R;
 import com.huerteando.app.api.ApiClient;
@@ -37,6 +36,7 @@ import com.huerteando.app.clases.Observacion;
 import com.huerteando.app.clases.TipoObservacion;
 import com.huerteando.app.clases.Usuario;
 import com.huerteando.app.utils.ErrorUtils;
+import com.huerteando.app.utils.ImageUtils;
 import com.huerteando.app.utils.SessionManager;
 
 import java.io.ByteArrayOutputStream;
@@ -68,7 +68,7 @@ public class CrearObservacionActivity extends AppCompatActivity {
 
     private TextInputEditText editTitulo, editDescripcion, editZona, editDireccion, editFecha, editNombreTradicional;
     private TextInputLayout layoutTitulo, layoutTipo;
-    private AutoCompleteTextView spinnerTipo, spinnerEspecie;
+    private MaterialAutoCompleteTextView spinnerTipo, spinnerEspecie;
     private final List<Uri> imagenesSeleccionadas = new ArrayList<>();
     private android.widget.Button btnSeleccionarImagen;
     private MaterialButton btnEliminarImagenes;
@@ -122,9 +122,25 @@ public class CrearObservacionActivity extends AppCompatActivity {
         btnSeleccionarImagen.setOnClickListener(v -> abrirGaleria());
         btnEliminarImagenes.setOnClickListener(v -> eliminarImagenes());
 
-        // Asegurar que los dropdowns se muestren al hacer clic
-        spinnerTipo.setOnClickListener(v -> spinnerTipo.showDropDown());
-        spinnerEspecie.setOnClickListener(v -> spinnerEspecie.showDropDown());
+        // Forzar despliegue de opciones al tocar el campo
+        View.OnClickListener dropdownListener = v -> {
+            MaterialAutoCompleteTextView s = (MaterialAutoCompleteTextView) v;
+            if (s.getAdapter() != null) {
+                s.showDropDown();
+            } else {
+                Toast.makeText(this, "Cargando datos, espera un momento...", Toast.LENGTH_SHORT).show();
+            }
+        };
+        spinnerTipo.setOnClickListener(dropdownListener);
+        spinnerEspecie.setOnClickListener(dropdownListener);
+
+        // También al recibir foco
+        spinnerTipo.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) spinnerTipo.showDropDown();
+        });
+        spinnerEspecie.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) spinnerEspecie.showDropDown();
+        });
     }
 
     private void initViews() {
@@ -235,6 +251,7 @@ public class CrearObservacionActivity extends AppCompatActivity {
                     ArrayAdapter<String> adapterTipos = new ArrayAdapter<>(CrearObservacionActivity.this,
                             android.R.layout.simple_dropdown_item_1line, nombresTipos);
                     spinnerTipo.setAdapter(adapterTipos);
+                    spinnerTipo.setThreshold(0);
                     Log.d(TAG, "Tipos cargados: " + tiposCatalogo.size());
                 } else {
                     Log.e(TAG, "Error al cargar tipos: " + response.code());
@@ -262,6 +279,7 @@ public class CrearObservacionActivity extends AppCompatActivity {
                     ArrayAdapter<String> adapterEspecies = new ArrayAdapter<>(CrearObservacionActivity.this,
                             android.R.layout.simple_dropdown_item_1line, nombres);
                     spinnerEspecie.setAdapter(adapterEspecies);
+                    spinnerEspecie.setThreshold(0);
                 } else {
                     Log.e(TAG, "Error al cargar especies: " + response.code());
                 }
@@ -451,55 +469,69 @@ public class CrearObservacionActivity extends AppCompatActivity {
     }
 
     private void subirImagenes(long idObs) {
-        Log.d(TAG, "Subiendo " + imagenesSeleccionadas.size() + " imágenes usando Multipart...");
+        Log.d(TAG, "Subiendo " + imagenesSeleccionadas.size() + " imágenes para observación " + idObs);
         ApiService apiService = ApiClient.getClient().create(ApiService.class);
         final int[] subidas = {0};
+        final int[] errores = {0};
+
         
-        for (Uri uri : imagenesSeleccionadas) {
+        for (int i = 0; i < imagenesSeleccionadas.size(); i++) {
+            Uri uri = imagenesSeleccionadas.get(i);
             try {
-                File file = copiarUriACache(uri);
-                if (file == null) continue;
+                // Usamos ImageUtils para comprimir y asegurar tamaño < 1MB
+                File file = ImageUtils.compressImage(this, uri, "upload", i);
+                if (file == null || !file.exists()) {
+                    Log.e(TAG, "Error: El archivo comprimido no se pudo crear para la URI: " + uri);
+                    subidas[0]++;
+                    if (subidas[0] == imagenesSeleccionadas.size()) finalizar();
+                    continue;
+                }
+
+                Log.d(TAG, "Imagen comprimida lista: " + file.getName() + " Tamaño: " + file.length() + " bytes");
 
                 String mimeType = getContentResolver().getType(uri);
                 if (mimeType == null) mimeType = "image/jpeg";
                 
-                RequestBody requestFile = RequestBody.create(MediaType.parse(mimeType), file);
+                // Sintaxis correcta para OkHttp 4.x
+                RequestBody requestFile = RequestBody.create(file, MediaType.parse(mimeType));
                 MultipartBody.Part body = MultipartBody.Part.createFormData("file", file.getName(), requestFile);
-                RequestBody titulo = RequestBody.create(MediaType.parse("text/plain"), "Foto");
+                RequestBody tituloPart = RequestBody.create("Foto de observación", MediaType.parse("text/plain"));
 
-                apiService.subirImagen(idObs, body, titulo).enqueue(new Callback<Imagen>() {
-                    @Override public void onResponse(Call<Imagen> c, Response<Imagen> r) {
+                apiService.subirImagen(idObs, body, tituloPart).enqueue(new Callback<Imagen>() {
+                    @Override
+                    public void onResponse(Call<Imagen> c, Response<Imagen> r) {
                         subidas[0]++;
-                        Log.d(TAG, "Imagen " + subidas[0] + " subida OK");
-                        if (subidas[0] == imagenesSeleccionadas.size()) finalizar();
+
+                        if (r.isSuccessful()) {
+                            Log.d(TAG, "Imagen subida OK");
+                        } else {
+                            errores[0]++;
+                            Log.e(TAG, "Error al subir imagen. Código: " + r.code());
+                        }
+
+                        if (subidas[0] == imagenesSeleccionadas.size()) {
+                            if (errores[0] > 0) {
+                                Toast.makeText(CrearObservacionActivity.this,
+                                        errores[0] + " imágenes fallaron",
+                                        Toast.LENGTH_LONG).show();
+                            }
+                            finalizar();
+                        }
                     }
                     @Override public void onFailure(Call<Imagen> c, Throwable t) {
                         subidas[0]++;
-                        Log.e(TAG, "Error al subir imagen " + subidas[0], t);
+                        Log.e(TAG, "Fallo de red al subir imagen", t);
                         if (subidas[0] == imagenesSeleccionadas.size()) finalizar();
                     }
                 });
-            } catch (IOException e) {
-                Log.e(TAG, "Error al procesar archivo para subir", e);
+            } catch (Exception e) {
+                Log.e(TAG, "Error procesando imagen", e);
                 subidas[0]++;
                 if (subidas[0] == imagenesSeleccionadas.size()) finalizar();
             }
         }
     }
 
-    private File copiarUriACache(Uri uri) throws IOException {
-        String extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(getContentResolver().getType(uri));
-        File outFile = new File(getCacheDir(), "upload_" + System.currentTimeMillis() + "." + (extension != null ? extension : "jpg"));
-        try (InputStream in = getContentResolver().openInputStream(uri);
-             OutputStream out = new FileOutputStream(outFile)) {
-            byte[] buffer = new byte[8192];
-            int len;
-            while ((len = in.read(buffer)) != -1) {
-                out.write(buffer, 0, len);
-            }
-        }
-        return outFile;
-    }
 
     private void mostrarError(String mensaje) {
         tvError.setText(mensaje);

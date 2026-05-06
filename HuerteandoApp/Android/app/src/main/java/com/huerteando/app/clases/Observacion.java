@@ -19,8 +19,6 @@ public class Observacion {
     private Usuario usuario;
     private Especie especie;
     private List<Imagen> imagenes;
-    
-    // Me gusta logic (local app support)
     private int numMeGustas;
     private boolean meGustaPropio;
     private int numComentarios;

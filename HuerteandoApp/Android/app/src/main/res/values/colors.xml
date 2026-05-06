@@ -15,9 +15,9 @@
     <color name="fondo_card">#FFFFFF</color>           <!-- Fondo de las tarjetas -->
 
     <!-- Texto -->
-    <color name="texto_principal">#212121</color>      <!-- Texto principal oscuro -->
-    <color name="texto_secundario">#888888</color>     <!-- Subtítulos, metadatos -->
-    <color name="texto_error">#D32F2F</color>          <!-- Mensajes de error -->
+    <color name="texto_principal">#000000</color>      <!-- Negro puro para contraste máximo -->
+    <color name="texto_secundario">#555555</color>     <!-- Gris más oscuro para legibilidad -->
+    <color name="texto_error">#B71C1C</color>          <!-- Rojo más oscuro -->
 
     <!-- Chips de tipo de observación -->
     <color name="chip_planta_fondo">#E8F5E9</color>
