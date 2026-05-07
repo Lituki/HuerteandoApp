@@ -111,6 +111,9 @@ public class ObservacionAdapter extends RecyclerView.Adapter<ObservacionAdapter.
                         else url = base + url;
                     }
 
+                    // Log para depuración
+                    android.util.Log.d("ObservacionAdapter", "Cargando imagen desde: " + url);
+
                     Glide.with(itemView.getContext())
                             .load(url)
                             .placeholder(android.R.drawable.ic_menu_gallery)
@@ -118,6 +121,8 @@ public class ObservacionAdapter extends RecyclerView.Adapter<ObservacionAdapter.
                             .centerCrop()
                             .into(ivImagen);
                     ivImagen.setVisibility(View.VISIBLE);
+                } else {
+                    ivImagen.setVisibility(View.GONE);
                 }
             } else {
                 ivImagen.setVisibility(View.GONE);

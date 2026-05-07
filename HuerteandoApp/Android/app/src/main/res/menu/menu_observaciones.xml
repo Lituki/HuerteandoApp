@@ -23,5 +23,4 @@
         android:id="@+id/action_logout"
         android:title="@string/menu_cerrar_sesion"
         app:showAsAction="never" />
-
 </menu>

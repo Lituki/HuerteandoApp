@@ -6,10 +6,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
- * ApiClient — Configuración básica de Retrofit sin JWT.
- * 
- * Eliminado el interceptor de autenticación (JWT) porque el
- * backend utiliza un sistema de login básico basado en nick y password.
+ * ApiClient — Configuración básica de Retrofit, sistema de login básico basado en nick y password.
  */
 public class ApiClient {
 

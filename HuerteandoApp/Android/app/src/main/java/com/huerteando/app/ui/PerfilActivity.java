@@ -213,6 +213,18 @@ public class PerfilActivity extends AppCompatActivity {
             // Cargar avatar usando Glide para evitar problemas de permisos de URI
             String avatarUrl = session.getAvatarUrl();
             if (avatarUrl != null && !avatarUrl.isEmpty() && !avatarUrl.equals("default_avatar")) {
+                // Si la URL es relativa, le añadimos la BASE_URL
+                if (!avatarUrl.startsWith("http")) {
+                    String base = com.huerteando.app.api.ApiClient.BASE_URL;
+                    if (base.endsWith("/") && avatarUrl.startsWith("/")) {
+                        avatarUrl = base + avatarUrl.substring(1);
+                    } else if (!base.endsWith("/") && !avatarUrl.startsWith("/")) {
+                        avatarUrl = base + "/" + avatarUrl;
+                    } else {
+                        avatarUrl = base + avatarUrl;
+                    }
+                }
+
                 com.bumptech.glide.Glide.with(this)
                         .load(avatarUrl)
                         .placeholder(R.drawable.ic_avatar_plant)

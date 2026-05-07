@@ -82,9 +82,22 @@ public class ComentarioAdapter extends RecyclerView.Adapter<ComentarioAdapter.Vi
             }
 
             // Cargar avatar
-            if (comentario.getAutorAvatarUrl() != null && !comentario.getAutorAvatarUrl().isEmpty()) {
+            String avatarUrl = comentario.getAutorAvatarUrl();
+            if (avatarUrl != null && !avatarUrl.isEmpty()) {
+                // Si la URL es relativa, le añadimos la BASE_URL
+                if (!avatarUrl.startsWith("http")) {
+                    String base = com.huerteando.app.api.ApiClient.BASE_URL;
+                    if (base.endsWith("/") && avatarUrl.startsWith("/")) {
+                        avatarUrl = base + avatarUrl.substring(1);
+                    } else if (!base.endsWith("/") && !avatarUrl.startsWith("/")) {
+                        avatarUrl = base + "/" + avatarUrl;
+                    } else {
+                        avatarUrl = base + avatarUrl;
+                    }
+                }
+
                 Glide.with(itemView.getContext())
-                        .load(comentario.getAutorAvatarUrl())
+                        .load(avatarUrl)
                         .placeholder(R.drawable.ic_avatar_plant)
                         .error(R.drawable.ic_avatar_plant)
                         .circleCrop()
