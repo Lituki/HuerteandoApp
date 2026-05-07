@@ -250,7 +250,7 @@ public class CrearObservacionActivity extends AppCompatActivity {
                         nombresTipos[i] = tiposCatalogo.get(i).getNombre();
                     }
                     ArrayAdapter<String> adapterTipos = new ArrayAdapter<>(CrearObservacionActivity.this,
-                            android.R.layout.simple_dropdown_item_1line, nombresTipos);
+                            R.layout.spinner_dropdown_item, nombresTipos);
                     spinnerTipo.setAdapter(adapterTipos);
                     spinnerTipo.setThreshold(0);
                     Log.d(TAG, "Tipos cargados: " + tiposCatalogo.size());
@@ -278,7 +278,7 @@ public class CrearObservacionActivity extends AppCompatActivity {
                         nombres.add(e.getNombreComun() + " (" + e.getNombreCientifico() + ")");
                     }
                     ArrayAdapter<String> adapterEspecies = new ArrayAdapter<>(CrearObservacionActivity.this,
-                            android.R.layout.simple_dropdown_item_1line, nombres);
+                            R.layout.spinner_dropdown_item, nombres);
                     spinnerEspecie.setAdapter(adapterEspecies);
                     spinnerEspecie.setThreshold(0);
                 } else {

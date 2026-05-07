@@ -99,8 +99,8 @@ public class ObservacionesActivity extends AppCompatActivity {
 
     private void setupSpinners() {
         ArrayAdapter<CharSequence> adapterTipo = ArrayAdapter.createFromResource(this,
-                R.array.array_tipos, android.R.layout.simple_spinner_item);
-        adapterTipo.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                R.array.array_tipos, R.layout.spinner_item);
+        adapterTipo.setDropDownViewResource(R.layout.spinner_dropdown_item);
         spinnerTipo.setAdapter(adapterTipo);
         spinnerTipo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -117,8 +117,8 @@ public class ObservacionesActivity extends AppCompatActivity {
         });
 
         ArrayAdapter<CharSequence> adapterUsuario = ArrayAdapter.createFromResource(this,
-                R.array.array_filtro_usuario, android.R.layout.simple_spinner_item);
-        adapterUsuario.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                R.array.array_filtro_usuario, R.layout.spinner_item);
+        adapterUsuario.setDropDownViewResource(R.layout.spinner_dropdown_item);
         spinnerUsuario.setAdapter(adapterUsuario);
         spinnerUsuario.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -134,8 +134,8 @@ public class ObservacionesActivity extends AppCompatActivity {
         });
 
         ArrayAdapter<CharSequence> adapterEstado = ArrayAdapter.createFromResource(this,
-                R.array.array_estados, android.R.layout.simple_spinner_item);
-        adapterEstado.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                R.array.array_estados, R.layout.spinner_item);
+        adapterEstado.setDropDownViewResource(R.layout.spinner_dropdown_item);
         spinnerEstado.setAdapter(adapterEstado);
         spinnerEstado.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -152,8 +152,8 @@ public class ObservacionesActivity extends AppCompatActivity {
 
         final String[] valoresOrden = {"fecha", "me gusta", "comentarios"};
         ArrayAdapter<CharSequence> adapterOrden = ArrayAdapter.createFromResource(this,
-                R.array.array_orden, android.R.layout.simple_spinner_item);
-        adapterOrden.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                R.array.array_orden, R.layout.spinner_item);
+        adapterOrden.setDropDownViewResource(R.layout.spinner_dropdown_item);
         spinnerOrden.setAdapter(adapterOrden);
         spinnerOrden.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override

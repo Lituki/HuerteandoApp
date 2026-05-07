@@ -25,6 +25,18 @@
         <item name="android:textColorSecondary">@color/texto_secundario</item>
         <item name="android:textColorHint">@color/texto_secundario</item>
         <item name="android:editTextColor">@color/texto_principal</item>
+
+        <!-- Estilos para Spinners -->
+        <item name="android:spinnerItemStyle">@style/CustomSpinnerItemStyle</item>
+        <item name="android:spinnerDropDownItemStyle">@style/CustomSpinnerDropDownItemStyle</item>
+    </style>
+
+    <style name="CustomSpinnerItemStyle" parent="Widget.AppCompat.TextView.SpinnerItem">
+        <item name="android:textColor">@color/texto_principal</item>
+    </style>
+
+    <style name="CustomSpinnerDropDownItemStyle" parent="Widget.AppCompat.DropDownItem.Spinner">
+        <item name="android:textColor">@color/texto_principal</item>
     </style>
 
     <style name="Theme.Huerteando" parent="Base.Theme.Huerteando" />
