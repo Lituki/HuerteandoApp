@@ -28,9 +28,9 @@
 
             <com.google.android.material.tabs.TabLayout
                 android:id="@+id/tabDots"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
+                android:layout_width="wrap_content"
+                android:layout_height="12dp"
+                android:layout_gravity="bottom|center_horizontal"
                 android:layout_marginBottom="32dp"
                 android:background="@android:color/transparent"
                 app:tabBackground="@drawable/dot_selector"

@@ -269,7 +269,7 @@ public class DetalleObservacionActivity extends AppCompatActivity {
 
         // Carrusel de Imágenes
         if (o.getImagenes() != null && !o.getImagenes().isEmpty()) {
-            ImageCarouselAdapter carouselAdapter = new ImageCarouselAdapter(o.getImagenes());
+            ImageCarouselAdapter carouselAdapter = new ImageCarouselAdapter(o.getImagenes(), url -> ampliarImagen(url));
             viewPagerImagenes.setAdapter(carouselAdapter);
             viewPagerImagenes.setVisibility(View.VISIBLE);
             
@@ -300,14 +300,37 @@ public class DetalleObservacionActivity extends AppCompatActivity {
                         .placeholder(android.R.drawable.ic_menu_gallery)
                         .error(android.R.drawable.ic_menu_report_image)
                         .into(ivDetalleImagen);
+                
+                ivDetalleImagen.setOnClickListener(v -> ampliarImagen(imagenLocal));
             } else {
                 ivDetalleImagen.setImageResource(android.R.drawable.ic_menu_gallery);
+                ivDetalleImagen.setOnClickListener(null);
             }
 
             if (btnBorrarImagen != null) btnBorrarImagen.setVisibility(View.GONE);
         }
 
         actualizarBotonMeGusta();
+    }
+
+    /**
+     * Muestra la imagen en pantalla completa usando un Dialog
+     */
+    private void ampliarImagen(String url) {
+        if (url == null || url.isEmpty()) return;
+
+        android.app.Dialog dialog = new android.app.Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+        dialog.setContentView(R.layout.dialog_foto_full);
+
+        android.widget.ImageView ivFull = dialog.findViewById(R.id.ivFotoFull);
+        android.widget.ImageButton btnCerrar = dialog.findViewById(R.id.btnCerrarFull);
+
+        Glide.with(this)
+                .load(url)
+                .into(ivFull);
+
+        btnCerrar.setOnClickListener(v -> dialog.dismiss());
+        dialog.show();
     }
 
     private String formatearFecha(String fechaIso) {
