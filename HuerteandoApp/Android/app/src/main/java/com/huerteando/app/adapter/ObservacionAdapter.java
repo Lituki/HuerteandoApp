@@ -79,7 +79,7 @@ public class ObservacionAdapter extends RecyclerView.Adapter<ObservacionAdapter.
 
         public void bind(Observacion obs) {
             tvTitulo.setText(obs.getTitulo());
-            
+
             if (obs.getTipoObservacion() != null) {
                 tvTipo.setText(obs.getTipoObservacion().getNombre());
                 tvTipo.setBackgroundColor(getColorTipo(obs.getTipoObservacion().getNombre()));

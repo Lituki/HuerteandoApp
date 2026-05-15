@@ -29,7 +29,7 @@ import retrofit2.Response;
 
 /**
  * Activity de Registro - Pantalla para crear una cuenta nueva
- * 
+ *
  * ¿Qué hace esta clase?
  * 1. Permite al usuario registrarse con: nick, contraseña, nombre, apellidos, email
  * 2. Envía los datos al servidor (API REST)
@@ -112,7 +112,7 @@ public class RegistroActivity extends AppCompatActivity {
                 realizarRegistro(); // Llamamos a la función de registro
             }
         });
-        }
+    }
     private void realizarRegistro() {
         // Obtener valores
         String nick = editNick.getText() != null ? editNick.getText().toString().trim() : "";
@@ -131,15 +131,24 @@ public class RegistroActivity extends AppCompatActivity {
             return;
         }
 
+        // Validar que el formato del correo electrónico sea correcto
+        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            Log.w(TAG, "Validación fallida: Formato de email incorrecto");
+            mostrarError("Por favor, introduce un correo electrónico válido (ejemplo@correo.com)");
+            return;
+        }
+
         if (!password.equals(confirmarPassword)) {
             Log.w(TAG, "Validación fallida: Contraseñas no coinciden");
             mostrarError("Las contraseñas no coinciden");
             return;
         }
 
-        if (password.length() < 6) {
-            Log.w(TAG, "Validación fallida: Contraseña demasiado corta");
-            mostrarError("La contraseña debe tener al menos 6 caracteres");
+        // Seguridad de la contraseña: Mínimo 8 caracteres, 1 mayúscula, 1 minúscula, 1 carácter especial
+        String passwordPattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{8,}$";
+        if (!password.matches(passwordPattern)) {
+            Log.w(TAG, "Validación fallida: Contraseña débil");
+            mostrarError("La contraseña debe tener al menos 8 letras, 1 mayúscula, 1 minúscula y 1 símbolo");
             return;
         }
 

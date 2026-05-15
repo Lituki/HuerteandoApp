@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_gradient_header"
+    android:background="@color/verde_principal"
     android:fitsSystemWindows="true">
 
     <LinearLayout
@@ -20,22 +20,23 @@
             android:layout_height="wrap_content"
             android:text="@string/registro_titulo"
             android:textColor="@color/white"
-            android:textSize="28sp"
+            android:textSize="32sp"
             android:textStyle="bold" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
             android:text="@string/registro_subtitulo"
-            android:textColor="#E0E0E0"
-            android:textSize="14sp" />
+            android:textColor="@color/verde_claro"
+            android:textSize="15sp" />
     </LinearLayout>
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:cardCornerRadius="32dp"
-        app:cardElevation="0dp"
+        app:cardElevation="8dp"
         android:layout_marginBottom="-32dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/headerLayout">
@@ -50,9 +51,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="24dp">
+                android:padding="32dp">
 
-                <!-- Sección de Avatar -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -78,6 +78,7 @@
                         android:layout_height="wrap_content"
                         android:text="@string/avatar_seleccionar"
                         android:textColor="@color/verde_principal"
+                        android:textStyle="bold"
                         android:textAllCaps="false" />
                 </LinearLayout>
 
@@ -85,6 +86,12 @@
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    app:boxStrokeColor="@color/verde_principal"
+                    app:hintTextColor="@color/verde_principal"
+                    app:boxCornerRadiusTopStart="12dp"
+                    app:boxCornerRadiusTopEnd="12dp"
+                    app:boxCornerRadiusBottomStart="12dp"
+                    app:boxCornerRadiusBottomEnd="12dp"
                     android:hint="@string/login_nick_hint">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -107,6 +114,12 @@
                         android:layout_marginTop="12dp"
                         android:layout_weight="1"
                         android:layout_marginEnd="4dp"
+                        app:boxStrokeColor="@color/verde_principal"
+                        app:hintTextColor="@color/verde_principal"
+                        app:boxCornerRadiusTopStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusBottomEnd="12dp"
                         android:hint="@string/registro_nombre_hint">
 
                         <com.google.android.material.textfield.TextInputEditText
@@ -123,6 +136,12 @@
                         android:layout_marginTop="12dp"
                         android:layout_weight="1"
                         android:layout_marginStart="4dp"
+                        app:boxStrokeColor="@color/verde_principal"
+                        app:hintTextColor="@color/verde_principal"
+                        app:boxCornerRadiusTopStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusBottomEnd="12dp"
                         android:hint="@string/registro_apellidos_hint">
 
                         <com.google.android.material.textfield.TextInputEditText
@@ -138,6 +157,12 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
+                    app:boxStrokeColor="@color/verde_principal"
+                    app:hintTextColor="@color/verde_principal"
+                    app:boxCornerRadiusTopStart="12dp"
+                    app:boxCornerRadiusTopEnd="12dp"
+                    app:boxCornerRadiusBottomStart="12dp"
+                    app:boxCornerRadiusBottomEnd="12dp"
                     android:hint="@string/registro_email_hint">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -152,6 +177,13 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
+                    app:boxStrokeColor="@color/verde_principal"
+                    app:hintTextColor="@color/verde_principal"
+                    app:passwordToggleTint="@color/verde_principal"
+                    app:boxCornerRadiusTopStart="12dp"
+                    app:boxCornerRadiusTopEnd="12dp"
+                    app:boxCornerRadiusBottomStart="12dp"
+                    app:boxCornerRadiusBottomEnd="12dp"
                     android:hint="@string/login_password_hint"
                     app:passwordToggleEnabled="true">
 
@@ -167,6 +199,13 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
+                    app:boxStrokeColor="@color/verde_principal"
+                    app:hintTextColor="@color/verde_principal"
+                    app:passwordToggleTint="@color/verde_principal"
+                    app:boxCornerRadiusTopStart="12dp"
+                    app:boxCornerRadiusTopEnd="12dp"
+                    app:boxCornerRadiusBottomStart="12dp"
+                    app:boxCornerRadiusBottomEnd="12dp"
                     android:hint="@string/registro_confirmar_password_hint"
                     app:passwordToggleEnabled="true">
 
@@ -183,17 +222,17 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:gravity="center"
-                    android:textColor="@android:color/holo_red_dark"
+                    android:textColor="@color/texto_error"
                     android:visibility="gone" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnRegistro"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
-                    android:layout_marginTop="24dp"
+                    android:layout_marginTop="32dp"
                     android:text="@string/registro_boton"
                     android:textAllCaps="false"
-                    android:textSize="16sp"
+                    android:textSize="18sp"
                     android:textStyle="bold"
                     app:cornerRadius="12dp"
                     app:backgroundTint="@color/verde_principal" />
@@ -207,6 +246,7 @@
                     android:padding="8dp"
                     android:text="@string/registro_ir_login"
                     android:textColor="@color/verde_principal"
+                    android:textSize="15sp"
                     android:textStyle="bold" />
 
                 <ProgressBar

@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Huerteando</string>
-    <string name="app_tagline">Huerta de Murcia</string>
+    <string name="app_tagline">Descubre y cuida la Huerta de Murcia</string>
 
     <!-- Menús -->
     <string name="menu_cerrar_sesion">Cerrar sesión</string>
@@ -10,56 +10,56 @@
     <!-- Tipos de observación -->
     <string name="tipo_todos">Todos los tipos</string>
     <string name="tipo_planta">PLANTA</string>
-    <string name="tipo_rincon">RINCON</string>
+    <string name="tipo_rincon">RINCÓN</string>
     <string name="tipo_incidencia">INCIDENCIA</string>
 
     <!-- Orden -->
     <string name="orden_recientes">Más recientes</string>
     <string name="orden_megusta">Más me gusta</string>
-    <string name="orden_comentarios">Más comentarios</string>
+    <string name="orden_comentarios">Más comentados</string>
 
     <!-- Mensajes generales -->
-    <string name="sin_resultados">No hay observaciones con estos filtros.</string>
-    <string name="sin_observaciones">No hay observaciones aún.\n¡Sé el primero en compartir!</string>
-    <string name="error_conexion">Error de conexión. Comprueba la red.</string>
-    <string name="cargando">Cargando…</string>
+    <string name="sin_resultados">¡Vaya! No encontramos nada con estos filtros.\nPrueba a buscar de otra forma.</string>
+    <string name="sin_observaciones">Aún no hay nada por aquí.\n¡Anímate y sé el primero en compartir!</string>
+    <string name="error_conexion">¡Ups! Parece que te has quedado sin cobertura en la huerta. Revisa tu conexión.</string>
+    <string name="cargando">Preparando todo…</string>
 
     <!-- Login -->
     <string name="login_titulo">🌿 Huerteando</string>
-    <string name="login_nick_hint">Usuario (nick)</string>
-    <string name="login_password_hint">Contraseña</string>
-    <string name="login_boton">Entrar</string>
-    <string name="login_ir_registro">¿No tienes cuenta? Regístrate</string>
+    <string name="login_nick_hint">Tu usuario</string>
+    <string name="login_password_hint">Tu contraseña</string>
+    <string name="login_boton">Entrar a la huerta</string>
+    <string name="login_ir_registro">¿Nuevo por aquí? Únete a la comunidad</string>
 
     <!-- Registro -->
     <string name="registro_titulo">Crear cuenta</string>
-    <string name="registro_subtitulo">Únete a Huerteando</string>
+    <string name="registro_subtitulo">Tu espacio en la huerta te espera</string>
     <string name="registro_nombre_hint">Nombre</string>
     <string name="registro_apellidos_hint">Apellidos</string>
     <string name="registro_email_hint">Correo electrónico</string>
-    <string name="registro_confirmar_password_hint">Confirmar contraseña</string>
-    <string name="registro_boton">Registrarse</string>
-    <string name="registro_ir_login">¿Ya tienes cuenta? Inicia sesión</string>
+    <string name="registro_confirmar_password_hint">Repite tu contraseña</string>
+    <string name="registro_boton">Comenzar mi aventura</string>
+    <string name="registro_ir_login">¿Ya eres de la familia? Inicia sesión</string>
 
     <!-- Avatar -->
-    <string name="avatar_seleccionar">Seleccionar avatar</string>
+    <string name="avatar_seleccionar">Elegir foto de perfil</string>
     <string name="avatar_cambiar">Cambiar avatar</string>
     <string name="avatar_eliminar">Eliminar avatar</string>
 
     <!-- Observaciones -->
     <string name="nueva_observacion">Nueva observación</string>
-    <string name="guardar_observacion">Guardar observación</string>
+    <string name="guardar_observacion">Publicar observación</string>
     <string name="fecha">Fecha</string>
-    <string name="obtener_ubicacion">📍 Obtener mi ubicación</string>
-    <string name="sin_ubicacion">Sin ubicación — pulsa el botón para obtenerla</string>
-    <string name="ubicacion_obteniendo">Obteniendo ubicación…</string>
+    <string name="obtener_ubicacion">📍 Detectar mi ubicación actual</string>
+    <string name="sin_ubicacion">Aún no sabemos dónde estás — pulsa para ubicarnos</string>
+    <string name="ubicacion_obteniendo">Buscando coordenadas…</string>
 
     <!-- Detalle -->
     <string name="me_gusta">🤍 Me gusta</string>
     <string name="te_gusta">❤️ Te gusta</string>
     <string name="comentarios">Comentarios</string>
     <string name="enviar">Enviar</string>
-    <string name="add_comentario_hint">Añadir comentario…</string>
+    <string name="add_comentario_hint">Escribe un comentario…</string>
     <string name="zona_prefijo">📍 </string>
     <string name="fecha_prefijo">📅 </string>
     <string name="autor_prefijo">👤 </string>
@@ -67,7 +67,7 @@
 
     <!-- Filtros Adicionales -->
     <string name="filtro_todos">Todas las observaciones</string>
-    <string name="filtro_mis_observaciones">Mis observaciones</string>
+    <string name="filtro_mis_observaciones">Mis aportaciones</string>
     <string name="estado_todos">Todos los estados</string>
     <string name="estado_abierta">ABIERTA</string>
     <string name="estado_cerrada">CERRADA</string>
