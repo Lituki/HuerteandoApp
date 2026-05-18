@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Huerteando</string>
-    <string name="app_tagline">Descubre y cuida la Huerta de Murcia</string>
+    <string name="app_tagline">Descubre la Huerta de Murcia</string>
 
     <!-- Menús -->
     <string name="menu_cerrar_sesion">Cerrar sesión</string>
@@ -25,9 +25,9 @@
     <string name="cargando">Preparando todo…</string>
 
     <!-- Login -->
-    <string name="login_titulo">🌿 Huerteando</string>
-    <string name="login_nick_hint">Tu usuario</string>
-    <string name="login_password_hint">Tu contraseña</string>
+    <string name="login_titulo">🌿 Huerteando 🌿</string>
+    <string name="login_nick_hint">Tu usuario:</string>
+    <string name="login_password_hint">Tu contraseña:</string>
     <string name="login_boton">Entrar a la huerta</string>
     <string name="login_ir_registro">¿Nuevo por aquí? Únete a la comunidad</string>
 
