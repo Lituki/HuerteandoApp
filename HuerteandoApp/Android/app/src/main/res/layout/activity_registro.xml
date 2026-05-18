@@ -92,7 +92,7 @@
                     app:boxCornerRadiusTopEnd="12dp"
                     app:boxCornerRadiusBottomStart="12dp"
                     app:boxCornerRadiusBottomEnd="12dp"
-                    android:hint="@string/login_nick_hint">
+                    android:hint="@string/registro_nick_hint">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/editNick"

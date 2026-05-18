@@ -5,13 +5,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
-
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.huerteando.app.R;
@@ -19,29 +17,33 @@ import com.huerteando.app.api.ApiClient;
 import com.huerteando.app.api.ApiService;
 import com.huerteando.app.utils.ErrorUtils;
 import com.huerteando.app.utils.SessionManager;
-
-import java.util.HashMap;
+import org.json.JSONObject;
+import java.io.IOException;
 import java.util.Map;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import retrofit2.Retrofit;
 
 /**
- * Pantalla de inicio de sesión.
- * Actualizada para usar Map como respuesta segun el Manual.
+ * Login con flujo:
+ * 1. Supabase Auth
+ * 2. Backend JWT
  */
 public class LoginActivity extends AppCompatActivity {
 
     private static final String TAG = "LoginActivity";
-
     private TextInputEditText editNick;
     private TextInputEditText editPassword;
     private MaterialButton    btnLogin;
     private TextView          tvError;
     private TextView          tvIrARegistro;
-
     private SessionManager sessionManager;
+    private OkHttpClient httpClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,8 +52,8 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         sessionManager = new SessionManager(this);
+        httpClient = new OkHttpClient();
 
-        // Si ya está logueado, saltar directamente a la app
         if (sessionManager.haySesion()) {
             irAObservaciones();
             return;
@@ -71,23 +73,22 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         btnLogin.setOnClickListener(v -> realizarLogin());
-
         tvIrARegistro.setOnClickListener(v ->
                 startActivity(new Intent(LoginActivity.this, RegistroActivity.class)));
     }
 
     private void realizarLogin() {
-        String nick     = texto(editNick);
+        String email = texto(editNick); // en Supabase esto suele ser email
         String password = texto(editPassword);
 
-        Log.d(TAG, "Intentando iniciar sesión para el usuario: " + nick);
+        Log.d(TAG, "Intentando iniciar sesión para el usuario: " + email);
 
-        if (nick.isEmpty()) {
-            mostrarError("Por favor, introduce el nick de usuario");
+        if (email.isEmpty()) {
+            mostrarError("Introduce el email");
             return;
         }
         if (password.isEmpty()) {
-            mostrarError("Por favor, introduce la contraseña");
+            mostrarError("Introduce la contraseña");
             return;
         }
 
@@ -95,24 +96,101 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin.setEnabled(false);
         btnLogin.setText("Accediendo...");
 
-        ApiService api = ApiClient.getClient().create(ApiService.class);
-        
-        Map<String, String> credenciales = new HashMap<>();
-        credenciales.put("nick", nick);
-        credenciales.put("password", password);
+        loginSupabase(email, password);
+    }
+    /**
+     * 1. LOGIN EN SUPABASE (OkHttp)
+     */
+    private void loginSupabase(String email, String password) {
 
-        Log.d(TAG, "Llamando al endpoint de login...");
-        api.login(credenciales).enqueue(new Callback<Map<String, Object>>() {
+        String url = getString(R.string.supabase_url_login);
+
+        MediaType JSON = MediaType.get("application/json; charset=utf-8");
+
+        JSONObject bodyJson = new JSONObject();
+        try {
+            bodyJson.put("email", email);
+            bodyJson.put("password", password);
+        } catch (Exception e) {
+            mostrarError("Error interno");
+            return;
+        }
+
+        RequestBody body = RequestBody.create(bodyJson.toString(), JSON);
+
+        Request request = new Request.Builder()
+                .url(url)
+                .post(body)
+                .addHeader("apikey", getString(R.string.supabase_api_key))
+                .addHeader("Content-Type", "application/json")
+                .build();
+
+        httpClient.newCall(request).enqueue(new Callback() {
             @Override
-            public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
+            public void onFailure(Call call, IOException e) {
+                runOnUiThread(() -> {
+                    btnLogin.setEnabled(true);
+                    btnLogin.setText("Entrar");
+                    mostrarError("Error de conexión con Supabase");
+                });
+                Log.e(TAG, "Error Supabase login", e);
+            }
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+
+                if (!response.isSuccessful() || response.body() == null) {
+                    runOnUiThread(() -> {
+                        btnLogin.setEnabled(true);
+                        btnLogin.setText("Entrar");
+                        mostrarError("Login incorrecto");
+                    });
+                    return;
+                }
+
+                try {
+                    String json = response.body().string();
+                    JSONObject obj = new JSONObject(json);
+
+                    String jwt = obj.getString("access_token");
+
+                    Log.d(TAG, "Login Supabase OK (JWT recibido)");
+
+                    // ⚠️ NO LOGS del token
+                    sessionManager.guardarToken(jwt);
+
+                    runOnUiThread(() -> llamarBackend());
+                } catch (Exception e) {
+                    runOnUiThread(() -> {
+                        btnLogin.setEnabled(true);
+                        btnLogin.setText("Entrar");
+                        mostrarError("Error procesando respuesta");
+                    });
+                    Log.e(TAG, "Parse error Supabase", e);
+                }
+            }
+        });
+    }
+
+    /**
+     * 2. LLAMADA AL BACKEND CON JWT
+     */
+    private void llamarBackend() {
+
+        ApiService api = ApiClient.getClient().create(ApiService.class);
+
+        api.loginJwt().enqueue(new retrofit2.Callback<Map<String, Object>>() {
+
+            @Override
+            public void onResponse(retrofit2.Call<Map<String, Object>> call,
+                                   retrofit2.Response<Map<String, Object>> response) {
+
                 btnLogin.setEnabled(true);
                 btnLogin.setText("Entrar");
 
                 if (response.isSuccessful() && response.body() != null) {
-                    Log.d(TAG, "¡Login exitoso! Recibiendo datos del usuario...");
+
                     Map<String, Object> datos = response.body();
-                    
-                    // GSON convierte numeros a Double en Map<String, Object>
+
                     Long idUsuario = ((Double) datos.get("id")).longValue();
                     String nickUsuario = (String) datos.get("nick");
                     String nombre = (String) datos.get("nombre");
@@ -121,32 +199,36 @@ public class LoginActivity extends AppCompatActivity {
                     String fecha = (String) datos.get("fechaRegistro");
                     String rol = (String) datos.get("rol");
                     String avatarUrl = (String) datos.get("avatarUrl");
-                    
-                    Log.d(TAG, "ID: " + idUsuario + ", Nick: " + nickUsuario + ", Rol: " + rol);
-                    
-                    // Guardamos en sesion
-                    sessionManager.guardarDatosCompletos(idUsuario, nickUsuario, nombre, apellidos, email, fecha, rol, avatarUrl);
-                    
+
+                    sessionManager.guardarDatosCompletos(
+                            idUsuario,
+                            nickUsuario,
+                            nombre,
+                            apellidos,
+                            email,
+                            fecha,
+                            rol,
+                            avatarUrl
+                    );
+
                     irAObservaciones();
+
                 } else {
-                    int code = response.code();
-                    Log.e(TAG, "Error en el login. Código: " + code);
-                    mostrarError(ErrorUtils.getMensajeError(code));
+                    mostrarError("Error de perfil");
                 }
             }
 
             @Override
-            public void onFailure(Call<Map<String, Object>> call, Throwable t) {
+            public void onFailure(retrofit2.Call<Map<String, Object>> call, Throwable t) {
                 btnLogin.setEnabled(true);
                 btnLogin.setText("Entrar");
-                Log.e(TAG, "Fallo de conexión en el login", t);
-                mostrarError("No se ha podido conectar. Comprueba tu conexión a internet.");
+                mostrarError("Sin conexión con el backend");
             }
         });
     }
 
     private void irAObservaciones() {
-        Intent intent = new Intent(LoginActivity.this, ObservacionesActivity.class);
+        Intent intent = new Intent(this, ObservacionesActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
     }

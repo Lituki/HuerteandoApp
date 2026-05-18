@@ -36,6 +36,7 @@
     <string name="registro_subtitulo">Tu espacio en la huerta te espera</string>
     <string name="registro_nombre_hint">Nombre</string>
     <string name="registro_apellidos_hint">Apellidos</string>
+    <string name="registro_nick_hint">Nombre de usuario</string>
     <string name="registro_email_hint">Correo electrónico</string>
     <string name="registro_confirmar_password_hint">Repite tu contraseña</string>
     <string name="registro_boton">Comenzar mi aventura</string>

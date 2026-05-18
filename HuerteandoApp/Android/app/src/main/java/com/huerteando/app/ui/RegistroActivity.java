@@ -1,10 +1,7 @@
 package com.huerteando.app.ui;
 
-import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,27 +16,23 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.huerteando.app.R;
 import com.huerteando.app.api.ApiClient;
 import com.huerteando.app.api.ApiService;
+import com.huerteando.app.api.SupabaseClient;
+import com.huerteando.app.api.SupabaseService;
 import com.huerteando.app.clases.RegistroRequest;
+import com.huerteando.app.clases.SupabaseSignUpRequest;
+import com.huerteando.app.clases.SupabaseSignUpResponse;
 import com.huerteando.app.clases.Usuario;
 import com.huerteando.app.utils.ErrorUtils;
+
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-/**
- * Activity de Registro - Pantalla para crear una cuenta nueva
- *
- * ¿Qué hace esta clase?
- * 1. Permite al usuario registrarse con: nick, contraseña, nombre, apellidos, email
- * 2. Envía los datos al servidor (API REST)
- * 3. Si el registro es exitoso, vuelve al login
- */
+
 public class RegistroActivity extends AppCompatActivity {
 
-    private static final String TAG = "RegistroActivity";
-
-    // Elementos del layout
     private TextInputEditText editNick;
     private TextInputEditText editPassword;
     private TextInputEditText editConfirmarPassword;
@@ -49,18 +42,14 @@ public class RegistroActivity extends AppCompatActivity {
     private MaterialButton btnRegistro;
     private TextView tvError;
     private TextView tvIrALogin;
-
-    // Avatar
     private ShapeableImageView imgAvatar;
     private MaterialButton btnSeleccionarAvatar;
-    private String avatarUriString = "default_avatar"; // Valor por defecto
+    private String avatarUriString = "default_avatar";
 
-    // Lanzador para abrir la galería
     private final ActivityResultLauncher<String> galleryLauncher = registerForActivityResult(
             new ActivityResultContracts.GetContent(),
             uri -> {
                 if (uri != null) {
-                    // Si el usuario selecciona una imagen, la mostramos y guardamos su URI
                     imgAvatar.setImageURI(uri);
                     avatarUriString = uri.toString();
                 }
@@ -73,7 +62,6 @@ public class RegistroActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_registro);
 
-        // Conectar las variables con los elementos del layout
         editNick = findViewById(R.id.editNick);
         editPassword = findViewById(R.id.editPassword);
         editConfirmarPassword = findViewById(R.id.editConfirmarPassword);
@@ -83,112 +71,149 @@ public class RegistroActivity extends AppCompatActivity {
         btnRegistro = findViewById(R.id.btnRegistro);
         tvError = findViewById(R.id.tvError);
         tvIrALogin = findViewById(R.id.tvIrALogin);
-
-        // Inicializar elementos del avatar
         imgAvatar = findViewById(R.id.imgAvatar);
         btnSeleccionarAvatar = findViewById(R.id.btnSeleccionarAvatar);
 
-        // Configurar botón para seleccionar avatar
-        btnSeleccionarAvatar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Abrir la galería para seleccionar solo imágenes
-                galleryLauncher.launch("image/*");
-            }
-        });
+        btnSeleccionarAvatar.setOnClickListener(v -> galleryLauncher.launch("image/*"));
 
-        // Volver al login al pulsar el texto
-        tvIrALogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish(); // Cierra esta pantalla y vuelve a la anterior (LoginActivity)
-            }
-        });
+        tvIrALogin.setOnClickListener(v -> finish());
 
-        // Botón de registro
-        btnRegistro.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                realizarRegistro(); // Llamamos a la función de registro
-            }
-        });
+        btnRegistro.setOnClickListener(v -> realizarRegistro());
     }
+
     private void realizarRegistro() {
-        // Obtener valores
-        String nick = editNick.getText() != null ? editNick.getText().toString().trim() : "";
-        String password = editPassword.getText() != null ? editPassword.getText().toString().trim() : "";
-        String confirmarPassword = editConfirmarPassword.getText() != null ? editConfirmarPassword.getText().toString().trim() : "";
-        String nombre = editNombre.getText() != null ? editNombre.getText().toString().trim() : "";
-        String apellidos = editApellidos.getText() != null ? editApellidos.getText().toString().trim() : "";
-        String email = editEmail.getText() != null ? editEmail.getText().toString().trim() : "";
+        String nick              = getText(editNick);
+        String password          = getText(editPassword);
+        String confirmarPassword = getText(editConfirmarPassword);
+        String nombre            = getText(editNombre);
+        String apellidos         = getText(editApellidos);
+        String email             = getText(editEmail);
 
-        Log.d(TAG, "Iniciando proceso de registro para: " + nick + " (" + email + ")");
-
-        // Validaciones
         if (nick.isEmpty() || password.isEmpty() || nombre.isEmpty() || email.isEmpty()) {
-            Log.w(TAG, "Validación fallida: Campos obligatorios vacíos");
             mostrarError("Por favor, completa los campos obligatorios");
             return;
         }
 
-        // Validar que el formato del correo electrónico sea correcto
         if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            Log.w(TAG, "Validación fallida: Formato de email incorrecto");
             mostrarError("Por favor, introduce un correo electrónico válido (ejemplo@correo.com)");
             return;
         }
 
         if (!password.equals(confirmarPassword)) {
-            Log.w(TAG, "Validación fallida: Contraseñas no coinciden");
             mostrarError("Las contraseñas no coinciden");
             return;
         }
 
-        // Seguridad de la contraseña: Mínimo 8 caracteres, 1 mayúscula, 1 minúscula, 1 carácter especial
-        String passwordPattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{8,}$";
-        if (!password.matches(passwordPattern)) {
-            Log.w(TAG, "Validación fallida: Contraseña débil");
+        if (!password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{8,}$")) {
             mostrarError("La contraseña debe tener al menos 8 letras, 1 mayúscula, 1 minúscula y 1 símbolo");
             return;
         }
 
-        // Ocultar error y desactivar botón
         tvError.setVisibility(View.GONE);
-        btnRegistro.setEnabled(false);
-        btnRegistro.setText("Registrando...");
+        setBtnCargando(true);
 
-        // Llamar al API
-        Log.d(TAG, "Enviando datos al servidor...");
+        comprobarDisponibilidad(nick, password, nombre, apellidos, email);
+    }
+
+    private void comprobarDisponibilidad(String nick, String password,
+                                         String nombre, String apellidos, String email) {
+        ApiService api = ApiClient.getClient().create(ApiService.class);
+        api.comprobarDisponibilidad(nick, email).enqueue(new Callback<Map<String, Boolean>>() {
+            @Override
+            public void onResponse(Call<Map<String, Boolean>> call,
+                                   Response<Map<String, Boolean>> response) {
+                if (!response.isSuccessful() || response.body() == null) {
+                    setBtnCargando(false);
+                    mostrarError("No se pudo comprobar la disponibilidad del usuario");
+                    return;
+                }
+
+                boolean nickDisponible  = Boolean.TRUE.equals(response.body().get("nickDisponible"));
+                boolean emailDisponible = Boolean.TRUE.equals(response.body().get("emailDisponible"));
+
+                if (!nickDisponible) {
+                    setBtnCargando(false);
+                    mostrarError("El nombre de usuario ya está en uso");
+                    return;
+                }
+
+                if (!emailDisponible) {
+                    setBtnCargando(false);
+                    mostrarError("El correo ya existe en Huerteando");
+                    return;
+                }
+
+                registrarEnSupabase(nick, password, nombre, apellidos, email);
+            }
+
+            @Override
+            public void onFailure(Call<Map<String, Boolean>> call, Throwable t) {
+                setBtnCargando(false);
+                mostrarError("No se ha podido conectar con el servidor. Revisa tu internet.");
+            }
+        });
+    }
+
+    private void registrarEnSupabase(String nick, String password,
+                                     String nombre, String apellidos, String email) {
+        SupabaseService supabase = SupabaseClient.getClient().create(SupabaseService.class);
+        SupabaseSignUpRequest request = new SupabaseSignUpRequest(email, password);
+
+        supabase.signUp(request).enqueue(new Callback<SupabaseSignUpResponse>() {
+            @Override
+            public void onResponse(Call<SupabaseSignUpResponse> call,
+                                   Response<SupabaseSignUpResponse> response) {
+                if (!response.isSuccessful() || response.body() == null) {
+                    setBtnCargando(false);
+                    mostrarError("No se pudo crear la cuenta. Inténtalo de nuevo.");
+                    return;
+                }
+                crearPerfilEnBackend(nick, nombre, apellidos, email, avatarUriString);
+            }
+
+            @Override
+            public void onFailure(Call<SupabaseSignUpResponse> call, Throwable t) {
+                setBtnCargando(false);
+                mostrarError("No se ha podido conectar con el servidor. Revisa tu internet.");
+            }
+        });
+    }
+
+    private void crearPerfilEnBackend(String nick, String nombre,
+                                      String apellidos, String email, String avatarUrl) {
         ApiService apiService = ApiClient.getClient().create(ApiService.class);
-        RegistroRequest request = new RegistroRequest(nick, password, nombre, apellidos, email, avatarUriString);
+        RegistroRequest request = new RegistroRequest(nick, "SUPABASE_MANAGED", nombre, apellidos, email, avatarUrl);
 
-        Call<Usuario> call = apiService.registrar(request);
-        call.enqueue(new Callback<Usuario>() {
+        apiService.registrar(request).enqueue(new Callback<Usuario>() {
             @Override
             public void onResponse(Call<Usuario> call, Response<Usuario> response) {
-                btnRegistro.setEnabled(true);
-                btnRegistro.setText("Registrarse");
+                setBtnCargando(false);
 
                 if (response.isSuccessful()) {
-                    Log.d(TAG, "¡Registro completado con éxito! Usuario creado.");
-                    Toast.makeText(RegistroActivity.this, "¡Bienvenido/a! Ya puedes iniciar sesión 🌿", Toast.LENGTH_LONG).show();
-                    // Volver al login
+                    Toast.makeText(RegistroActivity.this,
+                            "¡Bienvenido/a! Ya puedes iniciar sesión 🌿",
+                            Toast.LENGTH_LONG).show();
                     finish();
                 } else {
-                    int code = response.code();
-                    Log.e(TAG, "Error en el servidor al registrar: " + code);
-                    mostrarError(ErrorUtils.getMensajeError(code));
+                    mostrarError(ErrorUtils.getMensajeError(response.code()));
                 }
             }
 
             @Override
             public void onFailure(Call<Usuario> call, Throwable t) {
-                btnRegistro.setEnabled(true);
-                btnRegistro.setText("Registrarse");
-                Log.e(TAG, "Fallo crítico de red en el registro", t);
+                setBtnCargando(false);
                 mostrarError("No se ha podido conectar con el servidor. Revisa tu internet.");
             }
         });
+    }
+
+    private String getText(TextInputEditText field) {
+        return field.getText() != null ? field.getText().toString().trim() : "";
+    }
+
+    private void setBtnCargando(boolean cargando) {
+        btnRegistro.setEnabled(!cargando);
+        btnRegistro.setText(cargando ? "Registrando..." : "Registrarse");
     }
 
     private void mostrarError(String mensaje) {

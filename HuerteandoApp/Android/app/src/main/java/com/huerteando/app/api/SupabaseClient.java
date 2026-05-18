@@ -1,38 +1,38 @@
 package com.huerteando.app.api;
 
+import android.content.Context;
+
 import com.huerteando.app.MyApp;
+import com.huerteando.app.R;
+
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class ApiClient {
-    public static final String BASE_URL = "http://10.0.2.2:8080/";
+public class SupabaseClient {
+
     private static Retrofit retrofit = null;
 
     public static Retrofit getClient() {
         if (retrofit == null) {
+            Context context = MyApp.getInstance().getApplicationContext();
+            String baseUrl = context.getString(R.string.supabase_url_signup)
+                    .replace("auth/v1/signup", "");
+            String apiKey = context.getString(R.string.supabase_api_key);
+
             HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
             logging.setLevel(HttpLoggingInterceptor.Level.BODY);
 
             OkHttpClient httpClient = new OkHttpClient.Builder()
                     .addInterceptor(logging)
                     .addInterceptor(chain -> {
-                        Request.Builder requestBuilder = chain.request().newBuilder();
-                        String token = MyApp.getSession().getToken();
-                        if (token != null) {
-                            requestBuilder.header("Authorization", "Bearer " + token);
-                        }
-                        return chain.proceed(requestBuilder.build());
-                    })
-                    .addInterceptor(chain -> {
-                        okhttp3.Response response = chain.proceed(chain.request());
-                        if (response.code() == 401) {
-                            MyApp.getSession().cerrarSesion();
-                            retrofit = null;
-                        }
-                        return response;
+                        Request request = chain.request().newBuilder()
+                                .header("apikey", apiKey)
+                                .header("Content-Type", "application/json")
+                                .build();
+                        return chain.proceed(request);
                     })
                     .connectTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
                     .readTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
@@ -40,7 +40,7 @@ public class ApiClient {
                     .build();
 
             retrofit = new Retrofit.Builder()
-                    .baseUrl(BASE_URL)
+                    .baseUrl(baseUrl)
                     .addConverterFactory(GsonConverterFactory.create())
                     .client(httpClient)
                     .build();

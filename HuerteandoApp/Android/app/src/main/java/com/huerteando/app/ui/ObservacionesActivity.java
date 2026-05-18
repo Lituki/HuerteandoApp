@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.huerteando.app.MyApp;
 import com.huerteando.app.R;
 import com.huerteando.app.adapter.ObservacionAdapter;
 import com.huerteando.app.api.ApiClient;
@@ -52,7 +53,7 @@ public class ObservacionesActivity extends AppCompatActivity {
     private final List<Observacion> listaOriginal = new ArrayList<>();
     private final List<Observacion> listaAMostrar = new ArrayList<>();
 
-    private Long idTipoSeleccionado = null; 
+    private Long idTipoSeleccionado = null;
     private Long idUsuarioSeleccionado = null;
     private String estadoSeleccionado = null;
     private String ordenSeleccionado = "fecha";
@@ -69,7 +70,13 @@ public class ObservacionesActivity extends AppCompatActivity {
         initViews();
         setupSpinners();
 
-        fabNueva.setOnClickListener(v -> startActivity(new Intent(this, CrearObservacionActivity.class)));
+        fabNueva.setOnClickListener(v -> {
+            if (!MyApp.getSession().haySesion()) {
+                startActivity(new Intent(this, LoginActivity.class));
+            } else {
+                startActivity(new Intent(this, CrearObservacionActivity.class));
+            }
+        });
     }
 
     private void setupToolbar() {
@@ -169,7 +176,7 @@ public class ObservacionesActivity extends AppCompatActivity {
         Log.d(TAG, "Cargando observaciones desde la API...");
         progressBar.setVisibility(View.VISIBLE);
         ApiService api = ApiClient.getClient().create(ApiService.class);
-        
+
         Call<List<Observacion>> call;
         if (idTipoSeleccionado != null) {
             Log.d(TAG, "Filtrando por tipo ID: " + idTipoSeleccionado);
@@ -214,7 +221,7 @@ public class ObservacionesActivity extends AppCompatActivity {
             switch (ordenSeleccionado) {
                 case "me gusta": return Integer.compare(o2.getNumMeGustas(), o1.getNumMeGustas());
                 case "comentarios": return Integer.compare(o2.getNumComentarios(), o1.getNumComentarios());
-                default: 
+                default:
                     String f1 = o1.getFechaObservacion() != null ? o1.getFechaObservacion() : "";
                     String f2 = o2.getFechaObservacion() != null ? o2.getFechaObservacion() : "";
                     return f2.compareTo(f1);
@@ -228,7 +235,7 @@ public class ObservacionesActivity extends AppCompatActivity {
                 listaAMostrar.add(o);
             }
         }
-        
+
         adapter.notifyDataSetChanged();
         tvSinResultados.setVisibility(listaAMostrar.isEmpty() ? View.VISIBLE : View.GONE);
     }

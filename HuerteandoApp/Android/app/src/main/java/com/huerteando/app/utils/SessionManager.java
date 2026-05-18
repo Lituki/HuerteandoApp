@@ -9,8 +9,6 @@ import android.content.SharedPreferences;
 public class SessionManager {
 
     private static final String PREF_NAME = "HuerteandoSession";
-
-    // Claves para el almacenamiento local
     private static final String KEY_ID     = "userId";
     private static final String KEY_NICK   = "nick";
     private static final String KEY_NOMBRE    = "nombre";
@@ -19,14 +17,30 @@ public class SessionManager {
     private static final String KEY_FECHA     = "fechaRegistro";
     private static final String KEY_ROL       = "rol";
     private static final String KEY_AVATAR = "avatarUrl";
-
     private final SharedPreferences prefs;
     private final SharedPreferences.Editor editor;
+    private static final String TOKEN_KEY = "jwt_token";
 
     public SessionManager(Context context) {
-        prefs  = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        prefs  = context.getSharedPreferences("sesion", Context.MODE_PRIVATE);
         editor = prefs.edit();
     }
+    public void guardarToken(String token) {
+        prefs.edit().putString(TOKEN_KEY, token).apply();
+    }
+
+    public String getToken() {
+        return prefs.getString(TOKEN_KEY, null);
+    }
+
+    public boolean haySesion() {
+        return getToken() != null;
+    }
+
+    public void cerrarSesion() {
+        prefs.edit().clear().apply();
+    }
+
 
     /**
      * Guarda los datos del usuario recibidos en el login.
@@ -51,12 +65,4 @@ public class SessionManager {
     public String getFechaRegistro() { return prefs.getString(KEY_FECHA, null); }
     public String getRol()    { return prefs.getString(KEY_ROL, null); }
     public String getAvatarUrl() { return prefs.getString(KEY_AVATAR, "default_avatar"); }
-
-    public boolean haySesion() {
-        return getUserId() != -1;
-    }
-
-    public void cerrarSesion() {
-        editor.clear().apply();
-    }
 }
