@@ -15,6 +15,10 @@ import com.huerteando.app.clases.Observacion;
 import com.huerteando.app.clases.Imagen;
 import com.bumptech.glide.Glide;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 /**
@@ -86,7 +90,7 @@ public class ObservacionAdapter extends RecyclerView.Adapter<ObservacionAdapter.
             }
 
             tvZona.setText(obs.getNombreZona() != null ? obs.getNombreZona() : "Sin zona");
-            tvFecha.setText(obs.getFechaObservacion());
+            tvFecha.setText(formatearHaceDias(obs.getFechaObservacion()));
 
             tvMeGusta.setText(String.valueOf(obs.getNumMeGustas()));
             tvComentarios.setText(String.valueOf(obs.getNumComentarios()));
@@ -136,6 +140,28 @@ public class ObservacionAdapter extends RecyclerView.Adapter<ObservacionAdapter.
             if (n.contains("RINCON") || n.contains("RINCÓN")) return 0xFF2196F3;
             if (n.contains("INCIDENCIA") || n.contains("DENUNCIA")) return 0xFFF44336;
             return 0xFF888888;
+        }
+
+        private String formatearHaceDias(String fechaIso) {
+            if (fechaIso == null || fechaIso.trim().isEmpty()) {
+                return "";
+            }
+
+            try {
+                String limpia = fechaIso.split("\\.")[0];
+                LocalDateTime fechaComentario = LocalDateTime.parse(
+                        limpia,
+                        DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+                );
+
+                long dias = ChronoUnit.DAYS.between(fechaComentario.toLocalDate(), LocalDateTime.now().toLocalDate());
+
+                if (dias <= 0) return "hoy";
+                if (dias == 1) return "hace 1 día";
+                return "hace " + dias + " días";
+            } catch (DateTimeParseException e) {
+                return fechaIso;
+            }
         }
     }
 }

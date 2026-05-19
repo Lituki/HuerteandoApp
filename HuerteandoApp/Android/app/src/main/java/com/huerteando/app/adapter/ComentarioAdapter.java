@@ -9,12 +9,15 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.huerteando.app.R;
 import com.huerteando.app.clases.Comentario;
-import com.bumptech.glide.Glide;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
-
 /**
  * Adapter para mostrar la lista de comentarios
  */
@@ -71,7 +74,7 @@ public class ComentarioAdapter extends RecyclerView.Adapter<ComentarioAdapter.Vi
         public void bind(Comentario comentario) {
             tvAutor.setText(comentario.getAutorNick());
             tvContenido.setText(comentario.getContenido());
-            tvFecha.setText(comentario.getCreadoEn());
+            tvFecha.setText(formatearHaceDias(comentario.getCreadoEn()));
 
             // Solo mostrar botón eliminar si el comentario es del usuario actual
             if (currentUserId != null && currentUserId.equals(comentario.getUsuarioId())) {
@@ -104,6 +107,27 @@ public class ComentarioAdapter extends RecyclerView.Adapter<ComentarioAdapter.Vi
                         .into(ivAvatar);
             } else {
                 ivAvatar.setImageResource(R.drawable.ic_avatar_plant);
+            }
+        }
+        private String formatearHaceDias(String fechaIso) {
+            if (fechaIso == null || fechaIso.trim().isEmpty()) {
+                return "";
+            }
+
+            try {
+                String limpia = fechaIso.split("\\.")[0];
+                LocalDateTime fechaComentario = LocalDateTime.parse(
+                        limpia,
+                        DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+                );
+
+                long dias = ChronoUnit.DAYS.between(fechaComentario.toLocalDate(), LocalDateTime.now().toLocalDate());
+
+                if (dias <= 0) return "hoy";
+                if (dias == 1) return "hace 1 día";
+                return "hace " + dias + " días";
+            } catch (DateTimeParseException e) {
+                return fechaIso;
             }
         }
     }

@@ -70,6 +70,8 @@ public class DetalleObservacionActivity extends AppCompatActivity {
     private final List<Comentario> comentarios = new ArrayList<>();
     private SessionManager session;
 
+    private android.view.View layoutEspecie; 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -137,6 +139,7 @@ public class DetalleObservacionActivity extends AppCompatActivity {
         recyclerComentarios = findViewById(R.id.recyclerComentarios);
         editNuevoComentario = findViewById(R.id.editNuevoComentario);
         btnEnviarComentario = findViewById(R.id.btnEnviarComentario);
+        layoutEspecie = findViewById(R.id.layoutEspecie);
     }
 
     private void setupRecyclerView() {
@@ -262,9 +265,11 @@ public class DetalleObservacionActivity extends AppCompatActivity {
         tvDetalleDescripcion.setText(o.getDescripcion() != null ? o.getDescripcion() : "Sin descripción");
         tvDetalleZona.setText(o.getNombreZona() != null ? "📍 " + o.getNombreZona() : "Ubicación desconocida");
         
-        if (o.getEspecie() != null) {
+        if (o.getEspecie() != null && o.getEspecie().getNombreComun() != null && !o.getEspecie().getNombreComun().trim().isEmpty()) {
             tvDetalleEspecie.setText("🌿 " + o.getEspecie().getNombreComun());
-            tvDetalleEspecie.setVisibility(View.VISIBLE);
+            layoutEspecie.setVisibility(View.VISIBLE);
+        } else {
+            layoutEspecie.setVisibility(View.GONE);
         }
 
         // Carrusel de Imágenes
