@@ -30,6 +30,7 @@ import com.huerteando.app.utils.SessionManager;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -179,6 +180,9 @@ public class ObservacionesActivity extends AppCompatActivity {
                     listaOriginal.clear();
                     listaOriginal.addAll(response.body());
                     procesarYMostrarLista();
+                    // Cargamos los likes reales de cada observacion
+                    // para que no se queden todos a 0.
+                    cargarContadoresMeGusta();
                 } else {
                     Log.e(TAG, "Error del servidor al cargar observaciones: " + response.code());
                 }
@@ -216,6 +220,34 @@ public class ObservacionesActivity extends AppCompatActivity {
 
         adapter.notifyDataSetChanged();
         tvSinResultados.setVisibility(listaAMostrar.isEmpty() ? View.VISIBLE : View.GONE);
+    }
+
+    private void cargarContadoresMeGusta() {
+        ApiService api = ApiClient.getClient().create(ApiService.class);
+
+        for (Observacion observacion : listaOriginal) {
+            if (observacion.getId() == null) {
+                continue;
+            }
+
+            api.getMeGustasCount(observacion.getId()).enqueue(new Callback<Map<String, Long>>() {
+                @Override
+                public void onResponse(Call<Map<String, Long>> call, Response<Map<String, Long>> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        Long total = response.body().get("megustas");
+                        observacion.setNumMeGustas(total != null ? total.intValue() : 0);
+
+                        // Refrescamos para que se vea el contador y el orden por likes funcione.
+                        procesarYMostrarLista();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Map<String, Long>> call, Throwable t) {
+                    Log.e(TAG, "No se pudo cargar el contador de likes", t);
+                }
+            });
+        }
     }
 
     @Override
