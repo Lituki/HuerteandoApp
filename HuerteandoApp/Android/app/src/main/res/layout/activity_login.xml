@@ -84,15 +84,15 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="24dp"
                     android:hint="@string/login_nick_hint"
-                    app:startIconDrawable="@android:drawable/ic_menu_myplaces"
+                    app:startIconDrawable="@android:drawable/ic_dialog_email"
                     app:boxStrokeColor="@color/verde_principal"
                     app:hintTextColor="@color/verde_principal">
 
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/editNick"
+                        android:id="@+id/editEmail"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="text" />
+                        android:inputType="textEmailAddress" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout

@@ -26,7 +26,7 @@
 
     <!-- Login -->
     <string name="login_titulo">🌿 Huerteando 🌿</string>
-    <string name="login_nick_hint">Tu usuario:</string>
+    <string name="login_nick_hint">Tu correo:</string>
     <string name="login_password_hint">Tu contraseña:</string>
     <string name="login_boton">Entrar a la huerta</string>
     <string name="login_ir_registro">¿Nuevo por aquí? Únete a la comunidad</string>
