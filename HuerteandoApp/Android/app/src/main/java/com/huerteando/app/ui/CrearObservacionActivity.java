@@ -13,8 +13,10 @@ import android.provider.MediaStore;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -70,6 +72,7 @@ public class CrearObservacionActivity extends AppCompatActivity {
     private TextInputEditText editTitulo, editDescripcion, editZona, editDireccion, editFecha, editNombreTradicional;
     private TextInputLayout layoutTitulo, layoutTipo;
     private MaterialAutoCompleteTextView spinnerTipo, spinnerEspecie;
+    private LinearLayout layoutDetallesBotanicos; // NUEVO: Contenedor botánico
     private final List<Uri> imagenesSeleccionadas = new ArrayList<>();
     private android.widget.Button btnSeleccionarImagen;
     private MaterialButton btnEliminarImagenes;
@@ -94,7 +97,7 @@ public class CrearObservacionActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_crear_observacion);
-        
+
         sessionManager = new SessionManager(this);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -115,6 +118,8 @@ public class CrearObservacionActivity extends AppCompatActivity {
         } else {
             // Fecha actual (formato legible para UI)
             editFecha.setText(new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(new Date()));
+            // Por defecto ocultamos la caja botánica al crear uno nuevo
+            layoutDetallesBotanicos.setVisibility(View.GONE);
         }
         editFecha.setEnabled(false);
 
@@ -142,6 +147,19 @@ public class CrearObservacionActivity extends AppCompatActivity {
         spinnerEspecie.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus) spinnerEspecie.showDropDown();
         });
+
+        // NUEVO: Escuchar cambios en el tipo de observación para mostrar u ocultar la caja botánica
+        spinnerTipo.setOnItemClickListener((parent, view, position, id) -> {
+            String tipoSeleccionado = (String) parent.getItemAtPosition(position);
+            if (tipoSeleccionado != null && tipoSeleccionado.equalsIgnoreCase("Planta")) {
+                layoutDetallesBotanicos.setVisibility(View.VISIBLE);
+            } else {
+                layoutDetallesBotanicos.setVisibility(View.GONE);
+                // Si no es planta, limpiamos los datos botánicos por si había escrito algo
+                spinnerEspecie.setText("", false);
+                editNombreTradicional.setText("");
+            }
+        });
     }
 
     private void initViews() {
@@ -162,6 +180,7 @@ public class CrearObservacionActivity extends AppCompatActivity {
         tvImagenesSeleccionadas = findViewById(R.id.tvImagenesSeleccionadas);
         tvError = findViewById(R.id.tvErrorCrear);
         progressBar = findViewById(R.id.progressBar);
+        layoutDetallesBotanicos = findViewById(R.id.layoutDetallesBotanicos); // NUEVO
     }
 
     private void setupToolbar() {
@@ -211,7 +230,14 @@ public class CrearObservacionActivity extends AppCompatActivity {
         ubicacionObtenida = true;
 
         if (observacionAEditar.getTipoObservacion() != null) {
-            spinnerTipo.setText(observacionAEditar.getTipoObservacion().getNombre(), false);
+            String nombreTipo = observacionAEditar.getTipoObservacion().getNombre();
+            spinnerTipo.setText(nombreTipo, false);
+            // Comprobamos si es Planta al cargar para mostrar la caja
+            if (nombreTipo != null && nombreTipo.equalsIgnoreCase("Planta")) {
+                layoutDetallesBotanicos.setVisibility(View.VISIBLE);
+            } else {
+                layoutDetallesBotanicos.setVisibility(View.GONE);
+            }
         }
 
         if (observacionAEditar.getEspecie() != null) {
@@ -374,7 +400,7 @@ public class CrearObservacionActivity extends AppCompatActivity {
         obs.setLatitud(latitud);
         obs.setLongitud(longitud);
         obs.setEstadoObservacion("ABIERTA");
-        
+
         // Formato ISO para el backend
         String fechaISO = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).format(new Date());
         obs.setFechaObservacion(fechaISO);
@@ -388,12 +414,18 @@ public class CrearObservacionActivity extends AppCompatActivity {
                 break;
             }
         }
-        
+
         if (tipo == null) {
             mostrarError("Selecciona un tipo válido");
             return;
         }
         obs.setTipoObservacion(tipo);
+
+        // NUEVO: Si el tipo NO es planta, limpiamos los datos botánicos antes de enviarlos por si acaso
+        if (!tipo.getNombre().equalsIgnoreCase("Planta")) {
+            obs.setEspecie(null);
+            obs.setNombreTradicional(null);
+        }
 
         // Seteamos Usuario como objeto con ID
         Usuario user = new Usuario();
@@ -475,7 +507,7 @@ public class CrearObservacionActivity extends AppCompatActivity {
         final int[] subidas = {0};
         final int[] errores = {0};
 
-        
+
         for (int i = 0; i < imagenesSeleccionadas.size(); i++) {
             Uri uri = imagenesSeleccionadas.get(i);
             try {
@@ -492,7 +524,7 @@ public class CrearObservacionActivity extends AppCompatActivity {
 
                 String mimeType = getContentResolver().getType(uri);
                 if (mimeType == null) mimeType = "image/jpeg";
-                
+
                 // Sintaxis correcta para OkHttp 4.x
                 RequestBody requestFile = RequestBody.create(file, MediaType.parse(mimeType));
                 MultipartBody.Part body = MultipartBody.Part.createFormData("file", file.getName(), requestFile);

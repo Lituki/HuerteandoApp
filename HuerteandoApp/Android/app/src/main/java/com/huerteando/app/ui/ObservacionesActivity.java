@@ -46,7 +46,7 @@ public class ObservacionesActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
     private TextView tvSinResultados;
-    private Spinner spinnerTipo, spinnerOrden, spinnerUsuario, spinnerEstado;
+    private Spinner spinnerTipo, spinnerOrden, spinnerUsuario;
     private FloatingActionButton fabNueva;
 
     private ObservacionAdapter adapter;
@@ -55,7 +55,6 @@ public class ObservacionesActivity extends AppCompatActivity {
 
     private Long idTipoSeleccionado = null;
     private Long idUsuarioSeleccionado = null;
-    private String estadoSeleccionado = null;
     private String ordenSeleccionado = "fecha";
     private String textoBusqueda = "";
     private SessionManager session;
@@ -92,7 +91,6 @@ public class ObservacionesActivity extends AppCompatActivity {
         spinnerTipo = findViewById(R.id.spinnerTipo);
         spinnerOrden = findViewById(R.id.spinnerOrden);
         spinnerUsuario = findViewById(R.id.spinnerUsuario);
-        spinnerEstado = findViewById(R.id.spinnerEstado);
         fabNueva = findViewById(R.id.fabCrearObservacion);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -140,23 +138,6 @@ public class ObservacionesActivity extends AppCompatActivity {
             @Override public void onNothingSelected(AdapterView<?> parent) {}
         });
 
-        ArrayAdapter<CharSequence> adapterEstado = ArrayAdapter.createFromResource(this,
-                R.array.array_estados, R.layout.spinner_item);
-        adapterEstado.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        spinnerEstado.setAdapter(adapterEstado);
-        spinnerEstado.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                switch (position) {
-                    case 1: estadoSeleccionado = "ABIERTA"; break;
-                    case 2: estadoSeleccionado = "CERRADA"; break;
-                    default: estadoSeleccionado = null;
-                }
-                cargarObservaciones();
-            }
-            @Override public void onNothingSelected(AdapterView<?> parent) {}
-        });
-
         final String[] valoresOrden = {"fecha", "me gusta", "comentarios"};
         ArrayAdapter<CharSequence> adapterOrden = ArrayAdapter.createFromResource(this,
                 R.array.array_orden, R.layout.spinner_item);
@@ -184,9 +165,6 @@ public class ObservacionesActivity extends AppCompatActivity {
         } else if (idUsuarioSeleccionado != null) {
             Log.d(TAG, "Filtrando por usuario ID: " + idUsuarioSeleccionado);
             call = api.getObservacionesPorUsuario(idUsuarioSeleccionado);
-        } else if (estadoSeleccionado != null) {
-            Log.d(TAG, "Filtrando por estado: " + estadoSeleccionado);
-            call = api.getObservacionesPorEstado(estadoSeleccionado);
         } else {
             Log.d(TAG, "Cargando todas las observaciones");
             call = api.getObservaciones(); // Carga todas por defecto

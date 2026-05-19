@@ -2,16 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Permisos de red y localización -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <!-- Para móviles antiguos (Android 12 hacia abajo) -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
 
-    <!-- Para móviles modernos (Android 13 hacia arriba) -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 
     <application
@@ -27,48 +24,45 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
 
-        <!-- LAUNCHER: Listado de observaciones -->
         <activity
-            android:name=".ui.ObservacionesActivity"
-            android:exported="true"
-            android:windowSoftInputMode="adjustResize">
+            android:name=".ui.SplashActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <!-- Registro de nuevo usuario -->
+        <activity
+            android:name=".ui.ObservacionesActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize" />
+
         <activity
             android:name=".ui.RegistroActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
-        <!--Login -->
         <activity
             android:name=".ui.LoginActivity"
             android:exported="false" />
 
-        <!-- Detalle de una observación -->
         <activity
             android:name=".ui.DetalleObservacionActivity"
             android:exported="false"
             android:parentActivityName=".ui.ObservacionesActivity" />
 
-        <!-- Crear observación (versión alternativa con más campos) -->
         <activity
             android:name=".ui.CrearObservacionActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize"
             android:parentActivityName=".ui.ObservacionesActivity" />
 
-        <!-- Pantalla de perfil de usuario -->
         <activity
             android:name=".ui.PerfilActivity"
             android:exported="false"
             android:parentActivityName=".ui.ObservacionesActivity" />
 
-        <!-- Gestión de Especies -->
         <activity
             android:name=".ui.EspeciesActivity"
             android:exported="false"
