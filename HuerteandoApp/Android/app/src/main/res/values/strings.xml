@@ -8,15 +8,15 @@
 
 
     <!-- Tipos de observación -->
-    <string name="tipo_todos">Todos los tipos</string>
+    <string name="tipo_todos">Tipos</string>
     <string name="tipo_planta">PLANTA</string>
     <string name="tipo_rincon">RINCÓN</string>
     <string name="tipo_incidencia">INCIDENCIA</string>
 
     <!-- Orden -->
-    <string name="orden_recientes">Más recientes</string>
-    <string name="orden_megusta">Más me gusta</string>
-    <string name="orden_comentarios">Más comentados</string>
+    <string name="orden_recientes">Recientes</string>
+    <string name="orden_megusta">Likes</string>
+    <string name="orden_comentarios">Comentarios</string>
 
     <!-- Mensajes generales -->
     <string name="sin_resultados">¡Vaya! No encontramos nada con estos filtros.\nPrueba a buscar de otra forma.</string>
@@ -26,7 +26,7 @@
 
     <!-- Login -->
     <string name="login_titulo">🌿 Huerteando 🌿</string>
-    <string name="login_nick_hint">Tu usuario:</string>
+    <string name="login_nick_hint">Tu correo:</string>
     <string name="login_password_hint">Tu contraseña:</string>
     <string name="login_boton">Entrar a la huerta</string>
     <string name="login_ir_registro">¿Nuevo por aquí? Únete a la comunidad</string>
@@ -67,8 +67,8 @@
 
 
     <!-- Filtros Adicionales -->
-    <string name="filtro_todos">Todas las observaciones</string>
-    <string name="filtro_mis_observaciones">Mis aportaciones</string>
+    <string name="filtro_todos">Todas</string>
+    <string name="filtro_mis_observaciones">Mis posts</string>
     <string name="estado_todos">Todos los estados</string>
     <string name="estado_abierta">ABIERTA</string>
     <string name="estado_cerrada">CERRADA</string>

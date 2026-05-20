@@ -37,7 +37,7 @@ import retrofit2.Retrofit;
 public class LoginActivity extends AppCompatActivity {
 
     private static final String TAG = "LoginActivity";
-    private TextInputEditText editNick;
+    private TextInputEditText editEmail;
     private TextInputEditText editPassword;
     private MaterialButton    btnLogin;
     private TextView          tvError;
@@ -59,7 +59,7 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        editNick      = findViewById(R.id.editNick);
+        editEmail     = findViewById(R.id.editEmail);
         editPassword  = findViewById(R.id.editPassword);
         btnLogin      = findViewById(R.id.btnLogin);
         tvError       = findViewById(R.id.tvError);
@@ -78,7 +78,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void realizarLogin() {
-        String email = texto(editNick); // en Supabase esto suele ser email
+        String email = texto(editEmail);
         String password = texto(editPassword);
 
         Log.d(TAG, "Intentando iniciar sesión para el usuario: " + email);
