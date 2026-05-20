@@ -6,6 +6,7 @@ import com.huerteando.huerteandoapp.service.IObservacionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 // Igual que los comentarios, las imágenes van anidadas bajo la observación.
@@ -24,31 +25,32 @@ public class ImagenController {
     }
 
     // GET /api/observaciones/{idObservacion}/imagenes
-    // Devuelve todas las imágenes de una observación, ordenadas por fecha de subida.
     @GetMapping
     public ResponseEntity<List<Imagen>> listar(@PathVariable Long idObservacion) {
         return ResponseEntity.ok(imagenService.listarPorObservacion(idObservacion));
     }
 
     // POST /api/observaciones/{idObservacion}/imagenes
-    // Añade una imagen a una observación existente.
-    // El body lleva: urlArchivo (obligatorio) y titulo (opcional).
-    @PostMapping
-    public ResponseEntity<Imagen> crear(@PathVariable Long idObservacion, @RequestBody Imagen imagen) {
-
-        // Verificamos que la observación padre existe.
+    // Recibe un archivo (multipart/form-data) y un título opcional, y lo asocia a
+    // la observación.
+    @PostMapping(consumes = "multipart/form-data")
+    public ResponseEntity<Imagen> crear(
+            @PathVariable Long idObservacion,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "titulo", required = false) String titulo) {
         var observacion = observacionService.buscarPorId(idObservacion);
-        if (observacion == null) return ResponseEntity.notFound().build();
+        if (observacion == null)
+            return ResponseEntity.notFound().build();
 
-        // Asignamos la observación real. El id viene de la URL, no del body.
-        imagen.setObservacion(observacion);
+        Imagen nueva = imagenService.subirImagen(idObservacion, file, titulo);
 
-        // El servicio valida que urlArchivo no sea null ni vacío.
-        Imagen nueva = imagenService.crear(imagen);
-        if (nueva == null) return ResponseEntity.badRequest().build();
+        if (nueva == null)
+            return ResponseEntity.badRequest().build();
 
         return ResponseEntity.status(HttpStatus.CREATED).body(nueva);
     }
+
+
 
     // DELETE /api/observaciones/{idObservacion}/imagenes/{idImagen}
     @DeleteMapping("/{idImagen}")

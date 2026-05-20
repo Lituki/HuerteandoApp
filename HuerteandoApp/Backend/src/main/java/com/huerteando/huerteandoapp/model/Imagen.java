@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 /*
 Tabla: imagen
 Solo guardamos metadatos: URL y título.
@@ -21,11 +23,12 @@ public class Imagen {
     @Column(name = "id_imagen")
     private Long id;
 
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "id_observacion", nullable = false)
     private Observacion observacion;
 
-    @Column(name = "url_archivo", nullable = false, columnDefinition = "text")
+    @Column(name = "url_archivo", nullable = false)
     private String urlArchivo;
 
     @Column(name = "titulo")

@@ -23,7 +23,6 @@ public interface IObservacionService {
     List<Observacion> listarPorTipo(Long idTipoObservacion);
     List<Observacion> listarPorEspecie(Long idEspecie);
     List<Observacion> listarPorEstadoObservacion(String estadoObservacion);
-
     // Las 20 más recientes, para el feed de inicio
     List<Observacion> ultimas20();
 }

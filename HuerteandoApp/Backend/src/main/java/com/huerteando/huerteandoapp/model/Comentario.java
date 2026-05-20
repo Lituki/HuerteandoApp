@@ -10,7 +10,9 @@ import java.time.LocalDateTime;
 Tabla: comentario
 Comentario simple: quién comenta, en qué observación y qué dice.
 */
-@Getter @Setter @NoArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "comentario")
 public class Comentario {
@@ -20,6 +22,7 @@ public class Comentario {
     @Column(name = "id_comentario")
     private Long id;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @ManyToOne
     @JoinColumn(name = "id_observacion", nullable = false)
     private Observacion observacion;
@@ -38,5 +41,7 @@ public class Comentario {
     private LocalDateTime editadoEn;
 
     @PrePersist
-    void alCrear() { creadoEn = LocalDateTime.now(); }
+    void alCrear() {
+        creadoEn = LocalDateTime.now();
+    }
 }

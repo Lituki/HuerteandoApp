@@ -1,10 +1,13 @@
 package com.huerteando.huerteandoapp.controller;
 
+import com.huerteando.huerteandoapp.dto.RegistroRequest;
 import com.huerteando.huerteandoapp.model.Usuario;
 import com.huerteando.huerteandoapp.service.IUsuarioService;
+import com.huerteando.huerteandoapp.service.SupabaseStorageService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.Map;
 
@@ -15,31 +18,55 @@ import java.util.Map;
 public class UsuarioController {
 
     private final IUsuarioService usuarioService;
+    private final SupabaseStorageService supabaseStorageService;
 
-    public UsuarioController(IUsuarioService usuarioService) {
+    public UsuarioController(IUsuarioService usuarioService, SupabaseStorageService supabaseStorageService) {
         this.usuarioService = usuarioService;
+        this.supabaseStorageService = supabaseStorageService;
     }
 
     // POST /api/auth/register
-    // Recibe un objeto Usuario en el body con los datos del formulario de registro.
+    // Recibe un DTO con los datos del formulario de registro.
     @PostMapping("/api/auth/register")
-    public ResponseEntity<Usuario> register(@RequestBody Usuario usuario) {
+    public ResponseEntity<Usuario> register(@RequestBody RegistroRequest req) {
 
         // El nick es obligatorio y tiene que ser único en la BD.
-        if (usuario.getNick() == null || usuario.getNick().isBlank()) {
+        if (req.getNick() == null || req.getNick().isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        // En la BD, nombre es NOT NULL.
+        if (req.getNombre() == null || req.getNombre().isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        // En la BD, password_hash es NOT NULL.
+        if (req.getPassword() == null || req.getPassword().isBlank()) {
             return ResponseEntity.badRequest().build();
         }
 
         // Preguntamos al servicio si ese nick ya está pillado.
-        if (usuarioService.existeNick(usuario.getNick())) {
+        if (usuarioService.existeNick(req.getNick())) {
             // 409 Conflict: el recurso ya existe, no es un error del cliente ni del servidor.
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
 
         // El email es opcional, pero si llega tiene que ser único también.
-        if (usuario.getEmail() != null && usuarioService.existeEmail(usuario.getEmail())) {
+        if (req.getEmail() != null && usuarioService.existeEmail(req.getEmail())) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
+
+        // Creamos la entidad a partir del DTO.
+        Usuario usuario = new Usuario();
+        usuario.setNick(req.getNick());
+        usuario.setNombre(req.getNombre());
+        usuario.setApellidos(req.getApellidos());
+        usuario.setEmail(req.getEmail());
+        usuario.setAvatarUrl(req.getAvatarUrl());
+
+        // Para DAM: guardamos la contraseña tal cual en passwordHash.
+        // (En un proyecto real, aquí iría el hash con Spring Security.)
+        usuario.setPasswordHash(req.getPassword());
 
         // Estos campos los pone el backend, no el usuario que se registra.
         // Si dejáramos que el cliente los mandara, podría poner lo que quisiera.
@@ -103,5 +130,31 @@ public class UsuarioController {
         Usuario usuario = usuarioService.buscarPorId(id);
         if (usuario == null) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(usuario);
+    }
+
+    // POST /api/usuarios/{id}/avatar
+    // Sube un avatar (multipart) a Supabase Storage y guarda la URL pública en el usuario.
+    @PostMapping(value = "/api/usuarios/{id}/avatar", consumes = "multipart/form-data")
+    public ResponseEntity<Usuario> subirAvatar(
+            @PathVariable Long id,
+            @RequestParam("file") MultipartFile file) {
+
+        // Validación mínima: si no llega fichero o llega vacío, la petición es incorrecta.
+        if (file == null || file.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        // Comprobamos que el usuario exista.
+        Usuario usuario = usuarioService.buscarPorId(id);
+        if (usuario == null) return ResponseEntity.notFound().build();
+
+        // Subimos el fichero a Supabase y obtenemos la URL pública.
+        String urlAvatar = supabaseStorageService.subirAvatar(file);
+
+        // Guardamos esa URL en el usuario.
+        usuario.setAvatarUrl(urlAvatar);
+        Usuario actualizado = usuarioService.guardar(usuario);
+
+        return ResponseEntity.ok(actualizado);
     }
 }

@@ -4,10 +4,10 @@ import com.huerteando.huerteandoapp.model.Observacion;
 import com.huerteando.huerteandoapp.repository.ObservacionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
-// @Service le dice a Spring que esta clase es un componente de lógica de negocio.
-// Spring la detecta sola y la registra para poder inyectarla donde haga falta.
+// Service = lógica de negocio. Aquí validamos lo mínimo y llamamos al repositorio.
 @Service
 public class ObservacionServiceImpl implements IObservacionService {
 
@@ -17,37 +17,34 @@ public class ObservacionServiceImpl implements IObservacionService {
         this.observacionRepository = observacionRepository;
     }
 
-    // @Transactional significa que si algo falla dentro del método,
-    // la BD vuelve al estado anterior (rollback automático).
-    // Es importante en métodos que escriben en la BD.
+    // Crear una observación. Si faltan campos básicos, devolvemos null (controller -> 400).
     @Override
     @Transactional
     public Observacion crear(Observacion observacion) {
         if (observacion == null) return null;
 
-        // Validamos los campos mínimos obligatorios antes de intentar guardar.
-        // Si falta alguno, devolvemos null y el controller responde 400.
+        // Mínimos obligatorios para que la BD no reviente y tenga sentido.
         if (observacion.getUsuario() == null) return null;
         if (observacion.getTipoObservacion() == null) return null;
         if (observacion.getLatitud() == null || observacion.getLongitud() == null) return null;
 
-        // save() de JpaRepository hace el INSERT en la BD y devuelve el objeto con el id generado.
         return observacionRepository.save(observacion);
     }
 
+    // Actualizar: si no existe, devolvemos null (controller -> 404).
     @Override
     @Transactional
     public Observacion actualizar(Observacion observacion) {
         if (observacion == null) return null;
         if (observacion.getId() == null) return null;
 
-        // Comprobamos que existe antes de actualizar.
-        // Si no existe, save() haría un INSERT en vez de un UPDATE, lo cual sería un bug.
+        // Evita que un "update" acabe haciendo un "insert" por error.
         if (!observacionRepository.existsById(observacion.getId())) return null;
 
         return observacionRepository.save(observacion);
     }
 
+    // Borrado simple por id.
     @Override
     @Transactional
     public void eliminar(Long idObservacion) {
@@ -55,30 +52,31 @@ public class ObservacionServiceImpl implements IObservacionService {
         observacionRepository.deleteById(idObservacion);
     }
 
-    // readOnly = true le dice a Hibernate que esta transacción solo lee.
-    // Hibernate puede optimizarla internamente (no hace flush al final).
+    // Detalle por id. Traemos también las imágenes con EntityGraph.
+    // Motivo: con open-in-view=false, lo LAZY puede fallar al serializar a JSON.
     @Override
     @Transactional(readOnly = true)
     public Observacion buscarPorId(Long idObservacion) {
         if (idObservacion == null) return null;
-
-        // findById devuelve un Optional. orElse(null) lo convierte a null si no existe.
-        return observacionRepository.findById(idObservacion).orElse(null);
+        return observacionRepository.findWithImagenesById(idObservacion).orElse(null);
     }
 
+    // Listado sin filtros.
     @Override
     @Transactional(readOnly = true)
     public List<Observacion> listarTodas() {
         return observacionRepository.findAll();
     }
 
+    // Observaciones de un usuario (últimas primero).
     @Override
     @Transactional(readOnly = true)
     public List<Observacion> listarPorUsuario(Long idUsuario) {
-        if (idUsuario == null) return List.of(); // lista vacía, no null
+        if (idUsuario == null) return List.of();
         return observacionRepository.findByUsuario_IdOrderByCreadoEnDesc(idUsuario);
     }
 
+    // Por tipo (fecha desc).
     @Override
     @Transactional(readOnly = true)
     public List<Observacion> listarPorTipo(Long idTipoObservacion) {
@@ -86,6 +84,7 @@ public class ObservacionServiceImpl implements IObservacionService {
         return observacionRepository.findByTipoObservacion_IdOrderByFechaObservacionDesc(idTipoObservacion);
     }
 
+    // Por especie (fecha desc).
     @Override
     @Transactional(readOnly = true)
     public List<Observacion> listarPorEspecie(Long idEspecie) {
@@ -93,6 +92,7 @@ public class ObservacionServiceImpl implements IObservacionService {
         return observacionRepository.findByEspecie_IdOrderByFechaObservacionDesc(idEspecie);
     }
 
+    // Por estado (ABIERTA, CERRADA, ...).
     @Override
     @Transactional(readOnly = true)
     public List<Observacion> listarPorEstadoObservacion(String estadoObservacion) {
@@ -100,6 +100,7 @@ public class ObservacionServiceImpl implements IObservacionService {
         return observacionRepository.findByEstadoObservacionIgnoreCaseOrderByActualizadoEnDesc(estadoObservacion);
     }
 
+    // Para el feed: las 20 últimas creadas.
     @Override
     @Transactional(readOnly = true)
     public List<Observacion> ultimas20() {

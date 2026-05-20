@@ -1,6 +1,8 @@
 package com.huerteando.huerteandoapp.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -98,7 +100,7 @@ public class Observacion {
     @OneToMany(mappedBy = "observacion", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comentario> comentarios = new ArrayList<>();
 
-    @JsonIgnore
+    @JsonManagedReference
     @OneToMany(mappedBy = "observacion", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Imagen> imagenes = new ArrayList<>();
 

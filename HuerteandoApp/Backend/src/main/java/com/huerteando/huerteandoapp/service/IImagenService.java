@@ -4,6 +4,8 @@ import com.huerteando.huerteandoapp.model.Imagen;
 
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
+
 public interface IImagenService {
 
     // CRUD básico
@@ -18,4 +20,6 @@ public interface IImagenService {
     List<Imagen> listarPorObservacion(Long idObservacion);
     long contarPorObservacion(Long idObservacion);
     void borrarPorObservacion(Long idObservacion);
+
+    Imagen subirImagen(Long idObservacion, MultipartFile file, String titulo);
 }
