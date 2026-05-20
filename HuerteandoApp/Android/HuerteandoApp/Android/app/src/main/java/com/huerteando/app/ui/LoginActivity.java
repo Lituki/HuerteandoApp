@@ -78,7 +78,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void realizarLogin() {
-        String email = texto(editEmail); // Toma el texto del campo del email
+        String email = texto(editEmail); // Coge el texto del campo del email
         String password = texto(editPassword);
 
         Log.d(TAG, "Intentando iniciar sesión para el usuario: " + email);
