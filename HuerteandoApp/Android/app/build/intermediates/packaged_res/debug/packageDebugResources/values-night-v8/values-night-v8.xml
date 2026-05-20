@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Base.Theme.Huerteando" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        
+        <item name="colorPrimary">@color/verde_principal</item>
+        <item name="colorPrimaryDark">@color/verde_oscuro</item>
+        <item name="colorAccent">@color/verde_accent</item>
+
+        
+        <item name="colorSurface">@color/white</item>
+        <item name="colorOnSurface">@color/texto_principal</item>
+        <item name="colorOnSurfaceVariant">@color/texto_secundario</item>
+        <item name="android:colorBackground">@color/fondo_pantalla</item>
+
+        <item name="android:textColorPrimary">@color/texto_principal</item>
+        <item name="android:textColorSecondary">@color/texto_secundario</item>
+        
+        <item name="colorControlNormal">@color/white</item>
+    </style>
+</resources>

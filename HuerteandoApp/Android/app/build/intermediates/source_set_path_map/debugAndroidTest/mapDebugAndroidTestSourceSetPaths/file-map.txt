@@ -1,0 +1,6 @@
+com.huerteando.app.test.app-jetified-core-1.6.1-0 C:\Users\Antonio\.gradle\caches\9.3.1\transforms\760a31cf3fb730516ffb61245e5ba76e\workspace\transformed\jetified-core-1.6.1\res
+com.huerteando.app.test.app-androidTest-1 C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\build\generated\res\resValues\androidTest\debug
+com.huerteando.app.test.app-updated_navigation_xml-2 C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\build\generated\updated_navigation_xml\debugAndroidTest
+com.huerteando.app.test.app-mergeDebugAndroidTestResources-3 C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\build\intermediates\incremental\debugAndroidTest\mergeDebugAndroidTestResources\merged.dir
+com.huerteando.app.test.app-mergeDebugAndroidTestResources-4 C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\build\intermediates\incremental\debugAndroidTest\mergeDebugAndroidTestResources\stripped.dir
+com.huerteando.app.test.app-debugAndroidTest-5 C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\build\intermediates\merged_res\debugAndroidTest\mergeDebugAndroidTestResources

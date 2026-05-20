@@ -1,0 +1,263 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.huerteando.app"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="26"
+9        android:targetSdkVersion="35" />
+10
+11    <uses-permission android:name="android.permission.INTERNET" />
+11-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:5:5-67
+11-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:5:22-64
+12    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+12-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:6:5-79
+12-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:6:22-76
+13    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+13-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:7:5-79
+13-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:7:22-76
+14    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+14-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:8:5-81
+14-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:8:22-78
+15    <uses-permission
+15-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:9:5-10:38
+16        android:name="android.permission.READ_EXTERNAL_STORAGE"
+16-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:9:22-77
+17        android:maxSdkVersion="32" />
+17-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:10:9-35
+18    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+18-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:12:5-76
+18-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:12:22-73
+19
+20    <supports-screens
+20-->[org.osmdroid:osmdroid-android:6.1.20] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\84129a8340de982637be81dcc51e940e\workspace\transformed\jetified-osmdroid-android-6.1.20\AndroidManifest.xml:9:5-12:40
+21        android:anyDensity="true"
+21-->[org.osmdroid:osmdroid-android:6.1.20] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\84129a8340de982637be81dcc51e940e\workspace\transformed\jetified-osmdroid-android-6.1.20\AndroidManifest.xml:10:9-34
+22        android:largeScreens="true"
+22-->[org.osmdroid:osmdroid-android:6.1.20] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\84129a8340de982637be81dcc51e940e\workspace\transformed\jetified-osmdroid-android-6.1.20\AndroidManifest.xml:11:9-36
+23        android:normalScreens="true" />
+23-->[org.osmdroid:osmdroid-android:6.1.20] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\84129a8340de982637be81dcc51e940e\workspace\transformed\jetified-osmdroid-android-6.1.20\AndroidManifest.xml:12:9-37
+24
+25    <uses-feature
+25-->[org.osmdroid:osmdroid-android:6.1.20] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\84129a8340de982637be81dcc51e940e\workspace\transformed\jetified-osmdroid-android-6.1.20\AndroidManifest.xml:14:5-16:36
+26        android:name="android.hardware.location.network"
+26-->[org.osmdroid:osmdroid-android:6.1.20] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\84129a8340de982637be81dcc51e940e\workspace\transformed\jetified-osmdroid-android-6.1.20\AndroidManifest.xml:15:9-57
+27        android:required="false" />
+27-->[org.osmdroid:osmdroid-android:6.1.20] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\84129a8340de982637be81dcc51e940e\workspace\transformed\jetified-osmdroid-android-6.1.20\AndroidManifest.xml:16:9-33
+28    <uses-feature
+28-->[org.osmdroid:osmdroid-android:6.1.20] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\84129a8340de982637be81dcc51e940e\workspace\transformed\jetified-osmdroid-android-6.1.20\AndroidManifest.xml:17:5-19:36
+29        android:name="android.hardware.location.gps"
+29-->[org.osmdroid:osmdroid-android:6.1.20] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\84129a8340de982637be81dcc51e940e\workspace\transformed\jetified-osmdroid-android-6.1.20\AndroidManifest.xml:18:9-53
+30        android:required="false" />
+30-->[org.osmdroid:osmdroid-android:6.1.20] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\84129a8340de982637be81dcc51e940e\workspace\transformed\jetified-osmdroid-android-6.1.20\AndroidManifest.xml:19:9-33
+31    <uses-feature
+31-->[org.osmdroid:osmdroid-android:6.1.20] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\84129a8340de982637be81dcc51e940e\workspace\transformed\jetified-osmdroid-android-6.1.20\AndroidManifest.xml:20:5-22:36
+32        android:name="android.hardware.telephony"
+32-->[org.osmdroid:osmdroid-android:6.1.20] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\84129a8340de982637be81dcc51e940e\workspace\transformed\jetified-osmdroid-android-6.1.20\AndroidManifest.xml:21:9-50
+33        android:required="false" />
+33-->[org.osmdroid:osmdroid-android:6.1.20] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\84129a8340de982637be81dcc51e940e\workspace\transformed\jetified-osmdroid-android-6.1.20\AndroidManifest.xml:22:9-33
+34    <uses-feature
+34-->[org.osmdroid:osmdroid-android:6.1.20] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\84129a8340de982637be81dcc51e940e\workspace\transformed\jetified-osmdroid-android-6.1.20\AndroidManifest.xml:23:5-25:36
+35        android:name="android.hardware.wifi"
+35-->[org.osmdroid:osmdroid-android:6.1.20] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\84129a8340de982637be81dcc51e940e\workspace\transformed\jetified-osmdroid-android-6.1.20\AndroidManifest.xml:24:9-45
+36        android:required="false" />
+36-->[org.osmdroid:osmdroid-android:6.1.20] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\84129a8340de982637be81dcc51e940e\workspace\transformed\jetified-osmdroid-android-6.1.20\AndroidManifest.xml:25:9-33
+37
+38    <permission
+38-->[androidx.core:core:1.13.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\ea3a50dc6d255aa8746f234a39be4cd7\workspace\transformed\core-1.13.0\AndroidManifest.xml:22:5-24:47
+39        android:name="com.huerteando.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+39-->[androidx.core:core:1.13.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\ea3a50dc6d255aa8746f234a39be4cd7\workspace\transformed\core-1.13.0\AndroidManifest.xml:23:9-81
+40        android:protectionLevel="signature" />
+40-->[androidx.core:core:1.13.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\ea3a50dc6d255aa8746f234a39be4cd7\workspace\transformed\core-1.13.0\AndroidManifest.xml:24:9-44
+41
+42    <uses-permission android:name="com.huerteando.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+42-->[androidx.core:core:1.13.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\ea3a50dc6d255aa8746f234a39be4cd7\workspace\transformed\core-1.13.0\AndroidManifest.xml:26:5-97
+42-->[androidx.core:core:1.13.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\ea3a50dc6d255aa8746f234a39be4cd7\workspace\transformed\core-1.13.0\AndroidManifest.xml:26:22-94
+43
+44    <application
+44-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:14:5-72:19
+45        android:name="com.huerteando.app.MyApp"
+45-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:15:9-30
+46        android:allowBackup="true"
+46-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:16:9-35
+47        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+47-->[androidx.core:core:1.13.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\ea3a50dc6d255aa8746f234a39be4cd7\workspace\transformed\core-1.13.0\AndroidManifest.xml:28:18-86
+48        android:dataExtractionRules="@xml/data_extraction_rules"
+48-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:17:9-65
+49        android:debuggable="true"
+50        android:extractNativeLibs="false"
+51        android:fullBackupContent="@xml/backup_rules"
+51-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:18:9-54
+52        android:icon="@mipmap/ic_launcher"
+52-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:19:9-43
+53        android:label="@string/app_name"
+53-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:20:9-41
+54        android:roundIcon="@mipmap/ic_launcher_round"
+54-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:21:9-54
+55        android:supportsRtl="true"
+55-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:22:9-35
+56        android:testOnly="true"
+57        android:theme="@style/Theme.Huerteando"
+57-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:23:9-48
+58        android:usesCleartextTraffic="true" >
+58-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:24:9-44
+59        <activity
+59-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:27:9-34:20
+60            android:name="com.huerteando.app.ui.SplashActivity"
+60-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:28:13-46
+61            android:exported="true" >
+61-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:29:13-36
+62            <intent-filter>
+62-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:30:13-33:29
+63                <action android:name="android.intent.action.MAIN" />
+63-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:31:17-69
+63-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:31:25-66
+64
+65                <category android:name="android.intent.category.LAUNCHER" />
+65-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:32:17-77
+65-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:32:27-74
+66            </intent-filter>
+67        </activity>
+68        <activity
+68-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:36:9-39:58
+69            android:name="com.huerteando.app.ui.ObservacionesActivity"
+69-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:37:13-53
+70            android:exported="true"
+70-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:38:13-36
+71            android:windowSoftInputMode="adjustResize" />
+71-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:39:13-55
+72        <activity
+72-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:41:9-44:58
+73            android:name="com.huerteando.app.ui.RegistroActivity"
+73-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:42:13-48
+74            android:exported="false"
+74-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:43:13-37
+75            android:windowSoftInputMode="adjustResize" />
+75-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:44:13-55
+76        <activity
+76-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:46:9-48:40
+77            android:name="com.huerteando.app.ui.LoginActivity"
+77-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:47:13-45
+78            android:exported="false" />
+78-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:48:13-37
+79        <activity
+79-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:50:9-53:70
+80            android:name="com.huerteando.app.ui.DetalleObservacionActivity"
+80-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:51:13-58
+81            android:exported="false"
+81-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:52:13-37
+82            android:parentActivityName="com.huerteando.app.ui.ObservacionesActivity" />
+82-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:53:13-67
+83        <activity
+83-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:55:9-59:70
+84            android:name="com.huerteando.app.ui.CrearObservacionActivity"
+84-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:56:13-56
+85            android:exported="false"
+85-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:57:13-37
+86            android:parentActivityName="com.huerteando.app.ui.ObservacionesActivity"
+86-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:59:13-67
+87            android:windowSoftInputMode="adjustResize" />
+87-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:58:13-55
+88        <activity
+88-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:61:9-64:70
+89            android:name="com.huerteando.app.ui.PerfilActivity"
+89-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:62:13-46
+90            android:exported="false"
+90-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:63:13-37
+91            android:parentActivityName="com.huerteando.app.ui.ObservacionesActivity" />
+91-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:64:13-67
+92        <activity
+92-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:66:9-70:70
+93            android:name="com.huerteando.app.ui.EspeciesActivity"
+93-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:67:13-48
+94            android:exported="false"
+94-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:68:13-37
+95            android:label="Catálogo de Especies"
+95-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:69:13-49
+96            android:parentActivityName="com.huerteando.app.ui.ObservacionesActivity" />
+96-->C:\Users\Antonio\Desktop\HuerteandoApp\HuerteandoApp\Android\app\src\main\AndroidManifest.xml:70:13-67
+97        <activity
+97-->[com.google.android.gms:play-services-base:18.5.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\7727ace6918cf756062f15db69d811c8\workspace\transformed\jetified-play-services-base-18.5.0\AndroidManifest.xml:5:9-173
+98            android:name="com.google.android.gms.common.api.GoogleApiActivity"
+98-->[com.google.android.gms:play-services-base:18.5.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\7727ace6918cf756062f15db69d811c8\workspace\transformed\jetified-play-services-base-18.5.0\AndroidManifest.xml:5:19-85
+99            android:exported="false"
+99-->[com.google.android.gms:play-services-base:18.5.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\7727ace6918cf756062f15db69d811c8\workspace\transformed\jetified-play-services-base-18.5.0\AndroidManifest.xml:5:146-170
+100            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+100-->[com.google.android.gms:play-services-base:18.5.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\7727ace6918cf756062f15db69d811c8\workspace\transformed\jetified-play-services-base-18.5.0\AndroidManifest.xml:5:86-145
+101
+102        <meta-data
+102-->[com.google.android.gms:play-services-basement:18.4.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\d759963b56ca732d9d59d30f8457287d\workspace\transformed\jetified-play-services-basement-18.4.0\AndroidManifest.xml:6:9-122
+103            android:name="com.google.android.gms.version"
+103-->[com.google.android.gms:play-services-basement:18.4.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\d759963b56ca732d9d59d30f8457287d\workspace\transformed\jetified-play-services-basement-18.4.0\AndroidManifest.xml:6:20-65
+104            android:value="@integer/google_play_services_version" />
+104-->[com.google.android.gms:play-services-basement:18.4.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\d759963b56ca732d9d59d30f8457287d\workspace\transformed\jetified-play-services-basement-18.4.0\AndroidManifest.xml:6:66-119
+105
+106        <provider
+106-->[androidx.emoji2:emoji2:1.3.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\05c86a8c525122e63ad1e0318012cc1a\workspace\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:24:9-32:20
+107            android:name="androidx.startup.InitializationProvider"
+107-->[androidx.emoji2:emoji2:1.3.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\05c86a8c525122e63ad1e0318012cc1a\workspace\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:25:13-67
+108            android:authorities="com.huerteando.app.androidx-startup"
+108-->[androidx.emoji2:emoji2:1.3.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\05c86a8c525122e63ad1e0318012cc1a\workspace\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:26:13-68
+109            android:exported="false" >
+109-->[androidx.emoji2:emoji2:1.3.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\05c86a8c525122e63ad1e0318012cc1a\workspace\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:27:13-37
+110            <meta-data
+110-->[androidx.emoji2:emoji2:1.3.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\05c86a8c525122e63ad1e0318012cc1a\workspace\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:29:13-31:52
+111                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+111-->[androidx.emoji2:emoji2:1.3.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\05c86a8c525122e63ad1e0318012cc1a\workspace\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:30:17-75
+112                android:value="androidx.startup" />
+112-->[androidx.emoji2:emoji2:1.3.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\05c86a8c525122e63ad1e0318012cc1a\workspace\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:31:17-49
+113            <meta-data
+113-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\8721ef257855e573f7d9e3e8bf1baab5\workspace\transformed\jetified-lifecycle-process-2.6.2\AndroidManifest.xml:29:13-31:52
+114                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+114-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\8721ef257855e573f7d9e3e8bf1baab5\workspace\transformed\jetified-lifecycle-process-2.6.2\AndroidManifest.xml:30:17-78
+115                android:value="androidx.startup" />
+115-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\8721ef257855e573f7d9e3e8bf1baab5\workspace\transformed\jetified-lifecycle-process-2.6.2\AndroidManifest.xml:31:17-49
+116            <meta-data
+116-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\5f6f415ca85c0750a53aae4819dd092e\workspace\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:29:13-31:52
+117                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+117-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\5f6f415ca85c0750a53aae4819dd092e\workspace\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:30:17-85
+118                android:value="androidx.startup" />
+118-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\5f6f415ca85c0750a53aae4819dd092e\workspace\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:31:17-49
+119        </provider>
+120
+121        <receiver
+121-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\5f6f415ca85c0750a53aae4819dd092e\workspace\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:34:9-52:20
+122            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+122-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\5f6f415ca85c0750a53aae4819dd092e\workspace\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:35:13-76
+123            android:directBootAware="false"
+123-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\5f6f415ca85c0750a53aae4819dd092e\workspace\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:36:13-44
+124            android:enabled="true"
+124-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\5f6f415ca85c0750a53aae4819dd092e\workspace\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:37:13-35
+125            android:exported="true"
+125-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\5f6f415ca85c0750a53aae4819dd092e\workspace\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:38:13-36
+126            android:permission="android.permission.DUMP" >
+126-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\5f6f415ca85c0750a53aae4819dd092e\workspace\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:39:13-57
+127            <intent-filter>
+127-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\5f6f415ca85c0750a53aae4819dd092e\workspace\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:40:13-42:29
+128                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+128-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\5f6f415ca85c0750a53aae4819dd092e\workspace\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:41:17-91
+128-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\5f6f415ca85c0750a53aae4819dd092e\workspace\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:41:25-88
+129            </intent-filter>
+130            <intent-filter>
+130-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\5f6f415ca85c0750a53aae4819dd092e\workspace\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:43:13-45:29
+131                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+131-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\5f6f415ca85c0750a53aae4819dd092e\workspace\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:44:17-85
+131-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\5f6f415ca85c0750a53aae4819dd092e\workspace\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:44:25-82
+132            </intent-filter>
+133            <intent-filter>
+133-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\5f6f415ca85c0750a53aae4819dd092e\workspace\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:46:13-48:29
+134                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+134-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\5f6f415ca85c0750a53aae4819dd092e\workspace\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:47:17-88
+134-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\5f6f415ca85c0750a53aae4819dd092e\workspace\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:47:25-85
+135            </intent-filter>
+136            <intent-filter>
+136-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\5f6f415ca85c0750a53aae4819dd092e\workspace\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:49:13-51:29
+137                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+137-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\5f6f415ca85c0750a53aae4819dd092e\workspace\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:50:17-95
+137-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Antonio\.gradle\caches\9.3.1\transforms\5f6f415ca85c0750a53aae4819dd092e\workspace\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:50:25-92
+138            </intent-filter>
+139        </receiver>
+140    </application>
+141
+142</manifest>

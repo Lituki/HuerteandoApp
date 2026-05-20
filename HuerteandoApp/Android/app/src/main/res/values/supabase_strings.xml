@@ -1,0 +1,8 @@
+<resources>
+    <!-- URL para registro de usuario en Supabase -->
+    <string name="supabase_url_signup">https://moqignnvjhcxnhtzcsgx.supabase.co/auth/v1/signup</string>
+    <!-- URL para login de usuario en Supabase -->
+    <string name="supabase_url_login">https://moqignnvjhcxnhtzcsgx.supabase.co/auth/v1/token?grant_type=password</string>
+    <!-- Clave pública (anon key) de Supabase, se obtiene en Settings > API > anon public key -->
+    <string name="supabase_api_key">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vcWlnbm52amhjeG5odHpjc2d4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0ODE3NDMsImV4cCI6MjA4NTA1Nzc0M30.o6j4MseA2MlcplFgUGCgZZGZ371y1_X-WfXogOOvOmE</string>
+</resources>
