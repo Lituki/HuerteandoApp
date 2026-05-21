@@ -60,6 +60,8 @@ public interface ApiService {
     // ── COMENTARIOS ───────────────────────────────────────────────────
     @GET("api/observaciones/{id}/comentarios")
     Call<List<Comentario>> getComentarios(@Path("id") Long idObservacion);
+    @GET("api/observaciones/{id}/comentarios/count")
+    Call<Map<String, Long>> getComentariosCount(@Path("id") Long idObservacion);
     @POST("api/observaciones/{id}/comentarios")
     Call<Comentario> crearComentario(@Path("id") Long idObservacion, @Body Comentario comentario);
     @DELETE("api/observaciones/{idObs}/comentarios/{idCom}")

@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 
 // Los comentarios están anidados bajo una observación.
 // La URL base incluye el id de la observación padre: /api/observaciones/{idObservacion}/comentarios
@@ -31,6 +32,13 @@ public class ComentarioController {
     @GetMapping
     public ResponseEntity<List<Comentario>> listar(@PathVariable Long idObservacion) {
         return ResponseEntity.ok(comentarioService.listarPorObservacion(idObservacion));
+    }
+
+    // GET /api/observaciones/{idObservacion}/comentarios/count
+    @GetMapping("/count")
+    public ResponseEntity<Map<String, Long>> contar(@PathVariable Long idObservacion) {
+        long total = comentarioService.contarPorObservacion(idObservacion);
+        return ResponseEntity.ok(Map.of("comentarios", total));
     }
 
     // POST /api/observaciones/{idObservacion}/comentarios

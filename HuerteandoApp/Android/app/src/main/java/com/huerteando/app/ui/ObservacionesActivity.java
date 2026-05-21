@@ -171,9 +171,9 @@ public class ObservacionesActivity extends AppCompatActivity {
                     listaOriginal.clear();
                     listaOriginal.addAll(response.body());
                     procesarYMostrarLista();
-                    // Cargamos los likes reales de cada observacion
+                    // Cargamos los likes y comentarios reales de cada observacion
                     // para que no se queden todos a 0.
-                    cargarContadoresMeGusta();
+                    cargarContadores();
                 } else {
                     Log.e(TAG, "Error del servidor al cargar observaciones: " + response.code());
                 }
@@ -224,7 +224,7 @@ public class ObservacionesActivity extends AppCompatActivity {
         tvSinResultados.setVisibility(listaAMostrar.isEmpty() ? View.VISIBLE : View.GONE);
     }
 
-    private void cargarContadoresMeGusta() {
+    private void cargarContadores() {
         ApiService api = ApiClient.getClient().create(ApiService.class);
 
         for (Observacion observacion : listaOriginal) {
@@ -232,22 +232,30 @@ public class ObservacionesActivity extends AppCompatActivity {
                 continue;
             }
 
+            // Cargar Me Gustas
             api.getMeGustasCount(observacion.getId()).enqueue(new Callback<Map<String, Long>>() {
                 @Override
                 public void onResponse(Call<Map<String, Long>> call, Response<Map<String, Long>> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         Long total = response.body().get("megustas");
                         observacion.setNumMeGustas(total != null ? total.intValue() : 0);
-
-                        // Refrescamos para que se vea el contador y el orden por likes funcione.
                         procesarYMostrarLista();
                     }
                 }
+                @Override public void onFailure(Call<Map<String, Long>> call, Throwable t) {}
+            });
 
+            // Cargar Comentarios
+            api.getComentariosCount(observacion.getId()).enqueue(new Callback<Map<String, Long>>() {
                 @Override
-                public void onFailure(Call<Map<String, Long>> call, Throwable t) {
-                    Log.e(TAG, "No se pudo cargar el contador de likes", t);
+                public void onResponse(Call<Map<String, Long>> call, Response<Map<String, Long>> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        Long total = response.body().get("comentarios");
+                        observacion.setNumComentarios(total != null ? total.intValue() : 0);
+                        procesarYMostrarLista();
+                    }
                 }
+                @Override public void onFailure(Call<Map<String, Long>> call, Throwable t) {}
             });
         }
     }
