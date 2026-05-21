@@ -159,17 +159,8 @@ public class ObservacionesActivity extends AppCompatActivity {
         progressBar.setVisibility(View.VISIBLE);
         ApiService api = ApiClient.getClient().create(ApiService.class);
 
-        Call<List<Observacion>> call;
-        if (idTipoSeleccionado != null) {
-            Log.d(TAG, "Filtrando por tipo ID: " + idTipoSeleccionado);
-            call = api.getObservacionesPorTipo(idTipoSeleccionado);
-        } else if (idUsuarioSeleccionado != null) {
-            Log.d(TAG, "Filtrando por usuario ID: " + idUsuarioSeleccionado);
-            call = api.getObservacionesPorUsuario(idUsuarioSeleccionado);
-        } else {
-            Log.d(TAG, "Cargando todas las observaciones");
-            call = api.getObservaciones(); // Carga todas por defecto
-        }
+        Log.d(TAG, "Cargando observaciones filtradas: Tipo=" + idTipoSeleccionado + ", Usuario=" + idUsuarioSeleccionado);
+        Call<List<Observacion>> call = api.getObservaciones(idTipoSeleccionado, idUsuarioSeleccionado);
 
         call.enqueue(new Callback<List<Observacion>>() {
             @Override
@@ -199,6 +190,7 @@ public class ObservacionesActivity extends AppCompatActivity {
     private void procesarYMostrarLista() {
         List<Observacion> temp = new ArrayList<>(listaOriginal);
 
+        // 1. Ordenar
         Collections.sort(temp, (o1, o2) -> {
             switch (ordenSeleccionado) {
                 case "me gusta": return Integer.compare(o2.getNumMeGustas(), o1.getNumMeGustas());
@@ -210,10 +202,20 @@ public class ObservacionesActivity extends AppCompatActivity {
             }
         });
 
+        // 2. Filtrar (por texto y refuerzo local de los otros filtros)
         listaAMostrar.clear();
         String query = textoBusqueda.toLowerCase().trim();
         for (Observacion o : temp) {
-            if (query.isEmpty() || o.getTitulo().toLowerCase().contains(query)) {
+            boolean matchesSearch = query.isEmpty() || o.getTitulo().toLowerCase().contains(query);
+            
+            // Refuerzo local de filtros para asegurar coherencia si la API tarda o no soporta combinación
+            boolean matchesTipo = (idTipoSeleccionado == null) || 
+                    (o.getTipoObservacion() != null && o.getTipoObservacion().getId().longValue() == idTipoSeleccionado);
+            
+            boolean matchesUsuario = (idUsuarioSeleccionado == null) || 
+                    (o.getUsuario() != null && o.getUsuario().getId().equals(idUsuarioSeleccionado));
+
+            if (matchesSearch && matchesTipo && matchesUsuario) {
                 listaAMostrar.add(o);
             }
         }

@@ -33,11 +33,10 @@ public interface ApiService {
     Call<TipoObservacion> getTipo(@Path("id") short id);
     // ── OBSERVACIONES ─────────────────────────────────────────────────
     @GET("api/observaciones")
-    Call<List<Observacion>> getObservaciones();
-    @GET("api/observaciones")
-    Call<List<Observacion>> getObservacionesPorTipo(@Query("tipo") Long idTipo);
-    @GET("api/observaciones")
-    Call<List<Observacion>> getObservacionesPorUsuario(@Query("usuario") Long idUsuario);
+    Call<List<Observacion>> getObservaciones(
+            @Query("tipo") Long idTipo,
+            @Query("usuario") Long idUsuario
+    );
     @GET("api/observaciones")
     Call<List<Observacion>> getObservacionesPorEstado(@Query("estado_observacion") String estado);
     @GET("api/observaciones/{id}")
