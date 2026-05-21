@@ -1,11 +1,10 @@
-/*
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
  * Huerteando Backend
  * Copyright (C) 2026 Antonio García, Sergio Caro, Juan José Pérez
  * 
  * Licensed under Creative Commons CC BY-SA 4.0
- */
-
-<?xml version="1.0" encoding="UTF-8"?>
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -86,9 +85,13 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-security</artifactId>
-</dependency>
+	    <groupId>org.springframework.boot</groupId>
+	    <artifactId>spring-boot-starter-security</artifactId>
+	</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+		</dependency>
 	</dependencies>
 
 	
