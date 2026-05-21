@@ -123,3 +123,4 @@ nbproject/private/
 
 # No subir la carpeta docs dentro de Backend
 Backend/docs/
+docs/
