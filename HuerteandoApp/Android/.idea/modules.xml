@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/HuerteandoApp.iml" filepath="$PROJECT_DIR$/.idea/HuerteandoApp.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/HuerteandoApp.app.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/HuerteandoApp.app.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/HuerteandoApp.app.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/HuerteandoApp.app.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/HuerteandoApp.app.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/HuerteandoApp.app.unitTest.iml" />
     </modules>
   </component>
 </project>
