@@ -273,6 +273,15 @@ public class ObservacionesActivity extends AppCompatActivity {
                 }
             });
         }
+
+        // Ocultar opciones si el usuario no está logueado
+        MenuItem actionPerfil = menu.findItem(R.id.action_perfil);
+        MenuItem actionLogout = menu.findItem(R.id.action_logout);
+        boolean estaLogueado = session.haySesion();
+
+        if (actionPerfil != null) actionPerfil.setVisible(estaLogueado);
+        if (actionLogout != null) actionLogout.setVisible(estaLogueado);
+
         return true;
     }
 
