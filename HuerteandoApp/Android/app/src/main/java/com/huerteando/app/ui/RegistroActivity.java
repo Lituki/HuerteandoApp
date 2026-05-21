@@ -6,12 +6,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.huerteando.app.R;
 import com.huerteando.app.api.ApiClient;
@@ -42,19 +39,7 @@ public class RegistroActivity extends AppCompatActivity {
     private MaterialButton btnRegistro;
     private TextView tvError;
     private TextView tvIrALogin;
-    private ShapeableImageView imgAvatar;
-    private MaterialButton btnSeleccionarAvatar;
-    private String avatarUriString = "default_avatar";
-
-    private final ActivityResultLauncher<String> galleryLauncher = registerForActivityResult(
-            new ActivityResultContracts.GetContent(),
-            uri -> {
-                if (uri != null) {
-                    imgAvatar.setImageURI(uri);
-                    avatarUriString = uri.toString();
-                }
-            }
-    );
+    private final String avatarUriString = "default_avatar";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,10 +56,6 @@ public class RegistroActivity extends AppCompatActivity {
         btnRegistro = findViewById(R.id.btnRegistro);
         tvError = findViewById(R.id.tvError);
         tvIrALogin = findViewById(R.id.tvIrALogin);
-        imgAvatar = findViewById(R.id.imgAvatar);
-        btnSeleccionarAvatar = findViewById(R.id.btnSeleccionarAvatar);
-
-        btnSeleccionarAvatar.setOnClickListener(v -> galleryLauncher.launch("image/*"));
 
         tvIrALogin.setOnClickListener(v -> finish());
 
