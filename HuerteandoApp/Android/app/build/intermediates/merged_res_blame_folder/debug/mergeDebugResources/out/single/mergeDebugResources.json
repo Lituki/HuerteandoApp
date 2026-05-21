@@ -52,6 +52,10 @@
         "source": "C:\\Users\\Antonio\\.gradle\\daemon\\9.3.1\\com.huerteando.app-main-39:\\layout\\dialog_especie.xml"
     },
     {
+        "merged": "com.huerteando.app-debug-37:/layout_spinner_item.xml.flat",
+        "source": "com.huerteando.app-main-39:/layout/spinner_item.xml"
+    },
+    {
         "merged": "C:\\Users\\Antonio\\.gradle\\daemon\\9.3.1\\com.huerteando.app-debug-37:\\drawable_dot_active.xml.flat",
         "source": "C:\\Users\\Antonio\\.gradle\\daemon\\9.3.1\\com.huerteando.app-main-39:\\drawable\\dot_active.xml"
     },
@@ -68,12 +72,12 @@
         "source": "C:\\Users\\Antonio\\.gradle\\daemon\\9.3.1\\com.huerteando.app-main-39:\\layout\\activity_especies.xml"
     },
     {
-        "merged": "C:\\Users\\Antonio\\.gradle\\daemon\\9.3.1\\com.huerteando.app-debug-37:\\drawable_ic_heart_empty.xml.flat",
-        "source": "C:\\Users\\Antonio\\.gradle\\daemon\\9.3.1\\com.huerteando.app-main-39:\\drawable\\ic_heart_empty.xml"
-    },
-    {
         "merged": "C:\\Users\\Antonio\\.gradle\\daemon\\9.3.1\\com.huerteando.app-debug-37:\\mipmap-mdpi_ic_launcher.webp.flat",
         "source": "C:\\Users\\Antonio\\.gradle\\daemon\\9.3.1\\com.huerteando.app-main-39:\\mipmap-mdpi\\ic_launcher.webp"
+    },
+    {
+        "merged": "C:\\Users\\Antonio\\.gradle\\daemon\\9.3.1\\com.huerteando.app-debug-37:\\drawable_ic_heart_empty.xml.flat",
+        "source": "C:\\Users\\Antonio\\.gradle\\daemon\\9.3.1\\com.huerteando.app-main-39:\\drawable\\ic_heart_empty.xml"
     },
     {
         "merged": "C:\\Users\\Antonio\\.gradle\\daemon\\9.3.1\\com.huerteando.app-debug-37:\\drawable_dot_selector.xml.flat",
@@ -120,12 +124,12 @@
         "source": "C:\\Users\\Antonio\\.gradle\\daemon\\9.3.1\\com.huerteando.app-main-39:\\layout\\activity_crear_observacion.xml"
     },
     {
-        "merged": "C:\\Users\\Antonio\\.gradle\\daemon\\9.3.1\\com.huerteando.app-debug-37:\\layout_spinner_dropdown_item.xml.flat",
-        "source": "C:\\Users\\Antonio\\.gradle\\daemon\\9.3.1\\com.huerteando.app-main-39:\\layout\\spinner_dropdown_item.xml"
-    },
-    {
         "merged": "C:\\Users\\Antonio\\.gradle\\daemon\\9.3.1\\com.huerteando.app-debug-37:\\drawable_ic_launcher_foreground.xml.flat",
         "source": "C:\\Users\\Antonio\\.gradle\\daemon\\9.3.1\\com.huerteando.app-main-39:\\drawable\\ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "C:\\Users\\Antonio\\.gradle\\daemon\\9.3.1\\com.huerteando.app-debug-37:\\layout_spinner_dropdown_item.xml.flat",
+        "source": "C:\\Users\\Antonio\\.gradle\\daemon\\9.3.1\\com.huerteando.app-main-39:\\layout\\spinner_dropdown_item.xml"
     },
     {
         "merged": "C:\\Users\\Antonio\\.gradle\\daemon\\9.3.1\\com.huerteando.app-debug-37:\\layout_spinner_item.xml.flat",
@@ -160,6 +164,10 @@
         "source": "C:\\Users\\Antonio\\.gradle\\daemon\\9.3.1\\com.huerteando.app-main-39:\\drawable\\bg_gradient_header.xml"
     },
     {
+        "merged": "com.huerteando.app-debug-37:/layout_activity_observaciones.xml.flat",
+        "source": "com.huerteando.app-main-39:/layout/activity_observaciones.xml"
+    },
+    {
         "merged": "C:\\Users\\Antonio\\.gradle\\daemon\\9.3.1\\com.huerteando.app-debug-37:\\layout_activity_login.xml.flat",
         "source": "C:\\Users\\Antonio\\.gradle\\daemon\\9.3.1\\com.huerteando.app-main-39:\\layout\\activity_login.xml"
     },
@@ -180,12 +188,12 @@
         "source": "C:\\Users\\Antonio\\.gradle\\daemon\\9.3.1\\com.huerteando.app-main-39:\\drawable\\bg_rounded_top.xml"
     },
     {
-        "merged": "C:\\Users\\Antonio\\.gradle\\daemon\\9.3.1\\com.huerteando.app-debug-37:\\drawable_ic_launcher_background.xml.flat",
-        "source": "C:\\Users\\Antonio\\.gradle\\daemon\\9.3.1\\com.huerteando.app-main-39:\\drawable\\ic_launcher_background.xml"
-    },
-    {
         "merged": "C:\\Users\\Antonio\\.gradle\\daemon\\9.3.1\\com.huerteando.app-debug-37:\\layout_activity_detalle_observacion.xml.flat",
         "source": "C:\\Users\\Antonio\\.gradle\\daemon\\9.3.1\\com.huerteando.app-main-39:\\layout\\activity_detalle_observacion.xml"
+    },
+    {
+        "merged": "C:\\Users\\Antonio\\.gradle\\daemon\\9.3.1\\com.huerteando.app-debug-37:\\drawable_ic_launcher_background.xml.flat",
+        "source": "C:\\Users\\Antonio\\.gradle\\daemon\\9.3.1\\com.huerteando.app-main-39:\\drawable\\ic_launcher_background.xml"
     },
     {
         "merged": "C:\\Users\\Antonio\\.gradle\\daemon\\9.3.1\\com.huerteando.app-debug-37:\\mipmap-xxxhdpi_ic_launcher_round.webp.flat",
